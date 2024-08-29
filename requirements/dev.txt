@@ -1,0 +1,11 @@
+-r ./base.txt
+black
+isort
+mypy
+pytest
+pytest-cov
+pytest-env
+pytest-mock
+pytest-mockito
+pytest-timeout
+wemake-python-styleguide
