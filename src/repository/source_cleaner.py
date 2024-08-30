@@ -1,10 +1,10 @@
 import os
 import re
 
-from src.repository.source_cleaner_interface import SdCardCleanerInterface
+from src.repository.source_cleaner_interface import SourceCleanerInterface
 
 
-class SdCardCleaner(SdCardCleanerInterface):
+class SdCardCleaner(SourceCleanerInterface):
     def get_unwanted_root_dir_entries(  # noqa: WPS231
         self,
         sd_root_path: str,
