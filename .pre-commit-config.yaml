@@ -5,23 +5,7 @@ repos:
       - id: black
         name: black
         entry: |
-          .venv/bin/black .
-        language: system
-        types: [python]
-        pass_filenames: false
-
-      - id: flake8
-        name: flake8
-        entry: |
-          .venv/bin/flake8 .
-        language: system
-        types: [python]
-        pass_filenames: false
-
-      - id: mypy
-        name: mypy
-        entry: |
-          .venv/bin/mypy .
+          python ./tools/checks.py
         language: system
         types: [python]
         pass_filenames: false
