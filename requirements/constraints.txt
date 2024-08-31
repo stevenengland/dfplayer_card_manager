@@ -1,4 +1,5 @@
 black==24.4.2
+eyed3==0.9.6
 isort==5.13.2
 mypy==1.10.0
 pre-commit==3.8.0
