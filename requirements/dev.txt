@@ -3,6 +3,7 @@ black
 isort
 mypy
 pre-commit
+pyfakefs
 pytest
 pytest-cov
 pytest-env
