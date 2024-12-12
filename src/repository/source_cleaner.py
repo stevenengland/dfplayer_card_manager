@@ -42,3 +42,18 @@ class SdCardCleaner(SourceCleanerInterface):
                 os.remove(os.path.join(root, name))
             for dir_name in dirs:
                 os.rmdir(os.path.join(root, dir_name))
+
+    def get_root_dir_numbering_gaps(self, sd_root_path: str) -> list[int]:
+        entries = os.listdir(sd_root_path)
+        gaps = []
+        numbers = []
+        for entry in entries:
+            if re.match(r"^\d{2}$", entry):
+                numbers.append(int(entry))
+        numbers.sort()
+        # Get the highest number in the list, then get the range from 1 to that number
+        for expected_number in range(1, numbers[-1]):
+            if expected_number not in numbers:
+                gaps.append(expected_number)
+
+        return gaps

@@ -64,3 +64,21 @@ class TestUnwantedDirs:
         # THEN
         verify(os).remove("/sdcard/01.file")
         verify(os).rmdir("/sdcard/003.dir")
+
+    def test_get_root_dir_numbering_gaps(self, sut, when):
+        # GIVEN
+        sd_root_path = "/sdcard"
+        when(os).listdir(sd_root_path).thenReturn(
+            [
+                "01",
+                "02",
+                "004.dir",
+                "03",
+                "05",
+                "09",
+            ],
+        )
+        # WHEN
+        gaps = sut.get_root_dir_numbering_gaps(sd_root_path)
+        # THEN
+        assert gaps == [4, 6, 7, 8]
