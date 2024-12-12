@@ -1,6 +1,7 @@
 import os
 
 import pytest
+from mockito import verify
 
 from src.repository.source_cleaner import SdCardCleaner
 
@@ -41,3 +42,25 @@ class TestUnwantedDirs:
             "5dir",  # error
             ".6dir",  # error
         ]
+
+    def test_delete_unwanted_root_dir_entries(self, sut, when):
+        # GIVEN
+        file_paths = [
+            "/sdcard/01.file",
+            "/sdcard/003.dir",
+        ]
+
+        when(os.path).isfile("/sdcard/01.file").thenReturn(True)
+
+        when(os.path).isfile("/sdcard/003.dir").thenReturn(False)
+        when(os).listdir("/sdcard/003.dir").thenReturn([])
+
+        when(os).remove(...).thenReturn(None)
+        when(os).rmdir(...).thenReturn(None)
+
+        # WHEN
+        sut.delete_unwanted_root_dir_entries(file_paths)
+
+        # THEN
+        verify(os).remove("/sdcard/01.file")
+        verify(os).rmdir("/sdcard/003.dir")
