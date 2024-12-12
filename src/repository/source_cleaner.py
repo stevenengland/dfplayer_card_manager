@@ -20,8 +20,9 @@ class SdCardCleaner(SourceCleanerInterface):
                 errors.append(entry)
         return errors
 
-    def delete_unwanted_root_dir_entries(self, file_paths: list[str]) -> None:
-        for file_path in file_paths:
+    def delete_unwanted_root_dir_entries(self, sd_root_path) -> None:
+        unwanted_entries = self.get_unwanted_root_dir_entries(sd_root_path)
+        for file_path in unwanted_entries:
             self._delete_entry(file_path)
 
     def _delete_entry(self, file_path: str) -> None:

@@ -49,7 +49,7 @@ class TestUnwantedDirs:
             "/sdcard/01.file",
             "/sdcard/003.dir",
         ]
-
+        when(sut).get_unwanted_root_dir_entries(...).thenReturn(file_paths)
         when(os.path).isfile("/sdcard/01.file").thenReturn(True)
 
         when(os.path).isfile("/sdcard/003.dir").thenReturn(False)
@@ -59,7 +59,7 @@ class TestUnwantedDirs:
         when(os).rmdir(...).thenReturn(None)
 
         # WHEN
-        sut.delete_unwanted_root_dir_entries(file_paths)
+        sut.delete_unwanted_root_dir_entries("/sdcard")
 
         # THEN
         verify(os).remove("/sdcard/01.file")
