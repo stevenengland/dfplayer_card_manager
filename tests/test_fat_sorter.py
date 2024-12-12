@@ -6,6 +6,8 @@ from FATtools.Volume import vclose, vopen
 
 from src.repository.fat_sorter import FatSorter
 
+e2e = pytest.mark.skipif("not config.getoption('e2e')")
+
 
 @pytest.fixture(scope="function", name="sut")
 def fat_sorter() -> FatSorter:
@@ -14,6 +16,7 @@ def fat_sorter() -> FatSorter:
 
 
 class TestFatSorter:
+    @e2e
     def test_sort_fat_root(self, sut, when):
         # GIVEN
         bio = io.BytesIO((8 << 20) * b"\x00")
