@@ -1,5 +1,6 @@
 black==24.4.2
 eyed3==0.9.6
+FATtools==1.0.39
 isort==5.13.2
 mypy==1.10.0
 pyfakefs==5.6.0
