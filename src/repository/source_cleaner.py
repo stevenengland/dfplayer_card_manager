@@ -16,7 +16,7 @@ class SdCardCleaner(SourceCleanerInterface):
                 errors.append(entry)
             elif entry in {"mp3", "advertisment"}:
                 continue
-            elif not re.match(r"^\d{2}\..*$", entry):
+            elif not re.match(r"^\d{2}$", entry):
                 errors.append(entry)
         return errors
 
@@ -55,5 +55,28 @@ class SdCardCleaner(SourceCleanerInterface):
         for expected_number in range(1, numbers[-1]):
             if expected_number not in numbers:
                 gaps.append(expected_number)
+
+        return gaps
+
+    def get_subdir_numbering_gaps(self, sd_root_path: str) -> list[tuple[int, int]]:
+        entries = os.listdir(sd_root_path)
+        gaps = []
+        subdir = []
+        for entry in entries:
+            if re.match(r"^\d{2}$", entry):
+                subdir.append(entry)
+        subdir.sort()
+
+        for sub_dir in subdir:
+            sub_dir_path = os.path.join(sd_root_path, sub_dir)
+            files = os.listdir(sub_dir_path)
+            numbers = []
+            for numbered_file in files:
+                if re.match(r"^\d{3}$", numbered_file):
+                    numbers.append(int(numbered_file))
+            numbers.sort()
+            for expected_number in range(1, numbers[-1]):
+                if expected_number not in numbers:
+                    gaps.append((int(sub_dir), expected_number))
 
         return gaps

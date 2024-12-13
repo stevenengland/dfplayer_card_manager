@@ -1,5 +1,5 @@
 import os
-import subprocess
+import subprocess  # noqa: S404
 import sys
 
 
