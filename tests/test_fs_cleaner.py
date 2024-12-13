@@ -3,15 +3,15 @@ import os
 import pytest
 from mockito import verify
 
-from src.repository.source_cleaner import SdCardCleaner
+from src.repository.fs_cleaner import FsCleaner
 from tests.file_system_helper import FakeFileSystemHelper
 
 e2e = pytest.mark.skipif("not config.getoption('e2e')")
 
 
 @pytest.fixture(scope="function", name="sut")
-def sd_card_cleaner() -> SdCardCleaner:
-    sut = SdCardCleaner()
+def sd_card_cleaner() -> FsCleaner:
+    sut = FsCleaner()
     return sut  # noqa: WPS331
 
 
@@ -107,3 +107,37 @@ class TestUnwantedDirsAndFiles:
         gaps = sut.get_root_dir_numbering_gaps(sd_root_path)
         # THEN
         assert gaps == [4, 6, 7, 8]
+
+    def test_get_subdir_numbering_gaps(self, sut, when):
+        # GIVEN
+        sd_root_path = "/sdcard"
+        when(os).listdir(sd_root_path).thenReturn(
+            [
+                "01",
+                "02",
+            ],
+        )
+        when(os).listdir(os.path.join(sd_root_path, "01")).thenReturn(
+            [
+                "001",
+                "002",
+                "004",
+                "005",
+            ],
+        )
+        when(os).listdir(os.path.join(sd_root_path, "02")).thenReturn(
+            [
+                "001",
+                "003",
+                "006",
+            ],
+        )
+        # WHEN
+        gaps = sut.get_subdir_numbering_gaps(sd_root_path)
+        # THEN
+        assert gaps == [
+            (1, 3),
+            (2, 2),
+            (2, 4),
+            (2, 5),
+        ]
