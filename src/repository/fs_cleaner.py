@@ -50,7 +50,22 @@ class FsCleaner(FsCleanerInterface):
     def delete_unwanted_root_dir_entries(self, sd_root_path) -> None:
         unwanted_entries = self.get_unwanted_root_dir_entries(sd_root_path)
         for file_path in unwanted_entries:
-            self._delete_entry(file_path)
+            self._delete_entry(os.path.join(sd_root_path, file_path))
+
+    def delete_unwanted_subdir_entries(self, sd_root_path) -> None:
+        entries = os.listdir(sd_root_path)
+        subdirs = self._get_valid_subdirs(entries)
+
+        for sub_dir in subdirs:
+            sub_dir_path = os.path.join(sd_root_path, sub_dir)
+            files = os.listdir(sub_dir_path)
+            unwanted_entries = [
+                dir_entry
+                for dir_entry in files
+                if not re.match(r"^\d{3}\.mp3$", dir_entry)
+            ]
+            for file_path in unwanted_entries:
+                self._delete_entry(os.path.join(sub_dir_path, file_path))
 
     def _delete_entry(self, file_path: str) -> None:
         if os.path.isfile(file_path):

@@ -90,6 +90,54 @@ class TestUnwantedDirsAndFiles:
         verify(os).remove("/sdcard/01.file")
         verify(os).rmdir("/sdcard/003.dir")
 
+    @e2e
+    def test_delete_unwanted_root_dir_entries_on_real_fs(
+        self,
+        sut: FsCleaner,
+        test_assets_fs: FakeFileSystemHelper,
+    ):
+        # GIVEN
+        sd_root_path = str(test_assets_fs.test_assets_path / "sdcard")
+        test_assets_fs.file_system.create_dir(
+            sd_root_path,
+        )
+        test_assets_fs.file_system.create_file(f"{sd_root_path}/01.file")
+        test_assets_fs.file_system.create_dir(f"{sd_root_path}/003")
+        # WHEN
+        sut.delete_unwanted_root_dir_entries(sd_root_path)
+        # THEN
+        assert not os.path.exists(f"{sd_root_path}/01.file")
+        assert not os.path.exists(f"{sd_root_path}/003")
+
+    @e2e
+    def test_delete_unwanted_subdir_entries_on_real_fs(
+        self,
+        sut: FsCleaner,
+        test_assets_fs: FakeFileSystemHelper,
+    ):
+        # GIVEN
+        sd_root_path = str(test_assets_fs.test_assets_path / "sdcard")
+        test_assets_fs.file_system.create_dir(
+            sd_root_path,
+        )
+        test_assets_fs.file_system.create_dir(f"{sd_root_path}/01")
+        test_assets_fs.file_system.create_file(f"{sd_root_path}/01/001.mp3")
+        test_assets_fs.file_system.create_file(f"{sd_root_path}/01/002.mp3")
+        test_assets_fs.file_system.create_file(f"{sd_root_path}/01/fail.mp3")
+        test_assets_fs.file_system.create_dir(f"{sd_root_path}/02")
+        test_assets_fs.file_system.create_file(f"{sd_root_path}/02/001.mp3")
+        test_assets_fs.file_system.create_file(f"{sd_root_path}/02/002.mp3")
+        test_assets_fs.file_system.create_file(f"{sd_root_path}/02/.test")
+        # WHEN
+        sut.delete_unwanted_subdir_entries(sd_root_path)
+        # THEN
+        assert os.path.exists(f"{sd_root_path}/01/001.mp3")
+        assert os.path.exists(f"{sd_root_path}/01/002.mp3")
+        assert os.path.exists(f"{sd_root_path}/02/001.mp3")
+        assert os.path.exists(f"{sd_root_path}/02/002.mp3")
+        assert not os.path.exists(f"{sd_root_path}/01/fail.mp3")
+        assert not os.path.exists(f"{sd_root_path}/02/.test")
+
     def test_get_root_dir_numbering_gaps(self, sut, when):
         # GIVEN
         sd_root_path = "/sdcard"

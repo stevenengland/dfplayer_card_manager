@@ -7,7 +7,11 @@ class FsCleanerInterface(ABC):
         pass
 
     @abstractmethod
-    def delete_unwanted_root_dir_entries(self, file_paths: list[str]) -> None:
+    def delete_unwanted_root_dir_entries(self, sd_root_path: str) -> None:
+        pass
+
+    @abstractmethod
+    def delete_unwanted_subdir_entries(self, sd_root_path: str) -> None:
         pass
 
     @abstractmethod
