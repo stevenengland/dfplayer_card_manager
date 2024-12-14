@@ -87,7 +87,8 @@ def test_read_id3_tags_from_file_w_tags(
 
 @e2e
 def test_read_audio_content(
-    sut: AudioFileManager, test_assets_fs: FakeFileSystemHelper
+    sut: AudioFileManager,
+    test_assets_fs: FakeFileSystemHelper,
 ):
     # GIVEN
     # WHEN
