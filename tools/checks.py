@@ -11,7 +11,12 @@ def call_black(directory) -> None:
     print("** BLACK **")
     cmd_path = os.path.join(get_os_specific_command_directory(), "black")
     try:
-        subprocess.run([cmd_path, directory])  # noqa: S607, S603
+        result = subprocess.run([cmd_path, directory])  # noqa: S607, S603
+        if result.returncode != 0:
+            raise Exception(
+                f"Black formatter failed with return code {result.returncode}"
+            )
+
     except FileNotFoundError:
         print("Black formatter not found. Please make sure it is installed.")
 
@@ -22,7 +27,9 @@ def call_flake8(directory) -> None:
     print("** FLAKE8 **")
     cmd_path = os.path.join(get_os_specific_command_directory(), "flake8")
     try:
-        subprocess.run([cmd_path, directory])  # noqa: S607, S603
+        result = subprocess.run([cmd_path, directory])  # noqa: S607, S603
+        if result.returncode != 0:
+            raise Exception(f"flake8 failed with return code {result.returncode}")
     except FileNotFoundError:
         print("flake8 not found. Please make sure it is installed.")
 
@@ -33,7 +40,9 @@ def call_mypy(directory: str) -> None:
     print("** MYPY **")
     cmd_path = os.path.join(get_os_specific_command_directory(), "mypy")
     try:
-        subprocess.run([cmd_path, directory])  # noqa: S607, S603
+        result = subprocess.run([cmd_path, directory])  # noqa: S607, S603
+        if result.returncode != 0:
+            raise Exception(f"MyPy failed with return code {result.returncode}")
     except FileNotFoundError:
         print("MyPy formatter not found. Please make sure it is installed.")
 
