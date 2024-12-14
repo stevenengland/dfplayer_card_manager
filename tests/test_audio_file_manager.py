@@ -5,7 +5,7 @@ import eyed3
 import pytest
 from mockito import when
 
-from src.mp3.eyed3_tag_manager import Eyed3TagManager
+from src.mp3.audio_file_manager import AudioFileManager
 from src.mp3.tag_collection import TagCollection
 from src.mp3.tag_error import TagError
 from tests.file_system_helper import FakeFileSystemHelper
@@ -15,12 +15,12 @@ e2e = pytest.mark.skipif("not config.getoption('e2e')")
 
 
 @pytest.fixture(scope="function", name="sut")
-def tag_manager() -> Eyed3TagManager:
-    sut = Eyed3TagManager()
+def tag_manager() -> AudioFileManager:
+    sut = AudioFileManager()
     return sut  # noqa: WPS331
 
 
-def test_read_id3_tags_with_valid_tags(sut: Eyed3TagManager):
+def test_read_id3_tags_with_valid_tags(sut: AudioFileManager):
     # GIVEN
     tag_mock = MagicMock()
     tag_mock.tag.version = (2, 4)
@@ -41,7 +41,7 @@ def test_read_id3_tags_with_valid_tags(sut: Eyed3TagManager):
     assert sut_result.track_number == 1
 
 
-def test_read_id3_tags_with_invalid_tags(sut: Eyed3TagManager):
+def test_read_id3_tags_with_invalid_tags(sut: AudioFileManager):
     # GIVEN
     tag_mock = MagicMock()
     tag_mock.tag.version = (9,)
@@ -56,7 +56,7 @@ def test_read_id3_tags_with_invalid_tags(sut: Eyed3TagManager):
 
 @e2e
 def test_read_id3_tags_from_file_wo_tags(
-    sut: Eyed3TagManager,
+    sut: AudioFileManager,
     test_assets_fs: FakeFileSystemHelper,
 ):
     # GIVEN
@@ -70,7 +70,7 @@ def test_read_id3_tags_from_file_wo_tags(
 
 @e2e
 def test_read_id3_tags_from_file_w_tags(
-    sut: Eyed3TagManager,
+    sut: AudioFileManager,
     test_assets_fs: FakeFileSystemHelper,
 ):
     # GIVEN
@@ -86,7 +86,9 @@ def test_read_id3_tags_from_file_w_tags(
 
 
 @e2e
-def test_read_audio_content(sut: Eyed3TagManager, test_assets_fs: FakeFileSystemHelper):
+def test_read_audio_content(
+    sut: AudioFileManager, test_assets_fs: FakeFileSystemHelper
+):
     # GIVEN
     # WHEN
     sut_result_1 = sut.read_audio_content(

@@ -1,14 +1,14 @@
 import eyed3
 import pytest
 
+from src.mp3.audio_file_manager_interface import AudioFileManagerInterface
 from src.mp3.tag_collection import TagCollection
 from src.mp3.tag_error import TagError
-from src.mp3.tag_manager_interface import TagManagerInterface
 
 pytestmark = pytest.mark.usefixtures("unstub")
 
 
-class Eyed3TagManager(TagManagerInterface):
+class AudioFileManager(AudioFileManagerInterface):
 
     def read_id3_tags(self, file_path: str) -> TagCollection:
         audio = eyed3.load(file_path)
