@@ -7,3 +7,7 @@ class TagManagerInterface(ABC):
     @abstractmethod
     def read_id3_tags(self, file_path: str) -> TagCollection:
         pass
+
+    @abstractmethod
+    def read_audio_content(self, file_path: str) -> bytes:
+        pass
