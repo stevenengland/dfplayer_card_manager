@@ -39,7 +39,7 @@ class TestValidSubdirDetection:
         file_not_dir_path = os.path.join(root_dir, "01")
         when(os.path).isdir(file_not_dir_path).thenReturn(False)
         # WHEN
-        valid_subdirs = sut.get_valid_subdirs(root_dir)
+        valid_subdirs = sut.get_valid_subdirs(root_dir, r"^\d{2}$")
         # THEN
         assert valid_subdirs == [
             "02",
