@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+from src.repository.repository_element import RepositoryElement
+
 
 class RepositoryTreeInterface(ABC):
     @abstractmethod
@@ -12,4 +14,8 @@ class RepositoryTreeInterface(ABC):
 
     @abstractmethod
     def get_valid_subdir_files(self, subdir: str, valid_file_pattern: str) -> list[str]:
+        pass
+
+    @abstractmethod
+    def get_repository_tree(self, root_dir: str) -> list[RepositoryElement]:
         pass
