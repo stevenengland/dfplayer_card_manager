@@ -4,7 +4,7 @@ import re
 from src.repository.repository_tree_interface import RepositoryTreeInterface
 
 
-class RepositoryTree(RepositoryTreeInterface):
+class TargetRepositoryTree(RepositoryTreeInterface):
 
     def get_target_tree(self, root_dir: str) -> list[str]:
         return os.listdir(root_dir)  # Fake implementation

@@ -2,20 +2,24 @@ import os
 
 import pytest
 
-from src.repository.repository_tree import RepositoryTree
+from src.repository.target_repository_tree import TargetRepositoryTree
 
 pytestmark = pytest.mark.usefixtures("unstub")
 e2e = pytest.mark.skipif("not config.getoption('e2e')")
 
 
 @pytest.fixture(scope="function", name="sut")
-def repository_tree() -> RepositoryTree:
-    sut = RepositoryTree()
+def repository_tree() -> TargetRepositoryTree:
+    sut = TargetRepositoryTree()
     return sut  # noqa: WPS331
 
 
 class TestValidSubdirDetection:
-    def test_get_valid_subdirs_returns_valid_subdirs(self, sut: RepositoryTree, when):
+    def test_get_valid_subdirs_returns_valid_subdirs(
+        self,
+        sut: TargetRepositoryTree,
+        when,
+    ):
         # GIVEN
         root_dir = "/root"
         when(os).listdir(root_dir).thenReturn(
