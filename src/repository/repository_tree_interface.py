@@ -7,5 +7,9 @@ class RepositoryTreeInterface(ABC):
         pass
 
     @abstractmethod
-    def get_valid_subdirs(self, root_dir: str, pattern: str) -> list[str]:
+    def get_valid_root_dirs(self, root_dir: str, valid_dir_pattern: str) -> list[str]:
+        pass
+
+    @abstractmethod
+    def get_valid_subdir_files(self, subdir: str, valid_file_pattern: str) -> list[str]:
         pass
