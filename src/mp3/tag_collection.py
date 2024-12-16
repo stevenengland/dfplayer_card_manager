@@ -1,3 +1,7 @@
+from dataclasses import dataclass
+
+
+@dataclass
 class TagCollection:
     def __init__(self) -> None:
         self.title = ""
