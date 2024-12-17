@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from src.repository.fs_finder import (
+from src.repository.repository_finder import (
     get_repository_tree,
     get_valid_root_dirs,
     get_valid_subdir_files,
