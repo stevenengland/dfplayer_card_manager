@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
+from src.config.configuration import RepositorySourceConfig
 from src.repository.repository_element import RepositoryElement
 
 
@@ -13,6 +14,11 @@ class DfPlayerCardManagerInterface(ABC):
     @property
     @abstractmethod
     def target_repo(self) -> list[RepositoryElement]:
+        pass
+
+    @property
+    @abstractmethod
+    def config_overrides(self) -> dict[str, RepositorySourceConfig]:
         pass
 
     @abstractmethod

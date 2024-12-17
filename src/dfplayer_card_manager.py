@@ -46,6 +46,10 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):
     def target_repo(self):
         return self._target_repo
 
+    @property
+    def config_overrides(self):
+        return self._config_overrides
+
     def init_repositories(self) -> None:
         source_repository_tree = self.get_source_repository_tree()
         target_repository_tree = self.get_target_repository_tree()

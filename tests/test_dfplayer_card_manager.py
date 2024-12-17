@@ -1,10 +1,10 @@
 import pytest
 from mockito import mock
 
-from src.config.configuration import Configuration
+from src.config.configuration import Configuration, RepositorySourceConfig
 from src.dfplayer_card_manager import DfPlayerCardManager
 from src.mp3.audio_file_manager import AudioFileManager
-from src.repository import repository_finder
+from src.repository import config_override, repository_finder
 
 pytestmark = pytest.mark.usefixtures("unstub")
 e2e = pytest.mark.skipif("not config.getoption('e2e')")
@@ -78,3 +78,19 @@ class TestRepoInit:
         assert sut.source_repo[0].file_name == "01.mp3"
         assert sut.source_repo[1].dir == "03"
         assert sut.source_repo[1].file_name == "01.mp3"
+
+
+class TestConfigOverrides:
+    def test_reading_config_overrides_succeeds(self, sut: DfPlayerCardManager, when):
+        # GIVEN
+
+        when(config_override).get_config_overrides(...).thenReturn(
+            {
+                "01": mock(RepositorySourceConfig),
+                "03": mock(RepositorySourceConfig),
+            },
+        )
+        # WHEN
+        sut.read_config_overrides()
+        # THEN
+        assert len(sut.config_overrides) == 2
