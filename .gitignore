@@ -3,3 +3,4 @@
 coverage.xml
 
 __pycache__/
+.python-version
