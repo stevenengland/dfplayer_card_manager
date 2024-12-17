@@ -1,3 +1,7 @@
+from dataclasses import dataclass
+
+
+@dataclass
 class RepositoryElement:  # noqa: WPS230
     def __init__(self) -> None:
         self.tree_id = ""

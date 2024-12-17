@@ -27,6 +27,7 @@ from src.config.configuration import Configuration
 from src.dfplayer_card_manager_interface import DfPlayerCardManagerInterface
 from src.mp3.audio_file_manager_interface import AudioFileManagerInterface
 from src.repository import repository_finder
+from src.repository.repository_element import RepositoryElement
 
 
 class DfPlayerCardManager(DfPlayerCardManagerInterface):
@@ -34,6 +35,32 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):
         self._config = config
         self._config_overrides = config
         self._audio_manager = audio_manager
+        self._source_repo: list[RepositoryElement] = []
+        self._target_repo: list[RepositoryElement] = []
+
+    @property
+    def source_repo(self):
+        return self._source_repo
+
+    @property
+    def target_repo(self):
+        return self._target_repo
+
+    def init_repositories(self) -> None:
+        source_repository_tree = self.get_source_repository_tree()
+        target_repository_tree = self.get_target_repository_tree()
+        for source_subdirectory, source_file in source_repository_tree:
+            # create a repository element with subdir and file
+            element = RepositoryElement()
+            element.dir = source_subdirectory
+            element.file_name = source_file
+            self._source_repo.append(element)
+        for target_subdirectory, target_file in target_repository_tree:
+            # create a repository element with subdir and file
+            element = RepositoryElement()
+            element.dir = target_subdirectory
+            element.file_name = target_file
+            self._target_repo.append(element)
 
     def get_target_repository_tree(self) -> list[tuple[str, str]]:
         return repository_finder.get_repository_tree(

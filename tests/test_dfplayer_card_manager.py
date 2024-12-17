@@ -50,3 +50,31 @@ class TestRepositoryTreeCreation:
             ("01", "01.mp3"),
             ("02", "01.mp3"),
         ]
+
+
+class TestRepoInit:
+    def test_repo_init_succeeds(self, sut: DfPlayerCardManager, when):
+        # GIVEN
+        when(sut).get_target_repository_tree().thenReturn(
+            [
+                ("01", "01.mp3"),
+                ("02", "01.mp3"),
+            ],
+        )
+        when(sut).get_source_repository_tree().thenReturn(
+            [
+                ("01", "01.mp3"),
+                ("03", "01.mp3"),
+            ],
+        )
+        # WHEN
+        sut.init_repositories()
+        # THEN
+        assert sut.target_repo[0].dir == "01"
+        assert sut.target_repo[0].file_name == "01.mp3"
+        assert sut.target_repo[1].dir == "02"
+        assert sut.target_repo[1].file_name == "01.mp3"
+        assert sut.source_repo[0].dir == "01"
+        assert sut.source_repo[0].file_name == "01.mp3"
+        assert sut.source_repo[1].dir == "03"
+        assert sut.source_repo[1].file_name == "01.mp3"
