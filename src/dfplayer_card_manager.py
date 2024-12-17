@@ -23,17 +23,17 @@
 
 from typing import Optional
 
-from src.config.configuration import Configuration
+from src.config.configuration import Configuration, RepositorySourceConfig
 from src.dfplayer_card_manager_interface import DfPlayerCardManagerInterface
 from src.mp3.audio_file_manager_interface import AudioFileManagerInterface
-from src.repository import repository_finder
+from src.repository import config_override, repository_finder
 from src.repository.repository_element import RepositoryElement
 
 
 class DfPlayerCardManager(DfPlayerCardManagerInterface):
     def __init__(self, config: Configuration, audio_manager: AudioFileManagerInterface):
         self._config = config
-        self._config_overrides = config
+        self._config_overrides: dict[str, RepositorySourceConfig] = {}
         self._audio_manager = audio_manager
         self._source_repo: list[RepositoryElement] = []
         self._target_repo: list[RepositoryElement] = []
@@ -61,6 +61,14 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):
             element.dir = target_subdirectory
             element.file_name = target_file
             self._target_repo.append(element)
+
+    def read_config_overrides(self) -> None:
+        self._config_overrides = config_override.get_config_overrides(
+            self._config.repository_source.root_dir,
+            # get all distinct subdirs from the source repository
+            [element.dir for element in self._source_repo],
+            self._config.overrides_file_name,
+        )
 
     def get_target_repository_tree(self) -> list[tuple[str, str]]:
         return repository_finder.get_repository_tree(

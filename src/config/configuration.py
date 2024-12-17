@@ -1,48 +1,52 @@
 from dataclasses import dataclass, field
 
-
-@dataclass
-class RepositoryTargetConfig:  # Default configuration for the SD card and its contents
-    root_dir: str = ""  # Default root directory
-    valid_subdir_pattern: str = (
-        r"^\d{2}$"  # Default regex pattern to match any directory
-    )
-    valid_subdir_files_pattern: str = (
-        r"\d{3}\.mp3"  # Default regex pattern to match any file
-    )
+from src.config.yaml_config import YamlObject
+from src.repository.detection_source import DetectionSource
+from src.repository.diff_modes import DiffMode
 
 
 @dataclass
-class RepositorySourceConfig:  # Default configuration for the SD card and its contents
-    root_dir: str = ""  # Default root directory
-    valid_subdir_pattern: str = (
-        r"^\d{2}\..*$"  # Default regex pattern to match any directory
+class RepositoryTargetConfig(
+    YamlObject,
+):  # Default configuration for the SD card and its contents
+    root_dir: str = field(
+        default="",  # Default root directory, set by command line argument but not by configuration reader
     )
-    valid_subdir_files_pattern: str = (
-        r"^\d{3}\..*\.mp3$"  # Default regex pattern to match any file
+    valid_subdir_pattern: str = field(
+        default=r"^\d{2}$",  # Default regex pattern to match any directory, not read by configuration reader
+    )
+    valid_subdir_files_pattern: str = field(
+        default=r"\d{3}\.mp3",  # Default regex pattern to match any file, not read by configuration reader
     )
 
 
 @dataclass
-class SubdirsConfig:
-    valid_file_pattern: str = "^.*$"  # Default regex pattern to match any file
-
-
-@dataclass
-class TagsConfig:
-    track_number_source: str = "filename"  # Default track source
-    track_number_pattern: str = (
-        r"\d{3}.*\.mp3"  # Default regex pattern for track filenames
+class RepositorySourceConfig(
+    YamlObject,
+):  # Default configuration for source files and its contents
+    root_dir: str = field(
+        default="",
+    )  # Default root directory, set by command line argument but not by configuration reader
+    valid_subdir_pattern: str = field(
+        default=r"^\d{2}\..*$",  # Default regex pattern to match any directory
     )
+    valid_subdir_files_pattern: str = field(
+        default=r"^\d{3}\..*\.mp3$",  # Default regex pattern to match any file
+    )
+    diff_method: DiffMode = field(default=DiffMode.hash_and_tags)
+
+    title_source: DetectionSource = field(default=DetectionSource.tag)
+    title_match: int = field(default=0)
 
 
 @dataclass
-class Configuration:
+class Configuration(YamlObject):
     repository_target: RepositoryTargetConfig = field(
         default_factory=RepositoryTargetConfig,
     )
     repository_source: RepositorySourceConfig = field(
         default_factory=RepositorySourceConfig,
     )
-    subdirs: SubdirsConfig = field(default_factory=SubdirsConfig)
-    tags: TagsConfig = field(default_factory=TagsConfig)
+    overrides_file_name: str = field(
+        default=".dfplayer_card_manager.yaml",
+    )

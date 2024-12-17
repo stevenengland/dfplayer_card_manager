@@ -2,3 +2,5 @@
 
 eyed3
 FATtools
+pyyaml
+types-PyYAML
