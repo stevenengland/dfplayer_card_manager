@@ -2,6 +2,7 @@ from src.config.configuration import Configuration, RepositorySourceConfig
 from src.dfplayer_card_manager_interface import DfPlayerCardManagerInterface
 from src.mp3.audio_file_manager_interface import AudioFileManagerInterface
 from src.repository import config_override, repository_finder
+from src.repository.repository import Repository
 from src.repository.repository_element import RepositoryElement
 
 
@@ -10,8 +11,8 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):
         self._config = config
         self._config_overrides: dict[str, RepositorySourceConfig] = {}
         self._audio_manager = audio_manager
-        self._source_repo: list[RepositoryElement] = []
-        self._target_repo: list[RepositoryElement] = []
+        self._source_repo: Repository = Repository()
+        self._target_repo: Repository = Repository()
 
     @property
     def source_repo(self):
@@ -37,13 +38,13 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):
             element = RepositoryElement()
             element.dir = source_subdirectory
             element.file_name = source_file
-            self._source_repo.append(element)
+            self._source_repo.elements.append(element)
         for target_subdirectory, target_file in target_repository_tree:
             # create a repository element with subdir and file
             element = RepositoryElement()
             element.dir = target_subdirectory
             element.file_name = target_file
-            self._target_repo.append(element)
+            self._target_repo.elements.append(element)
 
     def read_config_overrides(self) -> None:
         if self._config.repository_source.root_dir is None:
@@ -51,7 +52,7 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):
         self._config_overrides = config_override.get_config_overrides(
             self._config.repository_source.root_dir,
             # get all distinct subdirs from the source repository
-            [element.dir for element in self._source_repo],
+            [element.dir for element in self._source_repo.elements],
             self._config.overrides_file_name,
         )
 
