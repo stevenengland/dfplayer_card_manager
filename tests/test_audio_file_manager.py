@@ -102,3 +102,19 @@ def test_read_audio_content(
 
     assert len(sut_result_1) == 3605
     assert len(sut_result_2) == 3605
+
+
+@e2e
+def test_read_audio_content_and_id3_tags(
+    sut: AudioFileManager,
+    test_assets_fs: FakeFileSystemHelper,
+):
+    # GIVEN
+    # WHEN
+    sut_result_1, sut_result_2 = sut.read_audio_content_and_id3_tags(
+        os.path.join(test_assets_fs.test_assets_path, "0002.mp3"),
+    )
+
+    # THEN
+    assert len(sut_result_1) == 3605
+    assert isinstance(sut_result_2, TagCollection)
