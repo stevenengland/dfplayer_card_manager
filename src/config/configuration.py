@@ -9,8 +9,8 @@ from src.repository.diff_modes import DiffMode
 class RepositoryTargetConfig(
     YamlObject,
 ):  # Default configuration for the SD card and its contents
-    root_dir: str = field(
-        default="",  # Default root directory, set by command line argument but not by configuration reader
+    root_dir: str | None = field(
+        default=None,  # Default root directory, set by command line argument but not by configuration reader
     )
     valid_subdir_pattern: str = field(
         default=r"^\d{2}$",  # Default regex pattern to match any directory, not read by configuration reader
@@ -24,19 +24,19 @@ class RepositoryTargetConfig(
 class RepositorySourceConfig(
     YamlObject,
 ):  # Default configuration for source files and its contents
-    root_dir: str = field(
-        default="",
+    root_dir: str | None = field(
+        default=None,
     )  # Default root directory, set by command line argument but not by configuration reader
-    valid_subdir_pattern: str = field(
-        default=r"^\d{2}\..*$",  # Default regex pattern to match any directory
+    valid_subdir_pattern: str | None = field(
+        default=None,  # Default regex pattern to match any directory
     )
-    valid_subdir_files_pattern: str = field(
-        default=r"^\d{3}\..*\.mp3$",  # Default regex pattern to match any file
+    valid_subdir_files_pattern: str | None = field(
+        default=None,  # Default regex pattern to match any file
     )
-    diff_method: DiffMode = field(default=DiffMode.hash_and_tags)
+    diff_method: DiffMode | None = field(default=None)
 
-    title_source: DetectionSource = field(default=DetectionSource.tag)
-    title_match: int = field(default=0)
+    title_source: DetectionSource | None = field(default=None)
+    title_match: int | None = field(default=None)
 
 
 @dataclass

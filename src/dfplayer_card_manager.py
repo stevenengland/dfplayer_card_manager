@@ -67,6 +67,8 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):
             self._target_repo.append(element)
 
     def read_config_overrides(self) -> None:
+        if self._config.repository_source.root_dir is None:
+            raise ValueError("Repository source root directory is not set")
         self._config_overrides = config_override.get_config_overrides(
             self._config.repository_source.root_dir,
             # get all distinct subdirs from the source repository
@@ -75,6 +77,8 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):
         )
 
     def get_target_repository_tree(self) -> list[tuple[str, str]]:
+        if self._config.repository_target.root_dir is None:
+            raise ValueError("Repository target root directory is not set")
         return repository_finder.get_repository_tree(
             self._config.repository_target.root_dir,
             self._config.repository_target.valid_subdir_pattern,
@@ -85,6 +89,12 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):
         self,
         valid_subdir_files_pattern_overrides: Optional[dict[str, str]] = None,
     ) -> list[tuple[str, str]]:
+        if self._config.repository_source.root_dir is None:
+            raise ValueError("Repository source root directory is not set")
+        if self._config.repository_source.valid_subdir_pattern is None:
+            raise ValueError("Repository source valid subdir pattern is not set")
+        if self._config.repository_source.valid_subdir_files_pattern is None:
+            raise ValueError("Repository source valid subdir files pattern is not set")
         return repository_finder.get_repository_tree(
             self._config.repository_source.root_dir,
             self._config.repository_source.valid_subdir_pattern,
