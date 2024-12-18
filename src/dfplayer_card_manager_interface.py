@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Optional
 
 from src.config.configuration import RepositorySourceConfig
 from src.repository.repository_element import RepositoryElement
@@ -32,6 +31,5 @@ class DfPlayerCardManagerInterface(ABC):
     @abstractmethod
     def get_source_repository_tree(
         self,
-        valid_subdir_files_pattern_overrides: Optional[dict[str, str]] = None,
     ) -> list[tuple[str, str]]:
         pass

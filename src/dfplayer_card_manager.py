@@ -1,28 +1,3 @@
-# - Create Delta List
-# What would be done?
-# also identify gaps, unwanted files and foldersks
-
-# - Write to SD Card
-# Check if unwanted files exist on the SD card and warn the user
-# Check if Gaps exist in the root directory and subdirs and warn the user
-# Check if file needs to be written to SD card
-# Check if file exists on SD card (function needs foldernumber / file number)
-# Check if file is the same (hash of content) on the SD card
-# check tags (function needs tags, foldernumber / file number)
-# 1. Write a file to the SD card with
-# if anything was written, call sort_fat_root
-
-
-# - check root for unwanted files
-# check if file is in the root
-# check if file is in a subdirectory
-
-# create a cli interface that first reads command line arguments handles defaults and mandatory arguments.
-# It also prints a help text explaining the cli parameters. Two arguments are: source-folder (default = .)
-# and target-folder (mandatory).
-
-from typing import Optional
-
 from src.config.configuration import Configuration, RepositorySourceConfig
 from src.dfplayer_card_manager_interface import DfPlayerCardManagerInterface
 from src.mp3.audio_file_manager_interface import AudioFileManagerInterface
@@ -49,6 +24,10 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):
     @property
     def config_overrides(self):
         return self._config_overrides
+
+    @config_overrides.setter
+    def config_overrides(self, overrides):
+        self._config_overrides = overrides
 
     def init_repositories(self) -> None:
         source_repository_tree = self.get_source_repository_tree()
@@ -87,7 +66,6 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):
 
     def get_source_repository_tree(
         self,
-        valid_subdir_files_pattern_overrides: Optional[dict[str, str]] = None,
     ) -> list[tuple[str, str]]:
         if self._config.repository_source.root_dir is None:
             raise ValueError("Repository source root directory is not set")
@@ -95,6 +73,13 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):
             raise ValueError("Repository source valid subdir pattern is not set")
         if self._config.repository_source.valid_subdir_files_pattern is None:
             raise ValueError("Repository source valid subdir files pattern is not set")
+        valid_subdir_files_pattern_overrides = {}
+        for subdir, config in self._config_overrides.items():
+            if not config.valid_subdir_files_pattern:
+                continue
+            valid_subdir_files_pattern_overrides[subdir] = (
+                config.valid_subdir_files_pattern
+            )
         return repository_finder.get_repository_tree(
             self._config.repository_source.root_dir,
             self._config.repository_source.valid_subdir_pattern,

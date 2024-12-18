@@ -41,9 +41,22 @@ class TestRepositoryTreeCreation:
             ("02", "01.mp3"),
         ]
 
-    def source_tree_creation_succeeds(self, sut: DfPlayerCardManager, when):
+    def test_source_tree_creation_succeeds(self, sut: DfPlayerCardManager, when):
         # GIVEN
-        when(repository_finder).get_repository_tree(...).thenReturn(
+        sut.config_overrides = {
+            "01": RepositorySourceConfig(valid_subdir_files_pattern="01.mp3"),
+            "03": RepositorySourceConfig(valid_subdir_files_pattern="01.mp3"),
+            "04": RepositorySourceConfig(valid_subdir_files_pattern=None),
+        }
+        when(repository_finder).get_repository_tree(
+            any,
+            any,
+            any,
+            {
+                "01": "01.mp3",
+                "03": "01.mp3",
+            },
+        ).thenReturn(
             [
                 ("01", "01.mp3"),
                 ("02", "01.mp3"),
