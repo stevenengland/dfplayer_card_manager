@@ -11,7 +11,7 @@ class TestConfigMerging:
     def test_source_repo_configs_get_merged(self):
         # GIVEN
         config: RepositoryConfig = RepositoryConfig()
-        config.root_dir = "/test/test_assets"
+        config.album_match = 1
         config.valid_subdir_pattern = "test_subdirs"
         config.valid_subdir_files_pattern = "test_files"
 
@@ -23,6 +23,6 @@ class TestConfigMerging:
             overrides,
         )
         # THEN
-        assert merged_config.root_dir == "/test/test_assets"
+        assert merged_config.album_match == 1
         assert merged_config.valid_subdir_pattern == "override_subdirs"
         assert merged_config.valid_subdir_files_pattern == "test_files"

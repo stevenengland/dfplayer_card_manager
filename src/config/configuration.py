@@ -7,18 +7,12 @@ from src.repository.diff_modes import DiffMode
 class RepositoryConfig(  # type: ignore[misc]
     BaseModel,
 ):  # Default configuration for source files and its contents
-    # ToDo: Remove the following Field
-    root_dir: str | None = Field(
-        default=None,
-    )  # Default root directory, set by command line argument but not by configuration reader
     valid_subdir_pattern: str | None = Field(
         default=None,  # Default regex pattern to match any directory
     )
     valid_subdir_files_pattern: str | None = Field(
         default=None,  # Default regex pattern to match any file
     )
-    # ToDo: Remove the following Field
-    diff_method: DiffMode | None = Field(default=None)
 
     album_source: DetectionSource | None = Field(default=None)
     album_match: int | None = Field(default=None)

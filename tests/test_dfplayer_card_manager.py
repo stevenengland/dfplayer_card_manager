@@ -20,7 +20,12 @@ def dfplayer_card_manager() -> DfPlayerCardManager:
     configuration = Configuration()
     configuration.repository_source = create_source_repo_config()
     configuration.repository_target = create_target_repo_config()
-    sut = DfPlayerCardManager(configuration, audio_file_manager_mock)
+    sut = DfPlayerCardManager(
+        "source_root",
+        "target_root",
+        configuration,
+        audio_file_manager_mock,
+    )
     return sut  # noqa: WPS331
 
 
@@ -89,18 +94,12 @@ class TestRepoInit:
         # WHEN
         sut.init_repositories()
         # THEN
-        assert (
-            sut.target_repo.elements[0].repo_root_dir
-            == sut.config.repository_target.root_dir
-        )
+        assert sut.target_repo.elements[0].repo_root_dir == sut.target_repo_root_dir
         assert sut.target_repo.elements[0].dir == "01"
         assert sut.target_repo.elements[0].file_name == "01.mp3"
         assert sut.target_repo.elements[1].dir == "02"
         assert sut.target_repo.elements[1].file_name == "01.mp3"
-        assert (
-            sut.source_repo.elements[0].repo_root_dir
-            == sut.config.repository_source.root_dir
-        )
+        assert sut.source_repo.elements[0].repo_root_dir == sut.source_repo_root_dir
         assert sut.source_repo.elements[0].dir == "01"
         assert sut.source_repo.elements[0].file_name == "01.mp3"
         assert sut.source_repo.elements[1].dir == "03"
