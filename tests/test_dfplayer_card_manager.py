@@ -89,10 +89,18 @@ class TestRepoInit:
         # WHEN
         sut.init_repositories()
         # THEN
+        assert (
+            sut.target_repo.elements[0].repo_root_dir
+            == sut.config.repository_target.root_dir
+        )
         assert sut.target_repo.elements[0].dir == "01"
         assert sut.target_repo.elements[0].file_name == "01.mp3"
         assert sut.target_repo.elements[1].dir == "02"
         assert sut.target_repo.elements[1].file_name == "01.mp3"
+        assert (
+            sut.source_repo.elements[0].repo_root_dir
+            == sut.config.repository_source.root_dir
+        )
         assert sut.source_repo.elements[0].dir == "01"
         assert sut.source_repo.elements[0].file_name == "01.mp3"
         assert sut.source_repo.elements[1].dir == "03"
