@@ -35,8 +35,17 @@ class RepositorySourceConfig(
     )
     diff_method: DiffMode | None = field(default=None)
 
+    album_source: DetectionSource | None = field(default=None)
+    album_match: int | None = field(default=None)
+
+    artist_source: DetectionSource | None = field(default=None)
+    artist_match: int | None = field(default=None)
+
     title_source: DetectionSource | None = field(default=None)
     title_match: int | None = field(default=None)
+
+    track_number_source: DetectionSource | None = field(default=None)
+    track_number_match: int | None = field(default=None)
 
 
 @dataclass
