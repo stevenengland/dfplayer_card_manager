@@ -2,7 +2,10 @@ import os
 
 import pytest
 
-from src.config.configuration import RepositorySourceConfig
+from src.config.configuration import Configuration, RepositoryConfig
+from src.config.yaml_config import create_yaml_object
+from src.repository.detection_source import DetectionSource
+from src.repository.diff_modes import DiffMode
 from tests.file_system_helper import FakeFileSystemHelper
 
 pytestmark = pytest.mark.usefixtures("unstub")
@@ -18,7 +21,20 @@ class TestConfigLoadingYaml:
         )
 
         # WHEN
-        config = RepositorySourceConfig().from_yaml(config_path)  # type: ignore [no-untyped-call]
+        config: RepositoryConfig = create_yaml_object(config_path, RepositoryConfig)
 
         # THEN
-        assert config.root_dir == "/test/test_assets"
+        assert config.artist_source == DetectionSource.dirname
+
+    def test_load_full_config(self, test_assets_fs: FakeFileSystemHelper):
+        # GIVEN
+        config_path = os.path.join(
+            test_assets_fs.test_assets_path,
+            "config_full.yaml",
+        )
+
+        # WHEN
+        config: Configuration = create_yaml_object(config_path, Configuration)
+
+        # THEN
+        assert config.repository_processing.diff_method == DiffMode.hash_and_tags

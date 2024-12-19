@@ -1,1 +1,9 @@
-root_dir: /test/test_assets
+valid_subdir_pattern: '^\d{2}\.(.*?)\.(.*?)$'
+valid_subdir_files_pattern: '^\d{3}\.(.*?)\.mp3$'
+album_source: "dirname"
+album_match: 2
+artist_source: "dirname"
+artist_match: 3
+title_source: "filename"
+track_number_source: "filename"
+track_number_match: 2

@@ -2,7 +2,7 @@ import hashlib
 import os
 
 from src.config.config_merger import merge_configs
-from src.config.configuration import Configuration, RepositorySourceConfig
+from src.config.configuration import Configuration, RepositoryConfig
 from src.dfplayer_card_manager_interface import DfPlayerCardManagerInterface
 from src.mp3.audio_file_manager_interface import AudioFileManagerInterface
 from src.mp3.tag_collection import TagCollection
@@ -20,7 +20,7 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
         audio_manager: AudioFileManagerInterface,
     ):
         self._config = config
-        self._config_overrides: dict[str, RepositorySourceConfig] = {}
+        self._config_overrides: dict[str, RepositoryConfig] = {}
         self._audio_manager = audio_manager
         self._source_repo: Repository = Repository()
         self._target_repo: Repository = Repository()
@@ -76,6 +76,10 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
     def get_target_repository_tree(self) -> list[tuple[str, str]]:
         if self._config.repository_target.root_dir is None:
             raise ValueError("Repository target root directory is not set")
+        if self._config.repository_target.valid_subdir_pattern is None:
+            raise ValueError("Repository target valid subdir pattern is not set")
+        if self._config.repository_target.valid_subdir_files_pattern is None:
+            raise ValueError("Repository target valid subdir files pattern is not set")
         return repository_finder.get_repository_tree(
             self._config.repository_target.root_dir,
             self._config.repository_target.valid_subdir_pattern,
@@ -150,12 +154,12 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
             or applied_config.track_number_source == DetectionSource.tag
         )
 
-    def _get_applied_config(self, element) -> RepositorySourceConfig:
-        applied_config: RepositorySourceConfig = self._config.repository_source
+    def _get_applied_config(self, element) -> RepositoryConfig:
+        applied_config: RepositoryConfig = self._config.repository_source
         if element.dir in self._config_overrides:
             applied_config = merge_configs(
                 self._config.repository_source,
-                self._config_overrides.get(element.dir, RepositorySourceConfig()),
+                self._config_overrides.get(element.dir, RepositoryConfig()),
             )
 
         return applied_config

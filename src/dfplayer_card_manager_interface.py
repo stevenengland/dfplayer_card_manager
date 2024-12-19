@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from src.config.configuration import RepositorySourceConfig
+from src.config.configuration import RepositoryConfig
 from src.repository.repository_element import RepositoryElement
 
 
@@ -17,7 +17,7 @@ class DfPlayerCardManagerInterface(ABC):
 
     @property
     @abstractmethod
-    def config_overrides(self) -> dict[str, RepositorySourceConfig]:
+    def config_overrides(self) -> dict[str, RepositoryConfig]:
         pass
 
     @abstractmethod

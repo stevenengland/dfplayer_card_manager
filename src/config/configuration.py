@@ -1,61 +1,69 @@
-from dataclasses import dataclass, field
+from pydantic import BaseModel, Field
 
-from src.config.yaml_config import YamlObject
 from src.repository.detection_source import DetectionSource
 from src.repository.diff_modes import DiffMode
 
 
-@dataclass
-class RepositoryTargetConfig(
-    YamlObject,
-):  # Default configuration for the SD card and its contents
-    root_dir: str | None = field(
-        default=None,  # Default root directory, set by command line argument but not by configuration reader
-    )
-    valid_subdir_pattern: str = field(
-        default=r"^\d{2}$",  # Default regex pattern to match any directory, not read by configuration reader
-    )
-    valid_subdir_files_pattern: str = field(
-        default=r"\d{3}\.mp3",  # Default regex pattern to match any file, not read by configuration reader
-    )
-
-
-@dataclass
-class RepositorySourceConfig(
-    YamlObject,
+class RepositoryConfig(  # type: ignore[misc]
+    BaseModel,
 ):  # Default configuration for source files and its contents
-    root_dir: str | None = field(
+    # ToDo: Remove the following Field
+    root_dir: str | None = Field(
         default=None,
     )  # Default root directory, set by command line argument but not by configuration reader
-    valid_subdir_pattern: str | None = field(
+    valid_subdir_pattern: str | None = Field(
         default=None,  # Default regex pattern to match any directory
     )
-    valid_subdir_files_pattern: str | None = field(
+    valid_subdir_files_pattern: str | None = Field(
         default=None,  # Default regex pattern to match any file
     )
-    diff_method: DiffMode | None = field(default=None)
+    # ToDo: Remove the following Field
+    diff_method: DiffMode | None = Field(default=None)
 
-    album_source: DetectionSource | None = field(default=None)
-    album_match: int | None = field(default=None)
+    album_source: DetectionSource | None = Field(default=None)
+    album_match: int | None = Field(default=None)
 
-    artist_source: DetectionSource | None = field(default=None)
-    artist_match: int | None = field(default=None)
+    artist_source: DetectionSource | None = Field(default=None)
+    artist_match: int | None = Field(default=None)
 
-    title_source: DetectionSource | None = field(default=None)
-    title_match: int | None = field(default=None)
+    title_source: DetectionSource | None = Field(default=None)
+    title_match: int | None = Field(default=None)
 
-    track_number_source: DetectionSource | None = field(default=None)
-    track_number_match: int | None = field(default=None)
+    track_number_source: DetectionSource | None = Field(default=None)
+    track_number_match: int | None = Field(default=None)
 
 
-@dataclass
-class Configuration(YamlObject):
-    repository_target: RepositoryTargetConfig = field(
-        default_factory=RepositoryTargetConfig,
-    )
-    repository_source: RepositorySourceConfig = field(
-        default_factory=RepositorySourceConfig,
-    )
-    overrides_file_name: str = field(
+class ProcessingConfig(BaseModel):  # type: ignore[misc]
+    diff_method: DiffMode | None = Field(default=None)
+    overrides_file_name: str = Field(
         default=".dfplayer_card_manager.yaml",
+    )
+
+
+class Configuration(BaseModel):  # type: ignore[misc]
+    repository_target: RepositoryConfig = Field(
+        default_factory=RepositoryConfig,
+        init=False,
+    )
+    repository_source: RepositoryConfig = Field(
+        default_factory=RepositoryConfig,
+        init=False,
+    )
+    repository_processing: ProcessingConfig = Field(
+        default_factory=ProcessingConfig,
+        init=False,
+    )
+    # ToDo: Remove the following Field
+    overrides_file_name: str = Field(
+        default=".dfplayer_card_manager.yaml",
+        init=False,
+    )
+
+
+class OverrideConfig(BaseModel):  # type: ignore[misc]
+    repository_source: RepositoryConfig = Field(
+        default_factory=RepositoryConfig,
+    )
+    repository_processing: ProcessingConfig = Field(
+        default_factory=ProcessingConfig,
     )

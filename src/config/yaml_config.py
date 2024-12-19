@@ -1,23 +1,13 @@
+from typing import Any
+
 import yaml
+from pydantic import BaseModel
 
 
-class YamlObject:
-    @classmethod
-    def from_yaml(cls, yaml_file):
-        with open(yaml_file, "r") as yaml_config_file:
-            yaml_data = yaml.safe_load(yaml_config_file)
-        return cls.create_instance(yaml_data)  # type: ignore [no-untyped-call]
-
-    @classmethod
-    def create_instance(cls, input_data):
-        if isinstance(input_data, dict):
-            return cls(
-                **{
-                    config_key: cls.create_instance(config_value)  # type: ignore [no-untyped-call]
-                    for config_key, config_value in input_data.items()
-                },
-            )
-        elif isinstance(input_data, list):
-            return [cls.create_instance(config_item) for config_item in input_data]  # type: ignore [no-untyped-call]
-
-        return input_data
+def create_yaml_object(  # type: ignore[misc]
+    yaml_file: str,
+    yaml_object_type: type[BaseModel],
+) -> Any:
+    with open(yaml_file, "r") as yaml_file_io:
+        yaml_data = yaml.safe_load(yaml_file_io)
+        return yaml_object_type.model_validate(yaml_data)

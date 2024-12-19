@@ -1,7 +1,7 @@
 import pytest
 from mockito import mock
 
-from src.config.configuration import Configuration, RepositorySourceConfig
+from src.config.configuration import Configuration, RepositoryConfig
 from src.dfplayer_card_manager import DfPlayerCardManager
 from src.mp3.audio_file_manager import AudioFileManager
 from src.repository import config_override, repository_finder
@@ -44,9 +44,9 @@ class TestRepositoryTreeCreation:
     def test_source_tree_creation_succeeds(self, sut: DfPlayerCardManager, when):
         # GIVEN
         sut.config_overrides = {
-            "01": RepositorySourceConfig(valid_subdir_files_pattern="01.mp3"),
-            "03": RepositorySourceConfig(valid_subdir_files_pattern="01.mp3"),
-            "04": RepositorySourceConfig(valid_subdir_files_pattern=None),
+            "01": RepositoryConfig(valid_subdir_files_pattern="01.mp3"),
+            "03": RepositoryConfig(valid_subdir_files_pattern="01.mp3"),
+            "04": RepositoryConfig(valid_subdir_files_pattern=None),
         }
         when(repository_finder).get_repository_tree(
             any,
@@ -113,8 +113,8 @@ class TestConfigOverrides:
 
         when(config_override).get_config_overrides(...).thenReturn(
             {
-                "01": mock(RepositorySourceConfig),
-                "03": mock(RepositorySourceConfig),
+                "01": mock(RepositoryConfig),
+                "03": mock(RepositoryConfig),
             },
         )
         # WHEN

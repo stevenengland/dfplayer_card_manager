@@ -44,7 +44,9 @@ def call_mypy(directory: str) -> None:
     print("** MYPY **")
     cmd_path = os.path.join(get_os_specific_command_directory(), "mypy")
     try:
-        result_subprocess = subprocess.run([cmd_path, directory])  # noqa: S607, S603
+        result_subprocess = subprocess.run(
+            [cmd_path, directory, "--cache-dir=nul"],
+        )  # noqa: S607, S603
 
     except FileNotFoundError:
         print("MyPy formatter not found. Please make sure it is installed.")
