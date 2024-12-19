@@ -11,7 +11,9 @@ def call_black(directory) -> None:
     print("** BLACK **")
     cmd_path = os.path.join(get_os_specific_command_directory(), "black")
     try:
-        result_subprocess = subprocess.run([cmd_path, directory])  # noqa: S607, S603
+        result_subprocess = subprocess.run(
+            [cmd_path, directory], check=True
+        )  # noqa: S607, S603
 
     except FileNotFoundError:
         print("Black formatter not found. Please make sure it is installed.")
@@ -44,9 +46,10 @@ def call_mypy(directory: str) -> None:
     print("** MYPY **")
     cmd_path = os.path.join(get_os_specific_command_directory(), "mypy")
     try:
-        result_subprocess = subprocess.run(
+        result_subprocess = subprocess.run(  # noqa: S607, S603
             [cmd_path, directory, "--cache-dir=nul"],
-        )  # noqa: S607, S603
+            check=True,
+        )
 
     except FileNotFoundError:
         print("MyPy formatter not found. Please make sure it is installed.")
