@@ -70,7 +70,7 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
             self._config.repository_source.root_dir,
             # get all distinct subdirs from the source repository
             [element.dir for element in self._source_repo.elements],
-            self._config.overrides_file_name,
+            self._config.repository_processing.overrides_file_name,
         )
 
     def get_target_repository_tree(self) -> list[tuple[str, str]]:

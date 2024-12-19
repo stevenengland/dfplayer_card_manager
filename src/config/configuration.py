@@ -53,11 +53,6 @@ class Configuration(BaseModel):  # type: ignore[misc]
         default_factory=ProcessingConfig,
         init=False,
     )
-    # ToDo: Remove the following Field
-    overrides_file_name: str = Field(
-        default=".dfplayer_card_manager.yaml",
-        init=False,
-    )
 
 
 class OverrideConfig(BaseModel):  # type: ignore[misc]
