@@ -11,9 +11,9 @@ def call_black(directory) -> None:
     print("** BLACK **")
     cmd_path = os.path.join(get_os_specific_command_directory(), "black")
     try:
-        result_subprocess = subprocess.run(
-            [cmd_path, directory], check=True
-        )  # noqa: S607, S603
+        result_subprocess = subprocess.run(  # noqa: S607, S603
+            [cmd_path, directory],
+        )
 
     except FileNotFoundError:
         print("Black formatter not found. Please make sure it is installed.")
