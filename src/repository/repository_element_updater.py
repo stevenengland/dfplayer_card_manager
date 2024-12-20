@@ -9,10 +9,10 @@ def update_element_by_dir(
     element: RepositoryElement,
     effective_config: RepositoryConfig,
 ) -> None:
-    update_title_by_dir(element, effective_config)
+    update_element_title_by_dir(element, effective_config)
 
 
-def update_title_by_dir(
+def update_element_title_by_dir(
     element: RepositoryElement,
     effective_config: RepositoryConfig,
 ) -> None:

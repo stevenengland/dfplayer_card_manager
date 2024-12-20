@@ -20,7 +20,7 @@ class TestElementUpdates:
         element = RepositoryElement()
         element.dir = "01.no.yes.loremipsum"
         # WHEN
-        repository_element_updater.update_title_by_dir(element, config)
+        repository_element_updater.update_element_title_by_dir(element, config)
         # THEN
         assert element.title == "yes"
 
@@ -33,7 +33,7 @@ class TestElementUpdates:
         # WHEN
         # THEN
         with pytest.raises(ValueError, match="match"):
-            repository_element_updater.update_title_by_dir(element, config)
+            repository_element_updater.update_element_title_by_dir(element, config)
 
     def test_title_gets_updated_raises_when_title_match_is_none(self):
         # GIVEN
@@ -44,7 +44,7 @@ class TestElementUpdates:
         # WHEN
         # THEN
         with pytest.raises(ValueError, match="match"):
-            repository_element_updater.update_title_by_dir(element, config)
+            repository_element_updater.update_element_title_by_dir(element, config)
 
     def test_title_gets_updated_raises_when_valid_subdir_pattern_is_none(self):
         # GIVEN
@@ -54,7 +54,7 @@ class TestElementUpdates:
         # WHEN
         # THEN
         with pytest.raises(ValueError, match="pattern"):
-            repository_element_updater.update_title_by_dir(element, config)
+            repository_element_updater.update_element_title_by_dir(element, config)
 
     def test_title_isnt_updated_when_title_match_is_too_large(self):
         # GIVEN
@@ -66,6 +66,6 @@ class TestElementUpdates:
         before = element.title
         element.dir = "01.no.yes.loremipsum"
         # WHEN
-        repository_element_updater.update_title_by_dir(element, config)
+        repository_element_updater.update_element_title_by_dir(element, config)
         # THEN
         assert element.title == before
