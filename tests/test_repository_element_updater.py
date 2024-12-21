@@ -65,11 +65,12 @@ class TestElementUpdates:
     def test_element_updates_by_tags(self, when):
         # GIVEN
         element = RepositoryElement()
-        id3_tags = TagCollection()
-        id3_tags.title = "test_title"
-        id3_tags.artist = "test_artist"
-        id3_tags.album = "test_album"
-        id3_tags.track_number = 66
+        id3_tags = TagCollection(
+            title="test_title",
+            artist="test_artist",
+            album="test_album",
+            track_number=66,
+        )
         config = RepositoryConfig(
             album_source=DetectionSource.tag,
             artist_source=DetectionSource.tag,

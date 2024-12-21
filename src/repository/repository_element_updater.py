@@ -131,13 +131,13 @@ def update_element_by_tags(
     config: RepositoryConfig,
     id3_tags: TagCollection,
 ) -> RepositoryElement:
-    if config.title_source == DetectionSource.tag:
+    if config.title_source == DetectionSource.tag and id3_tags.title:
         element.title = id3_tags.title
-    if config.artist_source == DetectionSource.tag:
+    if config.artist_source == DetectionSource.tag and id3_tags.artist:
         element.artist = id3_tags.artist
-    if config.album_source == DetectionSource.tag:
+    if config.album_source == DetectionSource.tag and id3_tags.album:
         element.album = id3_tags.album
-    if config.track_number_source == DetectionSource.tag:
+    if config.track_number_source == DetectionSource.tag and id3_tags.track_number:
         element.track_number = id3_tags.track_number
     return element
 

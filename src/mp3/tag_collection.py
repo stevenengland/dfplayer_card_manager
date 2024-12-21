@@ -1,10 +1,10 @@
-from dataclasses import dataclass
+from pydantic import Field
+from pydantic.dataclasses import dataclass
 
 
 @dataclass
 class TagCollection:
-    def __init__(self) -> None:
-        self.title = ""
-        self.artist = ""
-        self.album = ""
-        self.track_number = 0
+    title: str | None = Field(default=None)
+    artist: str | None = Field(default=None)
+    album: str | None = Field(default=None)
+    track_number: int | None = Field(default=None)
