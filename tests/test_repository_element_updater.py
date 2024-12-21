@@ -1,10 +1,37 @@
 import pytest
 
+from src.config.configuration import RepositoryConfig
 from src.repository import repository_element_updater
+from src.repository.detection_source import DetectionSource
 from src.repository.repository_element import RepositoryElement
 
 pytestmark = pytest.mark.usefixtures("unstub")
 e2e = pytest.mark.skipif("not config.getoption('e2e')")
+
+
+class TestElementUpdates:
+    def test_element_updates(self, when):
+        # GIVEN
+        element = RepositoryElement()
+        element.dir = "01.no.yes.loremipsum"
+        config = RepositoryConfig(
+            valid_subdir_pattern=r"^\d{2}\.(no)\.(yes).*$",
+            album_match=2,
+            artist_match=2,
+            title_match=2,
+            album_source=DetectionSource.dirname,
+            artist_source=DetectionSource.dirname,
+            title_source=DetectionSource.dirname,
+        )
+        # WHEN
+        repository_element_updater.update_element_by_dir(
+            element,
+            config,
+        )
+        # THEN
+        assert element.title == "yes"
+        assert element.artist == "yes"
+        assert element.album == "yes"
 
 
 class TestElementTitleUpdates:

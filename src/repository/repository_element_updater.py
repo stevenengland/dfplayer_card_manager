@@ -1,22 +1,34 @@
 import re
 
 from src.config.configuration import RepositoryConfig
+from src.repository.detection_source import DetectionSource
 from src.repository.repository_element import RepositoryElement
 
 
 def update_element_by_dir(
     element: RepositoryElement,
-    effective_config: RepositoryConfig,
+    config: RepositoryConfig,
 ) -> None:
-    if not effective_config.valid_subdir_pattern:
-        raise ValueError("No valid subdir pattern set")
-    if not effective_config.title_match or effective_config.title_match < 1:
-        raise ValueError("No valid album match set")
-    update_element_title_by_dir(
-        element,
-        effective_config.valid_subdir_pattern,
-        effective_config.title_match,
-    )
+    if config.album_source == DetectionSource.dirname:
+        update_element_album_by_dir(
+            element,
+            config.valid_subdir_pattern or "",
+            config.album_match or 0,
+        )
+
+    if config.artist_source == DetectionSource.dirname:
+        update_element_artist_by_dir(
+            element,
+            config.valid_subdir_pattern or "",
+            config.artist_match or 0,
+        )
+
+    if config.title_source == DetectionSource.dirname:
+        update_element_title_by_dir(
+            element,
+            config.valid_subdir_pattern or "",
+            config.title_match or 0,
+        )
 
 
 def update_element_album_by_dir(
