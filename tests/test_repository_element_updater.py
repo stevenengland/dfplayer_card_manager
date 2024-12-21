@@ -10,7 +10,7 @@ e2e = pytest.mark.skipif("not config.getoption('e2e')")
 
 
 class TestElementUpdates:
-    def test_element_updates(self, when):
+    def test_element_updates_by_dir(self, when):
         # GIVEN
         element = RepositoryElement()
         element.dir = "01.no.yes.loremipsum"
@@ -33,6 +33,32 @@ class TestElementUpdates:
         assert element.artist == "yes"
         assert element.album == "yes"
 
+    def test_element_updates_by_filename(self, when):
+        # GIVEN
+        element = RepositoryElement()
+        element.dir = "01.no.yes.loremipsum"
+        config = RepositoryConfig(
+            valid_subdir_files_pattern=r"^(\d{2})\.(no)\.(yes).*$",
+            album_match=3,
+            artist_match=3,
+            title_match=3,
+            track_number_match=1,
+            track_number_source=DetectionSource.filename,
+            album_source=DetectionSource.filename,
+            artist_source=DetectionSource.filename,
+            title_source=DetectionSource.filename,
+        )
+        # WHEN
+        repository_element_updater.update_element_by_filename(
+            element,
+            config,
+        )
+        # THEN
+        assert element.title == "yes"
+        assert element.artist == "yes"
+        assert element.album == "yes"
+        assert element.track_number == 1
+
 
 class TestElementTitleUpdates:
     def test_title_gets_updated(self, when):
@@ -40,7 +66,7 @@ class TestElementTitleUpdates:
         element = RepositoryElement()
         element.dir = "01.no.yes.loremipsum"
         # WHEN
-        repository_element_updater.update_element_title_by_dir(
+        repository_element_updater.update_element_title_by_fs(
             element,
             r"^\d{2}\.(no)\.(yes).*$",
             2,
@@ -54,7 +80,7 @@ class TestElementTitleUpdates:
         # WHEN
         # THEN
         with pytest.raises(ValueError, match="Match"):
-            repository_element_updater.update_element_title_by_dir(
+            repository_element_updater.update_element_title_by_fs(
                 element,
                 r"^\d{2}\.(no)\.(yes).*$",
                 0,
@@ -65,7 +91,7 @@ class TestElementTitleUpdates:
         element = RepositoryElement()
         element.dir = "01.no.yes.loremipsum"
         # WHEN
-        repository_element_updater.update_element_title_by_dir(
+        repository_element_updater.update_element_title_by_fs(
             element,
             r"^\d{2}\.(no)\.(yes).*$",
             99,
@@ -80,7 +106,7 @@ class TestElementAlbumUpdates:
         element = RepositoryElement()
         element.dir = "01.no.yes.loremipsum"
         # WHEN
-        repository_element_updater.update_element_album_by_dir(
+        repository_element_updater.update_element_album_by_fs(
             element,
             r"^\d{2}\.(no)\.(yes).*$",
             1,
@@ -94,7 +120,7 @@ class TestElementAlbumUpdates:
         # WHEN
         # THEN
         with pytest.raises(ValueError, match="Match"):
-            repository_element_updater.update_element_album_by_dir(
+            repository_element_updater.update_element_album_by_fs(
                 element,
                 r"^\d{2}\.(no)\.(yes).*$",
                 0,
@@ -105,7 +131,7 @@ class TestElementAlbumUpdates:
         element = RepositoryElement()
         element.dir = "01.no.yes.loremipsum"
         # WHEN
-        repository_element_updater.update_element_album_by_dir(
+        repository_element_updater.update_element_album_by_fs(
             element,
             r"^\d{2}\.(no)\.(yes).*$",
             99,
@@ -120,7 +146,7 @@ class TestElementArtistUpdates:
         element = RepositoryElement()
         element.dir = "01.no.yes.loremipsum"
         # WHEN
-        repository_element_updater.update_element_artist_by_dir(
+        repository_element_updater.update_element_artist_by_fs(
             element,
             r"^\d{2}\.(no)\.(yes).*$",
             1,
@@ -134,7 +160,7 @@ class TestElementArtistUpdates:
         # WHEN
         # THEN
         with pytest.raises(ValueError, match="Match"):
-            repository_element_updater.update_element_artist_by_dir(
+            repository_element_updater.update_element_artist_by_fs(
                 element,
                 r"^\d{2}\.(no)\.(yes).*$",
                 0,
@@ -145,7 +171,7 @@ class TestElementArtistUpdates:
         element = RepositoryElement()
         element.dir = "01.no.yes.loremipsum"
         # WHEN
-        repository_element_updater.update_element_artist_by_dir(
+        repository_element_updater.update_element_artist_by_fs(
             element,
             r"^\d{2}\.(no)\.(yes).*$",
             99,
