@@ -1,6 +1,9 @@
+import hashlib
+
 import pytest
 
 from src.config.configuration import RepositoryConfig
+from src.mp3.tag_collection import TagCollection
 from src.repository import repository_element_updater
 from src.repository.detection_source import DetectionSource
 from src.repository.repository_element import RepositoryElement
@@ -58,6 +61,48 @@ class TestElementUpdates:
         assert element.artist == "yes"
         assert element.album == "yes"
         assert element.track_number == 1
+
+    def test_element_updates_by_tags(self, when):
+        # GIVEN
+        element = RepositoryElement()
+        id3_tags = TagCollection()
+        id3_tags.title = "test_title"
+        id3_tags.artist = "test_artist"
+        id3_tags.album = "test_album"
+        id3_tags.track_number = 66
+        config = RepositoryConfig(
+            album_source=DetectionSource.tag,
+            artist_source=DetectionSource.tag,
+            title_source=DetectionSource.tag,
+            track_number_source=DetectionSource.tag,
+        )
+        # WHEN
+        repository_element_updater.update_element_by_tags(
+            element,
+            config,
+            id3_tags,
+        )
+        # THEN
+        assert element.title == "test_title"
+        assert element.artist == "test_artist"
+        assert element.album == "test_album"
+        assert element.track_number == 66
+
+    def test_element_updates_by_audio_content(self, when):
+        # GIVEN
+        element = RepositoryElement()
+        audio_content = b"test_audio_content"
+        audio_content_hash = hashlib.md5(
+            audio_content,
+            usedforsecurity=False,
+        ).hexdigest()
+        # WHEN
+        repository_element_updater.update_element_by_audio_content(
+            element,
+            audio_content,
+        )
+        # THEN
+        assert element.hash == audio_content_hash
 
 
 class TestElementTitleUpdates:

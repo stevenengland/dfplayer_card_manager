@@ -1,6 +1,8 @@
+import hashlib
 import re
 
 from src.config.configuration import RepositoryConfig
+from src.mp3.tag_collection import TagCollection
 from src.repository.detection_source import DetectionSource
 from src.repository.repository_element import RepositoryElement
 
@@ -9,21 +11,21 @@ def update_element_by_dir(
     element: RepositoryElement,
     config: RepositoryConfig,
 ) -> None:
-    if config.album_source == DetectionSource.dirname:
+    if config.album_source and config.album_source == DetectionSource.dirname:
         update_element_album_by_fs(
             element,
             config.valid_subdir_pattern or "",
             config.album_match or 0,
         )
 
-    if config.artist_source == DetectionSource.dirname:
+    if config.artist_source and config.artist_source == DetectionSource.dirname:
         update_element_artist_by_fs(
             element,
             config.valid_subdir_pattern or "",
             config.artist_match or 0,
         )
 
-    if config.title_source == DetectionSource.dirname:
+    if config.title_source and config.title_source == DetectionSource.dirname:
         update_element_title_by_fs(
             element,
             config.valid_subdir_pattern or "",
@@ -31,32 +33,35 @@ def update_element_by_dir(
         )
 
 
-def update_element_by_filename(
+def update_element_by_filename(  # noqa: WPS231
     element: RepositoryElement,
     config: RepositoryConfig,
 ) -> None:
-    if config.album_source == DetectionSource.filename:
+    if config.album_source and config.album_source == DetectionSource.filename:
         update_element_album_by_fs(
             element,
             config.valid_subdir_files_pattern or "",
             config.album_match or 0,
         )
 
-    if config.artist_source == DetectionSource.filename:
+    if config.artist_source and config.artist_source == DetectionSource.filename:
         update_element_artist_by_fs(
             element,
             config.valid_subdir_files_pattern or "",
             config.artist_match or 0,
         )
 
-    if config.title_source == DetectionSource.filename:
+    if config.title_source and config.title_source == DetectionSource.filename:
         update_element_title_by_fs(
             element,
             config.valid_subdir_files_pattern or "",
             config.title_match or 0,
         )
 
-    if config.track_number_source == DetectionSource.filename:
+    if (  # noqa: WPS337
+        config.track_number_source
+        and config.track_number_source == DetectionSource.filename
+    ):
         update_element_tracknum_by_fs(
             element,
             config.valid_subdir_files_pattern or "",
@@ -119,3 +124,29 @@ def _get_match(element: RepositoryElement, dir_pattern: str, field_match: int):
             return None
         artist_result = field_matched_text.group(field_match)
     return artist_result
+
+
+def update_element_by_tags(
+    element: RepositoryElement,
+    config: RepositoryConfig,
+    id3_tags: TagCollection,
+) -> RepositoryElement:
+    if config.title_source == DetectionSource.tag:
+        element.title = id3_tags.title
+    if config.artist_source == DetectionSource.tag:
+        element.artist = id3_tags.artist
+    if config.album_source == DetectionSource.tag:
+        element.album = id3_tags.album
+    if config.track_number_source == DetectionSource.tag:
+        element.track_number = id3_tags.track_number
+    return element
+
+
+def update_element_by_audio_content(
+    element: RepositoryElement,
+    audio_content: bytes,
+) -> RepositoryElement:
+    # create md5 hash from audio content
+    md5_hash = hashlib.md5(audio_content, usedforsecurity=False).hexdigest()
+    element.hash = md5_hash
+    return element

@@ -4,7 +4,27 @@ from src.repository.detection_source import DetectionSource
 
 def check_repository_config(  # noqa: C901, WPS238, WPS231
     config: RepositoryConfig,
+    check_mandatory_values: bool = True,
 ) -> None:
+    # check mandatory config values
+    if check_mandatory_values:
+        if (
+            config.album_source == DetectionSource.filename
+            or config.artist_source == DetectionSource.filename
+            or config.title_source == DetectionSource.filename
+            or config.track_number_source == DetectionSource.filename
+        ):
+            if config.valid_subdir_files_pattern is None:
+                raise ValueError("Valid subdir files pattern must be set")
+        if (
+            config.album_source == DetectionSource.dirname
+            or config.artist_source == DetectionSource.dirname
+            or config.title_source == DetectionSource.dirname
+            or config.track_number_source == DetectionSource.dirname
+        ):
+            if config.valid_subdir_pattern is None:
+                raise ValueError("Valid subdir pattern must be set")
+
     # detection constellations that are not supported
     if config.track_number_source == DetectionSource.dirname:
         raise ValueError("Track number source cannot be read from dir name")

@@ -1,12 +1,15 @@
-import hashlib
 import os
 
+from src.config import config_checker
 from src.config.config_merger import merge_configs
 from src.config.configuration import Configuration, RepositoryConfig
 from src.dfplayer_card_manager_interface import DfPlayerCardManagerInterface
 from src.mp3.audio_file_manager_interface import AudioFileManagerInterface
-from src.mp3.tag_collection import TagCollection
-from src.repository import config_override, repository_finder
+from src.repository import (
+    config_override,
+    repository_element_updater,
+    repository_finder,
+)
 from src.repository.detection_source import DetectionSource
 from src.repository.diff_modes import DiffMode
 from src.repository.repository import Repository
@@ -57,18 +60,22 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
     def config_overrides(self, overrides):
         self._config_overrides = overrides
 
+    def init(self):
+        self.init_repositories()
+        self.read_config_overrides()
+        config_checker.check_repository_config(self._config.repository_source)
+        config_checker.check_repository_config(self._config.repository_target)
+
     def init_repositories(self) -> None:
         source_repository_tree = self.get_source_repository_tree()
         target_repository_tree = self.get_target_repository_tree()
         for source_subdirectory, source_file in source_repository_tree:
-            # create a repository element with subdir and file
             element = RepositoryElement()
             element.repo_root_dir = self._source_repo_root_dir or ""
             element.dir = source_subdirectory
             element.file_name = source_file
             self._source_repo.elements.append(element)
         for target_subdirectory, target_file in target_repository_tree:
-            # create a repository element with subdir and file
             element = RepositoryElement()
             element.repo_root_dir = self._target_repo_root_dir or ""
             element.dir = target_subdirectory
@@ -121,8 +128,13 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
             valid_subdir_files_pattern_overrides,
         )
 
-    def update_element(self, element: RepositoryElement):
-        applied_config = self._get_applied_config(element)
+    def update_element(self, element: RepositoryElement):  # noqa: WPS231
+        if element.repo_root_dir == self._target_repo_root_dir:
+            applied_config = self._config.repository_target
+        elif element.repo_root_dir == self._source_repo_root_dir:
+            applied_config = self._get_applied_config(element)
+        else:
+            raise ValueError("The element does not belong to any of the repositories")
 
         is_tag_reading_needed = self.is_tag_reading_needed(applied_config)
 
@@ -134,18 +146,32 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
                     os.path.join(element.repo_root_dir, element.dir, element.file_name),
                 )
             )
-            element = self._update_element_by_tags(element, id3_tags)
-            element = self._update_element_by_audio_content(element, audio_content)
+            repository_element_updater.update_element_by_tags(
+                element,
+                applied_config,
+                id3_tags,
+            )
+            repository_element_updater.update_element_by_audio_content(
+                element,
+                audio_content,
+            )
         elif is_tag_reading_needed and not is_hash_reading_needed:
             id3_tags = self._audio_manager.read_id3_tags(
                 os.path.join(element.repo_root_dir, element.dir, element.file_name),
             )
-            element = self._update_element_by_tags(element, id3_tags)
+            repository_element_updater.update_element_by_tags(
+                element,
+                applied_config,
+                id3_tags,
+            )
         elif not is_tag_reading_needed and is_hash_reading_needed:
             audio_content = self._audio_manager.read_audio_content(
                 os.path.join(element.repo_root_dir, element.dir, element.file_name),
             )
-            element = self._update_element_by_audio_content(element, audio_content)
+            repository_element_updater.update_element_by_audio_content(
+                element,
+                audio_content,
+            )
 
         return element
 
@@ -175,28 +201,3 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
             )
 
         return applied_config
-
-    def _update_element_by_tags(
-        self,
-        element: RepositoryElement,
-        id3_tags: TagCollection,
-    ) -> RepositoryElement:
-        if self._config.repository_source.title_source == DetectionSource.tag:
-            element.title = id3_tags.title
-        if self._config.repository_source.artist_source == DetectionSource.tag:
-            element.artist = id3_tags.artist
-        if self._config.repository_source.album_source == DetectionSource.tag:
-            element.album = id3_tags.album
-        if self._config.repository_source.track_number_source == DetectionSource.tag:
-            element.track_number = id3_tags.track_number
-        return element
-
-    def _update_element_by_audio_content(
-        self,
-        element: RepositoryElement,
-        audio_content: bytes,
-    ) -> RepositoryElement:
-        # create md5 hash from audio content
-        md5_hash = hashlib.md5(audio_content, usedforsecurity=False).hexdigest()
-        element.hash = md5_hash
-        return element
