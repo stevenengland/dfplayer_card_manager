@@ -2,6 +2,7 @@
 
 eyed3
 FATtools
+multipledispatch
 pydantic
 pyyaml
 types-PyYAML

@@ -3,6 +3,7 @@ eyed3==0.9.6
 faker==33.1.0
 FATtools==1.0.39
 isort==5.13.2
+multipledispatch==1.0.0
 mypy==1.10.0
 pyfakefs==5.6.0
 pre-commit==3.8.0
