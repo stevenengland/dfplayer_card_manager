@@ -120,17 +120,17 @@ class TestElementTitleUpdates:
         # THEN
         assert element.title == "yes"
 
-    def test_title_gets_updated_raises_when_title_match_lt_1(self):
+    def test_title_gets_updated_to_none_if_field_match_lt_1(self):
         # GIVEN
-        element = RepositoryElement()
+        element = RepositoryElement(dir="test_dir", title="test_title")
         # WHEN
         # THEN
-        with pytest.raises(ValueError, match="Match"):
-            repository_element_updater.update_element_title_by_fs(
-                element,
-                r"^\d{2}\.(no)\.(yes).*$",
-                0,
-            )
+        repository_element_updater.update_element_title_by_fs(
+            element,
+            r"^\d{2}\.(no)\.(yes).*$",
+            0,
+        )
+        assert element.title is None
 
     def test_title_isnt_updated_when_title_match_is_too_large(self):
         # GIVEN
@@ -160,17 +160,17 @@ class TestElementAlbumUpdates:
         # THEN
         assert element.album == "no"
 
-    def test_album_gets_updated_raises_when_album_match_lt_1(self):
+    def test_album_gets_updated_to_none_if_field_match_lt_1(self):
         # GIVEN
-        element = RepositoryElement()
+        element = RepositoryElement(dir="test_dir", album="test_title")
         # WHEN
         # THEN
-        with pytest.raises(ValueError, match="Match"):
-            repository_element_updater.update_element_album_by_fs(
-                element,
-                r"^\d{2}\.(no)\.(yes).*$",
-                0,
-            )
+        repository_element_updater.update_element_album_by_fs(
+            element,
+            r"^\d{2}\.(no)\.(yes).*$",
+            0,
+        )
+        assert element.album is None
 
     def test_album_isnt_updated_when_album_match_is_too_large(self):
         # GIVEN
@@ -200,17 +200,17 @@ class TestElementArtistUpdates:
         # THEN
         assert element.artist == "no"
 
-    def test_artist_gets_updated_raises_when_artist_match_lt_1(self):
+    def test_artist_gets_updated_to_none_if_field_match_lt_1(self):
         # GIVEN
-        element = RepositoryElement()
+        element = RepositoryElement(dir="test_dir", artist="test_artist")
         # WHEN
         # THEN
-        with pytest.raises(ValueError, match="Match"):
-            repository_element_updater.update_element_artist_by_fs(
-                element,
-                r"^\d{2}\.(no)\.(yes).*$",
-                0,
-            )
+        repository_element_updater.update_element_artist_by_fs(
+            element,
+            r"^\d{2}\.(no)\.(yes).*$",
+            0,
+        )
+        assert element.artist is None
 
     def test_artist_isnt_updated_when_artist_match_is_too_large(self):
         # GIVEN

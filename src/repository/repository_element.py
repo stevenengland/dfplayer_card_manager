@@ -1,15 +1,15 @@
-from dataclasses import dataclass
+from pydantic import Field
+from pydantic.dataclasses import dataclass
 
 
 @dataclass
 class RepositoryElement:  # noqa: WPS230
-    def __init__(self) -> None:
-        self.tree_id = ""
-        self.repo_root_dir = ""
-        self.dir = ""
-        self.file_name = ""
-        self.title = ""
-        self.artist = ""
-        self.album = ""
-        self.track_number = 0
-        self.hash = ""
+    tree_id: str | None = Field(default=None)
+    repo_root_dir: str | None = Field(default=None)
+    dir: str = Field(default="")
+    file_name: str = Field(default="")
+    title: str | None = Field(default=None)
+    artist: str | None = Field(default=None)
+    album: str | None = Field(default=None)
+    track_number: int | None = Field(default=None)
+    hash: str | None = Field(default=None)

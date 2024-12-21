@@ -7,95 +7,116 @@ from src.repository.detection_source import DetectionSource
 from src.repository.repository_element import RepositoryElement
 
 
-def update_element_by_dir(
+def update_element_by_dir(  # noqa: C901, WPS231
     element: RepositoryElement,
     config: RepositoryConfig,
 ) -> None:
     if config.album_source and config.album_source == DetectionSource.dirname:
+        if not config.valid_subdir_pattern or not config.album_match:
+            element.album = None
+            return
         update_element_album_by_fs(
             element,
-            config.valid_subdir_pattern or "",
-            config.album_match or 0,
+            config.valid_subdir_pattern,
+            config.album_match,
         )
 
     if config.artist_source and config.artist_source == DetectionSource.dirname:
+        if not config.valid_subdir_pattern or not config.artist_match:
+            element.artist = None
+            return
         update_element_artist_by_fs(
             element,
-            config.valid_subdir_pattern or "",
-            config.artist_match or 0,
+            config.valid_subdir_pattern,
+            config.artist_match,
         )
 
     if config.title_source and config.title_source == DetectionSource.dirname:
+        if not config.valid_subdir_pattern or not config.title_match:
+            element.title = None
+            return
         update_element_title_by_fs(
             element,
-            config.valid_subdir_pattern or "",
-            config.title_match or 0,
+            config.valid_subdir_pattern,
+            config.title_match,
         )
 
 
-def update_element_by_filename(  # noqa: WPS231
+def update_element_by_filename(  # noqa: WPS231, C901
     element: RepositoryElement,
     config: RepositoryConfig,
 ) -> None:
     if config.album_source and config.album_source == DetectionSource.filename:
+        if not config.valid_subdir_files_pattern or not config.album_match:
+            element.album = None
+            return
         update_element_album_by_fs(
             element,
-            config.valid_subdir_files_pattern or "",
-            config.album_match or 0,
+            config.valid_subdir_files_pattern,
+            config.album_match,
         )
 
     if config.artist_source and config.artist_source == DetectionSource.filename:
+        if not config.valid_subdir_files_pattern or not config.artist_match:
+            element.artist = None
+            return
         update_element_artist_by_fs(
             element,
-            config.valid_subdir_files_pattern or "",
-            config.artist_match or 0,
+            config.valid_subdir_files_pattern,
+            config.artist_match,
         )
 
     if config.title_source and config.title_source == DetectionSource.filename:
+        if not config.valid_subdir_files_pattern or not config.title_match:
+            element.title = None
+            return
         update_element_title_by_fs(
             element,
-            config.valid_subdir_files_pattern or "",
-            config.title_match or 0,
+            config.valid_subdir_files_pattern,
+            config.title_match,
         )
 
     if (  # noqa: WPS337
         config.track_number_source
         and config.track_number_source == DetectionSource.filename
     ):
+        if not config.valid_subdir_files_pattern or not config.track_number_match:
+            element.track_number = None
+            return
         update_element_tracknum_by_fs(
             element,
-            config.valid_subdir_files_pattern or "",
-            config.track_number_match or 0,
+            config.valid_subdir_files_pattern,
+            config.track_number_match,
         )
 
 
 def update_element_album_by_fs(
     element: RepositoryElement,
-    dir_pattern: str,
+    fs_pattern: str,
     album_match: int,
 ) -> None:
-    match_result = _get_match(element, dir_pattern, album_match)
+    match_result = _get_match(element, fs_pattern, album_match)
 
     element.album = match_result
 
 
 def update_element_artist_by_fs(
     element: RepositoryElement,
-    dir_pattern: str,
+    fs_pattern: str,
     artist_match: int,
 ) -> None:
 
-    match_result = _get_match(element, dir_pattern, artist_match)
+    match_result = _get_match(element, fs_pattern, artist_match)
 
     element.artist = match_result
 
 
 def update_element_title_by_fs(
     element: RepositoryElement,
-    dir_pattern: str,
+    fs_pattern: str,
     title_match: int,
 ) -> None:
-    match_result = _get_match(element, dir_pattern, title_match)
+    match_result = _get_match(element, fs_pattern, title_match)
 
     element.title = match_result
 
@@ -106,17 +127,25 @@ def update_element_tracknum_by_fs(
     match_num: int,
 ) -> None:
     match_result = _get_match(element, filename_pattern, match_num)
+    if match_result is None:
+        element.track_number = None
+        return
     try:
         element.track_number = int(match_result)
     except ValueError:
-        element.track_number = element.track_number
+        return
 
 
-def _get_match(element: RepositoryElement, dir_pattern: str, field_match: int):
+# ToDo: switch element to string
+def _get_match(
+    element: RepositoryElement,
+    fs_pattern: str,
+    field_match: int,
+) -> str | None:
     if field_match < 1:
-        raise ValueError("Match number must be 1 or greater")
+        return None
     field_matched_text = re.search(
-        dir_pattern,
+        fs_pattern,
         element.dir,
     )
     if field_matched_text:

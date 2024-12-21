@@ -84,11 +84,14 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
 
     def read_config_overrides(self) -> None:
         if self._source_repo_root_dir is None:
-            raise ValueError("Repository source root directory is not set")
+            raise ValueError(
+                "Repository source root directory is not set. Was the init method called?",
+            )
+
         self._config_overrides = config_override.get_config_overrides(
             self._source_repo_root_dir,
             # get all distinct subdirs from the source repository
-            [element.dir for element in self._source_repo.elements],
+            [element.dir or "" for element in self._source_repo.elements],
             self._config.repository_processing.overrides_file_name,
         )
 
