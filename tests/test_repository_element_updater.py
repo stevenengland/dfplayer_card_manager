@@ -16,14 +16,16 @@ class TestElementUpdates:
     def test_element_updates_by_dir(self, when):
         # GIVEN
         element = RepositoryElement()
-        element.dir = "01.no.yes.loremipsum"
+        element.dir = "01.no.yes.02.loremipsum"
         config = RepositoryConfig(
-            valid_subdir_pattern=r"^\d{2}\.(no)\.(yes).*$",
+            valid_subdir_pattern=r"^\d{2}\.(no)\.(yes)\.(\d{2}).*$",
             album_match=2,
             artist_match=2,
+            dir_number_match=3,
             title_match=2,
             album_source=DetectionSource.dirname,
             artist_source=DetectionSource.dirname,
+            dir_number_source=DetectionSource.dirname,
             title_source=DetectionSource.dirname,
         )
         # WHEN
@@ -35,6 +37,7 @@ class TestElementUpdates:
         assert element.title == "yes"
         assert element.artist == "yes"
         assert element.album == "yes"
+        assert element.dir_number == 2
 
     def test_element_updates_by_filename(self, when):
         # GIVEN
@@ -44,11 +47,13 @@ class TestElementUpdates:
             valid_subdir_files_pattern=r"^(\d{2})\.(no)\.(yes).*$",
             album_match=3,
             artist_match=3,
+            dir_number_match=1,
             title_match=3,
             track_number_match=1,
             track_number_source=DetectionSource.filename,
             album_source=DetectionSource.filename,
             artist_source=DetectionSource.filename,
+            dir_number_source=DetectionSource.filename,
             title_source=DetectionSource.filename,
         )
         # WHEN
@@ -60,6 +65,7 @@ class TestElementUpdates:
         assert element.title == "yes"
         assert element.artist == "yes"
         assert element.album == "yes"
+        assert element.dir_number == 1
         assert element.track_number == 1
 
     def test_element_updates_by_tags(self, when):
@@ -224,3 +230,83 @@ class TestElementArtistUpdates:
         )
         # THEN
         assert element.artist is None
+
+
+class TestElementDirNumberUpdates:
+    def test_dir_number_gets_updated(self, when):
+        # GIVEN
+        element = RepositoryElement()
+        element.dir = "01.no.yes.loremipsum"
+        # WHEN
+        repository_element_updater.update_element_dirnum_by_fs(
+            element,
+            r"^(\d{2})\.(no)\.(yes).*$",
+            1,
+        )
+        # THEN
+        assert element.dir_number == 1
+
+    def test_dir_number_gets_updated_to_none_if_field_match_lt_1(self):
+        # GIVEN
+        element = RepositoryElement(dir="test_dir", dir_number=1)
+        # WHEN
+        # THEN
+        repository_element_updater.update_element_dirnum_by_fs(
+            element,
+            r"^\d{2}\.(no)\.(yes).*$",
+            0,
+        )
+        assert element.dir_number is None
+
+    def test_dir_number_isnt_updated_when_dir_number_match_is_too_large(self):
+        # GIVEN
+        element = RepositoryElement()
+        element.dir = "01.no.yes.loremipsum"
+        # WHEN
+        repository_element_updater.update_element_dirnum_by_fs(
+            element,
+            r"^\d{2}\.(no)\.(yes).*$",
+            99,
+        )
+        # THEN
+        assert element.dir_number is None
+
+
+class TestElementTrackNumberUpdates:
+    def test_track_number_gets_updated(self, when):
+        # GIVEN
+        element = RepositoryElement()
+        element.dir = "01.no.yes.loremipsum"
+        # WHEN
+        repository_element_updater.update_element_tracknum_by_fs(
+            element,
+            r"^(\d{2})\.(no)\.(yes).*$",
+            1,
+        )
+        # THEN
+        assert element.track_number == 1
+
+    def test_track_number_gets_updated_to_none_if_field_match_lt_1(self):
+        # GIVEN
+        element = RepositoryElement(dir="test_dir", track_number=1)
+        # WHEN
+        # THEN
+        repository_element_updater.update_element_tracknum_by_fs(
+            element,
+            r"^\d{2}\.(no)\.(yes).*$",
+            0,
+        )
+        assert element.track_number is None
+
+    def test_track_number_isnt_updated_when_track_number_match_is_too_large(self):
+        # GIVEN
+        element = RepositoryElement()
+        element.dir = "01.no.yes.loremipsum"
+        # WHEN
+        repository_element_updater.update_element_tracknum_by_fs(
+            element,
+            r"^\d{2}\.(no)\.(yes).*$",
+            99,
+        )
+        # THEN
+        assert element.track_number is None

@@ -184,14 +184,15 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
             or applied_config.diff_method == DiffMode.hash
         )
 
-    def is_tag_reading_needed(self, applied_config) -> bool:
+    def is_tag_reading_needed(self, applied_config: RepositoryConfig) -> bool:
         return (
             self._config.repository_processing.diff_method  # noqa: WPS222
             == DiffMode.hash_and_tags
-            or applied_config.diff_method == DiffMode.tags
+            or self._config.repository_processing.diff_method == DiffMode.tags
             or applied_config.title_source == DetectionSource.tag
             or applied_config.artist_source == DetectionSource.tag
             or applied_config.album_source == DetectionSource.tag
+            or applied_config.dir_number_source == DetectionSource.tag
             or applied_config.track_number_source == DetectionSource.tag
         )
 
