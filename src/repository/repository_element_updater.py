@@ -15,7 +15,7 @@ def update_element_by_dir(  # noqa: C901, WPS231
         if not config.valid_subdir_pattern or not config.album_match:
             element.album = None
             return
-        update_element_album_by_fs(
+        update_element_album_by_dir(
             element,
             config.valid_subdir_pattern,
             config.album_match,
@@ -25,7 +25,7 @@ def update_element_by_dir(  # noqa: C901, WPS231
         if not config.valid_subdir_pattern or not config.artist_match:
             element.artist = None
             return
-        update_element_artist_by_fs(
+        update_element_artist_by_dir(
             element,
             config.valid_subdir_pattern,
             config.artist_match,
@@ -35,7 +35,7 @@ def update_element_by_dir(  # noqa: C901, WPS231
         if not config.valid_subdir_pattern or not config.dir_number_match:
             element.dir_number = None
             return
-        update_element_dirnum_by_fs(
+        update_element_dirnum_by_dir(
             element,
             config.valid_subdir_pattern,
             config.dir_number_match,
@@ -45,7 +45,7 @@ def update_element_by_dir(  # noqa: C901, WPS231
         if not config.valid_subdir_pattern or not config.title_match:
             element.title = None
             return
-        update_element_title_by_fs(
+        update_element_title_by_dir(
             element,
             config.valid_subdir_pattern,
             config.title_match,
@@ -63,7 +63,7 @@ def update_element_by_filename(  # noqa: WPS231, C901
         ):
             element.album = None
             return
-        update_element_album_by_fs(
+        update_element_album_by_dir(
             element,
             config.valid_subdir_files_pattern,
             config.album_match,
@@ -73,7 +73,7 @@ def update_element_by_filename(  # noqa: WPS231, C901
         if not config.valid_subdir_files_pattern or not config.artist_match:
             element.artist = None
             return
-        update_element_artist_by_fs(
+        update_element_artist_by_dir(
             element,
             config.valid_subdir_files_pattern,
             config.artist_match,
@@ -86,7 +86,7 @@ def update_element_by_filename(  # noqa: WPS231, C901
         if not config.valid_subdir_files_pattern or not config.dir_number_match:
             element.dir_number = None
             return
-        update_element_dirnum_by_fs(
+        update_element_dirnum_by_dir(
             element,
             config.valid_subdir_files_pattern,
             config.dir_number_match,
@@ -96,7 +96,7 @@ def update_element_by_filename(  # noqa: WPS231, C901
         if not config.valid_subdir_files_pattern or not config.title_match:
             element.title = None
             return
-        update_element_title_by_fs(
+        update_element_title_by_dir(
             element,
             config.valid_subdir_files_pattern,
             config.title_match,
@@ -109,50 +109,81 @@ def update_element_by_filename(  # noqa: WPS231, C901
         if not config.valid_subdir_files_pattern or not config.track_number_match:
             element.track_number = None
             return
-        update_element_tracknum_by_fs(
+        update_element_tracknum_by_dir(
             element,
             config.valid_subdir_files_pattern,
             config.track_number_match,
         )
 
 
-def update_element_album_by_fs(
+def update_element_album_by_dir(
     element: RepositoryElement,
     fs_pattern: str,
     album_match: int,
 ) -> None:
-    match_result = _get_match(element, fs_pattern, album_match)
+    match_result = _get_match(element.dir, fs_pattern, album_match)
 
     element.album = match_result
 
 
-def update_element_artist_by_fs(
+def update_element_album_by_filename(
+    element: RepositoryElement,
+    fs_pattern: str,
+    album_match: int,
+) -> None:
+    match_result = _get_match(element.file_name, fs_pattern, album_match)
+
+    element.album = match_result
+
+
+def update_element_artist_by_dir(
     element: RepositoryElement,
     fs_pattern: str,
     artist_match: int,
 ) -> None:
 
-    match_result = _get_match(element, fs_pattern, artist_match)
+    match_result = _get_match(element.dir, fs_pattern, artist_match)
 
     element.artist = match_result
 
 
-def update_element_title_by_fs(
+def update_element_artist_by_filename(
+    element: RepositoryElement,
+    fs_pattern: str,
+    artist_match: int,
+) -> None:
+
+    match_result = _get_match(element.file_name, fs_pattern, artist_match)
+
+    element.artist = match_result
+
+
+def update_element_title_by_dir(
     element: RepositoryElement,
     fs_pattern: str,
     title_match: int,
 ) -> None:
-    match_result = _get_match(element, fs_pattern, title_match)
+    match_result = _get_match(element.dir, fs_pattern, title_match)
 
     element.title = match_result
 
 
-def update_element_tracknum_by_fs(
+def update_element_title_by_filename(
+    element: RepositoryElement,
+    fs_pattern: str,
+    title_match: int,
+) -> None:
+    match_result = _get_match(element.file_name, fs_pattern, title_match)
+
+    element.title = match_result
+
+
+def update_element_tracknum_by_dir(
     element: RepositoryElement,
     fs_pattern: str,
     match_num: int,
 ) -> None:
-    match_result = _get_match(element, fs_pattern, match_num)
+    match_result = _get_match(element.dir, fs_pattern, match_num)
     if match_result is None:
         element.track_number = None
         return
@@ -162,12 +193,42 @@ def update_element_tracknum_by_fs(
         return
 
 
-def update_element_dirnum_by_fs(
+def update_element_tracknum_by_filename(
     element: RepositoryElement,
     fs_pattern: str,
     match_num: int,
 ) -> None:
-    match_result = _get_match(element, fs_pattern, match_num)
+    match_result = _get_match(element.file_name, fs_pattern, match_num)
+    if match_result is None:
+        element.track_number = None
+        return
+    try:
+        element.track_number = int(match_result)
+    except ValueError:
+        return
+
+
+def update_element_dirnum_by_dir(
+    element: RepositoryElement,
+    fs_pattern: str,
+    match_num: int,
+) -> None:
+    match_result = _get_match(element.dir, fs_pattern, match_num)
+    if match_result is None:
+        element.dir_number = None
+        return
+    try:
+        element.dir_number = int(match_result)
+    except ValueError:
+        return
+
+
+def update_element_dirnum_by_filename(
+    element: RepositoryElement,
+    fs_pattern: str,
+    match_num: int,
+) -> None:
+    match_result = _get_match(element.file_name, fs_pattern, match_num)
     if match_result is None:
         element.dir_number = None
         return
@@ -179,7 +240,7 @@ def update_element_dirnum_by_fs(
 
 # ToDo: switch element to string
 def _get_match(
-    element: RepositoryElement,
+    fs_text: str,
     fs_pattern: str,
     field_match: int,
 ) -> str | None:
@@ -187,7 +248,7 @@ def _get_match(
         return None
     field_matched_text = re.search(
         fs_pattern,
-        element.dir,
+        fs_text,
     )
     if field_matched_text:
         if len(field_matched_text.groups()) < field_match:

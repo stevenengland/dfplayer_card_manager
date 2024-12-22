@@ -13,7 +13,7 @@ e2e = pytest.mark.skipif("not config.getoption('e2e')")
 
 
 class TestElementUpdates:
-    def test_element_updates_by_dir(self, when):
+    def test_element_updates_by_dir(self):
         # GIVEN
         element = RepositoryElement()
         element.dir = "01.no.yes.02.loremipsum"
@@ -39,7 +39,7 @@ class TestElementUpdates:
         assert element.album == "yes"
         assert element.dir_number == 2
 
-    def test_element_updates_by_filename(self, when):
+    def test_element_updates_by_filename(self):
         # GIVEN
         element = RepositoryElement()
         element.dir = "01.no.yes.loremipsum"
@@ -68,7 +68,7 @@ class TestElementUpdates:
         assert element.dir_number == 1
         assert element.track_number == 1
 
-    def test_element_updates_by_tags(self, when):
+    def test_element_updates_by_tags(self):
         # GIVEN
         element = RepositoryElement()
         id3_tags = TagCollection(
@@ -95,7 +95,7 @@ class TestElementUpdates:
         assert element.album == "test_album"
         assert element.track_number == 66
 
-    def test_element_updates_by_audio_content(self, when):
+    def test_element_updates_by_audio_content(self):
         # GIVEN
         element = RepositoryElement()
         audio_content = b"test_audio_content"
@@ -113,12 +113,25 @@ class TestElementUpdates:
 
 
 class TestElementTitleUpdates:
-    def test_title_gets_updated(self, when):
+    def test_title_gets_updated(self):
         # GIVEN
         element = RepositoryElement()
         element.dir = "01.no.yes.loremipsum"
         # WHEN
-        repository_element_updater.update_element_title_by_fs(
+        repository_element_updater.update_element_title_by_dir(
+            element,
+            r"^\d{2}\.(no)\.(yes).*$",
+            2,
+        )
+        # THEN
+        assert element.title == "yes"
+
+    def test_title_gets_updated_by_filename(self):
+        # GIVEN
+        element = RepositoryElement()
+        element.file_name = "01.no.yes.loremipsum"
+        # WHEN
+        repository_element_updater.update_element_title_by_filename(
             element,
             r"^\d{2}\.(no)\.(yes).*$",
             2,
@@ -131,7 +144,7 @@ class TestElementTitleUpdates:
         element = RepositoryElement(dir="test_dir", title="test_title")
         # WHEN
         # THEN
-        repository_element_updater.update_element_title_by_fs(
+        repository_element_updater.update_element_title_by_dir(
             element,
             r"^\d{2}\.(no)\.(yes).*$",
             0,
@@ -143,7 +156,7 @@ class TestElementTitleUpdates:
         element = RepositoryElement()
         element.dir = "01.no.yes.loremipsum"
         # WHEN
-        repository_element_updater.update_element_title_by_fs(
+        repository_element_updater.update_element_title_by_dir(
             element,
             r"^\d{2}\.(no)\.(yes).*$",
             99,
@@ -153,12 +166,25 @@ class TestElementTitleUpdates:
 
 
 class TestElementAlbumUpdates:
-    def test_album_gets_updated(self, when):
+    def test_album_gets_updated(self):
         # GIVEN
         element = RepositoryElement()
         element.dir = "01.no.yes.loremipsum"
         # WHEN
-        repository_element_updater.update_element_album_by_fs(
+        repository_element_updater.update_element_album_by_dir(
+            element,
+            r"^\d{2}\.(no)\.(yes).*$",
+            1,
+        )
+        # THEN
+        assert element.album == "no"
+
+    def test_album_gets_updated_by_filename(self):
+        # GIVEN
+        element = RepositoryElement()
+        element.file_name = "01.no.yes.loremipsum"
+        # WHEN
+        repository_element_updater.update_element_album_by_filename(
             element,
             r"^\d{2}\.(no)\.(yes).*$",
             1,
@@ -171,7 +197,7 @@ class TestElementAlbumUpdates:
         element = RepositoryElement(dir="test_dir", album="test_title")
         # WHEN
         # THEN
-        repository_element_updater.update_element_album_by_fs(
+        repository_element_updater.update_element_album_by_dir(
             element,
             r"^\d{2}\.(no)\.(yes).*$",
             0,
@@ -183,7 +209,7 @@ class TestElementAlbumUpdates:
         element = RepositoryElement()
         element.dir = "01.no.yes.loremipsum"
         # WHEN
-        repository_element_updater.update_element_album_by_fs(
+        repository_element_updater.update_element_album_by_dir(
             element,
             r"^\d{2}\.(no)\.(yes).*$",
             99,
@@ -193,12 +219,25 @@ class TestElementAlbumUpdates:
 
 
 class TestElementArtistUpdates:
-    def test_artist_gets_updated(self, when):
+    def test_artist_gets_updated(self):
         # GIVEN
         element = RepositoryElement()
         element.dir = "01.no.yes.loremipsum"
         # WHEN
-        repository_element_updater.update_element_artist_by_fs(
+        repository_element_updater.update_element_artist_by_dir(
+            element,
+            r"^\d{2}\.(no)\.(yes).*$",
+            1,
+        )
+        # THEN
+        assert element.artist == "no"
+
+    def test_artist_gets_updated_by_filename(self):
+        # GIVEN
+        element = RepositoryElement()
+        element.file_name = "01.no.yes.loremipsum"
+        # WHEN
+        repository_element_updater.update_element_artist_by_filename(
             element,
             r"^\d{2}\.(no)\.(yes).*$",
             1,
@@ -211,7 +250,7 @@ class TestElementArtistUpdates:
         element = RepositoryElement(dir="test_dir", artist="test_artist")
         # WHEN
         # THEN
-        repository_element_updater.update_element_artist_by_fs(
+        repository_element_updater.update_element_artist_by_dir(
             element,
             r"^\d{2}\.(no)\.(yes).*$",
             0,
@@ -223,7 +262,7 @@ class TestElementArtistUpdates:
         element = RepositoryElement()
         element.dir = "01.no.yes.loremipsum"
         # WHEN
-        repository_element_updater.update_element_artist_by_fs(
+        repository_element_updater.update_element_artist_by_dir(
             element,
             r"^\d{2}\.(no)\.(yes).*$",
             99,
@@ -238,7 +277,20 @@ class TestElementDirNumberUpdates:
         element = RepositoryElement()
         element.dir = "01.no.yes.loremipsum"
         # WHEN
-        repository_element_updater.update_element_dirnum_by_fs(
+        repository_element_updater.update_element_dirnum_by_dir(
+            element,
+            r"^(\d{2})\.(no)\.(yes).*$",
+            1,
+        )
+        # THEN
+        assert element.dir_number == 1
+
+    def test_dir_number_gets_updated_by_filename(self):
+        # GIVEN
+        element = RepositoryElement()
+        element.file_name = "01.no.yes.loremipsum"
+        # WHEN
+        repository_element_updater.update_element_dirnum_by_filename(
             element,
             r"^(\d{2})\.(no)\.(yes).*$",
             1,
@@ -251,7 +303,7 @@ class TestElementDirNumberUpdates:
         element = RepositoryElement(dir="test_dir", dir_number=1)
         # WHEN
         # THEN
-        repository_element_updater.update_element_dirnum_by_fs(
+        repository_element_updater.update_element_dirnum_by_dir(
             element,
             r"^\d{2}\.(no)\.(yes).*$",
             0,
@@ -263,7 +315,7 @@ class TestElementDirNumberUpdates:
         element = RepositoryElement()
         element.dir = "01.no.yes.loremipsum"
         # WHEN
-        repository_element_updater.update_element_dirnum_by_fs(
+        repository_element_updater.update_element_dirnum_by_dir(
             element,
             r"^\d{2}\.(no)\.(yes).*$",
             99,
@@ -273,12 +325,25 @@ class TestElementDirNumberUpdates:
 
 
 class TestElementTrackNumberUpdates:
-    def test_track_number_gets_updated(self, when):
+    def test_track_number_gets_updated(self):
         # GIVEN
         element = RepositoryElement()
         element.dir = "01.no.yes.loremipsum"
         # WHEN
-        repository_element_updater.update_element_tracknum_by_fs(
+        repository_element_updater.update_element_tracknum_by_dir(
+            element,
+            r"^(\d{2})\.(no)\.(yes).*$",
+            1,
+        )
+        # THEN
+        assert element.track_number == 1
+
+    def test_track_number_gets_updated_by_filename(self):
+        # GIVEN
+        element = RepositoryElement()
+        element.file_name = "01.no.yes.loremipsum"
+        # WHEN
+        repository_element_updater.update_element_tracknum_by_filename(
             element,
             r"^(\d{2})\.(no)\.(yes).*$",
             1,
@@ -291,7 +356,7 @@ class TestElementTrackNumberUpdates:
         element = RepositoryElement(dir="test_dir", track_number=1)
         # WHEN
         # THEN
-        repository_element_updater.update_element_tracknum_by_fs(
+        repository_element_updater.update_element_tracknum_by_dir(
             element,
             r"^\d{2}\.(no)\.(yes).*$",
             0,
@@ -303,7 +368,7 @@ class TestElementTrackNumberUpdates:
         element = RepositoryElement()
         element.dir = "01.no.yes.loremipsum"
         # WHEN
-        repository_element_updater.update_element_tracknum_by_fs(
+        repository_element_updater.update_element_tracknum_by_dir(
             element,
             r"^\d{2}\.(no)\.(yes).*$",
             99,
