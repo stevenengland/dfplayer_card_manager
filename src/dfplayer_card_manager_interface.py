@@ -21,17 +21,7 @@ class DfPlayerCardManagerInterface(ABC):
         pass
 
     @abstractmethod
-    def init_repositories(self):
-        pass
-
-    @abstractmethod
-    def get_target_repository_tree(self) -> list[tuple[str, str]]:
-        pass
-
-    @abstractmethod
-    def get_source_repository_tree(
-        self,
-    ) -> list[tuple[str, str]]:
+    def create_repositories(self) -> None:
         pass
 
     @abstractmethod

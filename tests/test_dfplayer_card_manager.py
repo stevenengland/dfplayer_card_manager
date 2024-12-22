@@ -140,11 +140,21 @@ class TestConfigOverrides:
 
         when(config_override).get_config_overrides(...).thenReturn(
             {
-                "01": mock(RepositoryConfig),
-                "03": mock(RepositoryConfig),
+                "01": RepositoryConfig(valid_subdir_files_pattern="test"),
+                "03": RepositoryConfig(valid_subdir_files_pattern="test2"),
             },
         )
         # WHEN
         overrides = sut.read_config_overrides()
         # THEN
         assert len(overrides) == 2
+        assert overrides["01"].valid_subdir_files_pattern == "test"
+        assert (
+            overrides["01"].valid_subdir_pattern
+            == sut.config.repository_source.valid_subdir_pattern
+        )
+        assert overrides["03"].valid_subdir_files_pattern == "test2"
+        assert (
+            overrides["03"].valid_subdir_pattern
+            == sut.config.repository_source.valid_subdir_pattern
+        )

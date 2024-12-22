@@ -1,8 +1,7 @@
 import os
 from typing import Optional
 
-from src.config import config_checker, yaml_config
-from src.config.config_merger import merge_configs
+from src.config import config_checker, config_merger, yaml_config
 from src.config.configuration import Configuration, RepositoryConfig
 from src.dfplayer_card_manager_interface import DfPlayerCardManagerInterface
 from src.mp3.audio_file_manager_interface import AudioFileManagerInterface
@@ -63,15 +62,19 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
     def config_overrides(self, overrides):
         self._config_overrides = overrides
 
-    def init(self) -> None:
+    def create_repositories(self) -> None:
         if not os.path.isdir(self._source_repo_root_dir):
             raise ValueError("Source repository root directory is not a directory")
         if not os.path.isdir(self._target_repo_root_dir):
             raise ValueError("Target repository root directory is not a directory")
-        self.init_repositories()
-        self._config_overrides = self.read_config_overrides()
+
         config_checker.check_repository_config(self._config.repository_source)
         config_checker.check_repository_config(self._config.repository_target)
+        self._config_overrides = self.read_config_overrides()
+        for _subdir, config in self._config_overrides.items():
+            config_checker.check_repository_config(config)
+        self.init_repositories()
+        self.complete_repositories()
 
     def init_repositories(self) -> None:
         source_repository_tree = self.get_source_repository_tree()
@@ -89,14 +92,22 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
             element.file_name = target_file
             self._target_repo.elements.append(element)
 
-    def read_config_overrides(self) -> dict[str, RepositoryConfig]:
+    def complete_repositories(self) -> None:
+        print("Completing source repository")
 
-        return config_override.get_config_overrides(
+    def read_config_overrides(self) -> dict[str, RepositoryConfig]:
+        overrides = config_override.get_config_overrides(
             self._source_repo_root_dir,
             # get all distinct subdirs from the source repository
             [element.dir or "" for element in self._source_repo.elements],
             self._config.repository_processing.overrides_file_name,
         )
+        for subdir, config in overrides.items():
+            overrides[subdir] = config_merger.merge_configs(
+                self._config.repository_source,
+                config,
+            )
+        return overrides
 
     def get_target_repository_tree(self) -> list[tuple[str, str]]:
         if self._config.repository_target.valid_subdir_pattern is None:
@@ -205,7 +216,7 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
     def _get_applied_config(self, element) -> RepositoryConfig:
         applied_config: RepositoryConfig = self._config.repository_source
         if element.dir in self._config_overrides:
-            applied_config = merge_configs(
+            applied_config = config_merger.merge_configs(
                 self._config.repository_source,
                 self._config_overrides.get(element.dir, RepositoryConfig()),
             )
