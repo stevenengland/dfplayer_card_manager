@@ -238,7 +238,6 @@ def update_element_dirnum_by_filename(
         return
 
 
-# ToDo: switch element to string
 def _get_match(
     fs_text: str,
     fs_pattern: str,

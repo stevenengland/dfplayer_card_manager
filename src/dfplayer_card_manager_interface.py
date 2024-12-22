@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from src.config.configuration import RepositoryConfig
+from src.config.configuration import Configuration, RepositoryConfig
 from src.repository.repository_element import RepositoryElement
 
 
@@ -32,4 +32,8 @@ class DfPlayerCardManagerInterface(ABC):
     def get_source_repository_tree(
         self,
     ) -> list[tuple[str, str]]:
+        pass
+
+    @abstractmethod
+    def read_config(self) -> Configuration:
         pass

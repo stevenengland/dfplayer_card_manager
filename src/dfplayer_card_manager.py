@@ -1,6 +1,7 @@
 import os
+from typing import Optional
 
-from src.config import config_checker
+from src.config import config_checker, yaml_config
 from src.config.config_merger import merge_configs
 from src.config.configuration import Configuration, RepositoryConfig
 from src.dfplayer_card_manager_interface import DfPlayerCardManagerInterface
@@ -17,20 +18,22 @@ from src.repository.repository_element import RepositoryElement
 
 
 class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
+
     def __init__(
         self,
         source_repo_root_dir: str,
         target_repo_root_dir: str,
-        config: Configuration,
         audio_manager: AudioFileManagerInterface,
+        config: Optional[Configuration] = None,
     ):
-        self._config = config
         self._config_overrides: dict[str, RepositoryConfig] = {}
         self._audio_manager = audio_manager
         self._source_repo: Repository = Repository()
         self._target_repo: Repository = Repository()
         self._source_repo_root_dir = source_repo_root_dir
         self._target_repo_root_dir = target_repo_root_dir
+
+        self._config: Configuration = config or self.read_config()
 
     @property
     def config(self):
@@ -60,7 +63,11 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
     def config_overrides(self, overrides):
         self._config_overrides = overrides
 
-    def init(self):
+    def init(self) -> None:
+        if not os.path.isdir(self._source_repo_root_dir):
+            raise ValueError("Source repository root directory is not a directory")
+        if not os.path.isdir(self._target_repo_root_dir):
+            raise ValueError("Target repository root directory is not a directory")
         self.init_repositories()
         self.read_config_overrides()
         config_checker.check_repository_config(self._config.repository_source)
@@ -195,6 +202,13 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
             or applied_config.dir_number_source == DetectionSource.tag
             or applied_config.track_number_source == DetectionSource.tag
         )
+
+    def read_config(self) -> Configuration:
+        config_file = Configuration().repository_processing.overrides_file_name
+        if not os.path.isfile(config_file):
+            raise FileNotFoundError("Configuration file not found")
+
+        return yaml_config.create_yaml_object(config_file, Configuration)
 
     def _get_applied_config(self, element) -> RepositoryConfig:
         applied_config: RepositoryConfig = self._config.repository_source

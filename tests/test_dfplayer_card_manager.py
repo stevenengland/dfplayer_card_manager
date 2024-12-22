@@ -1,10 +1,14 @@
+import os
+
 import pytest
 from mockito import mock
 
+from src.config import yaml_config
 from src.config.configuration import Configuration, RepositoryConfig
 from src.dfplayer_card_manager import DfPlayerCardManager
 from src.mp3.audio_file_manager import AudioFileManager
 from src.repository import config_override, repository_finder
+from src.repository.diff_modes import DiffMode
 from tests.factories.configuration_factory import (
     create_source_repo_config,
     create_target_repo_config,
@@ -23,10 +27,34 @@ def dfplayer_card_manager() -> DfPlayerCardManager:
     sut = DfPlayerCardManager(
         "source_root",
         "target_root",
-        configuration,
         audio_file_manager_mock,
+        configuration,
     )
     return sut  # noqa: WPS331
+
+
+class TestConfigReading:
+    def test_config_reading_succeeds(self, sut: DfPlayerCardManager, when):
+        # GIVEN
+        init_config = Configuration()
+        init_config.repository_processing.diff_method = DiffMode.tags
+        when(os.path).isfile(
+            Configuration().repository_processing.overrides_file_name,
+        ).thenReturn(True)
+        when(yaml_config).create_yaml_object(...).thenReturn(init_config)
+        # WHEN
+        config = sut.read_config()
+        # THEN
+        assert config.repository_processing.diff_method == DiffMode.tags
+
+    def test_config_reading_raises(self, sut: DfPlayerCardManager, when):
+        # GIVEN
+        when(os.path).isfile(
+            Configuration().repository_processing.overrides_file_name,
+        ).thenReturn(False)
+        # WHEN
+        with pytest.raises(FileNotFoundError):
+            sut.read_config()
 
 
 class TestRepositoryTreeCreation:
