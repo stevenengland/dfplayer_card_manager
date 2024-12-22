@@ -37,3 +37,7 @@ class DfPlayerCardManagerInterface(ABC):
     @abstractmethod
     def read_config(self) -> Configuration:
         pass
+
+    @abstractmethod
+    def read_config_overrides(self) -> dict[str, RepositoryConfig]:
+        pass

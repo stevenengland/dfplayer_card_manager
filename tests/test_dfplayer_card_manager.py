@@ -145,6 +145,6 @@ class TestConfigOverrides:
             },
         )
         # WHEN
-        sut.read_config_overrides()
+        overrides = sut.read_config_overrides()
         # THEN
-        assert len(sut.config_overrides) == 2
+        assert len(overrides) == 2
