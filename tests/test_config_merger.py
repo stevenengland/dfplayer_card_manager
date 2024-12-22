@@ -12,17 +12,31 @@ class TestConfigMerging:
         # GIVEN
         config: RepositoryConfig = RepositoryConfig()
         config.album_match = 1
-        config.valid_subdir_pattern = "test_subdirs"
-        config.valid_subdir_files_pattern = "test_files"
+        config.valid_subdir_pattern = "test_subdirs_original"
+        config.valid_subdir_files_pattern = "test_files_original"
 
-        overrides: RepositoryConfig = RepositoryConfig()
-        overrides.valid_subdir_pattern = "override_subdirs"
+        overrides_1: RepositoryConfig = RepositoryConfig()
+        overrides_1.valid_subdir_pattern = "override_subdirs_1"
+        overrides_1.valid_subdir_files_pattern = "override_files_1"
+        overrides_2: RepositoryConfig = RepositoryConfig()
+        overrides_2.valid_subdir_pattern = "override_subdirs_2"
         # WHEN
-        merged_config = config_merger.merge_configs(
+        merged_config_1 = config_merger.merge_configs(
             config,
-            overrides,
+            overrides_1,
+        )
+        merged_config_2 = config_merger.merge_configs(
+            config,
+            overrides_2,
         )
         # THEN
-        assert merged_config.album_match == 1
-        assert merged_config.valid_subdir_pattern == "override_subdirs"
-        assert merged_config.valid_subdir_files_pattern == "test_files"
+        assert config.valid_subdir_pattern == "test_subdirs_original"
+        assert config.valid_subdir_files_pattern == "test_files_original"
+
+        assert merged_config_1.album_match == 1
+        assert merged_config_1.valid_subdir_pattern == "override_subdirs_1"
+        assert merged_config_1.valid_subdir_files_pattern == "override_files_1"
+
+        assert merged_config_2.album_match == 1
+        assert merged_config_2.valid_subdir_pattern == "override_subdirs_2"
+        assert merged_config_2.valid_subdir_files_pattern == "test_files_original"
