@@ -90,10 +90,6 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
             self._target_repo.elements.append(element)
 
     def read_config_overrides(self) -> dict[str, RepositoryConfig]:
-        if self._source_repo_root_dir is None:
-            raise ValueError(
-                "Repository source root directory is not set. Was the init method called?",
-            )
 
         return config_override.get_config_overrides(
             self._source_repo_root_dir,
@@ -103,12 +99,10 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
         )
 
     def get_target_repository_tree(self) -> list[tuple[str, str]]:
-        if self._target_repo_root_dir is None:
-            raise ValueError("Repository target root directory is not set")
         if self._config.repository_target.valid_subdir_pattern is None:
-            raise ValueError("Repository target valid subdir pattern is not set")
+            return []
         if self._config.repository_target.valid_subdir_files_pattern is None:
-            raise ValueError("Repository target valid subdir files pattern is not set")
+            return []
         return repository_finder.get_repository_tree(
             self._target_repo_root_dir,
             self._config.repository_target.valid_subdir_pattern,
@@ -118,12 +112,10 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
     def get_source_repository_tree(
         self,
     ) -> list[tuple[str, str]]:
-        if self._source_repo_root_dir is None:
-            raise ValueError("Repository source root directory is not set")
         if self._config.repository_source.valid_subdir_pattern is None:
-            raise ValueError("Repository source valid subdir pattern is not set")
+            return []
         if self._config.repository_source.valid_subdir_files_pattern is None:
-            raise ValueError("Repository source valid subdir files pattern is not set")
+            return []
         valid_subdir_files_pattern_overrides = {}
         for subdir, config in self._config_overrides.items():
             if not config.valid_subdir_files_pattern:
