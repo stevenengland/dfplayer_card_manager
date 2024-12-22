@@ -12,4 +12,5 @@ class RepositoryElement:  # noqa: WPS230
     artist: str | None = Field(default=None)
     album: str | None = Field(default=None)
     track_number: int | None = Field(default=None)
+    dir_number: int | None = Field(default=None)
     hash: str | None = Field(default=None)
