@@ -27,7 +27,10 @@ def check_repository_config(  # noqa: C901, WPS238, WPS231
 
     # detection constellations that are not supported
     if config.track_number_source == DetectionSource.dirname:
-        raise ValueError("Track number source cannot be read from dir name")
+        raise ValueError("Track number cannot be read from dir name")
+
+    if config.dir_number_source == DetectionSource.tag:
+        raise ValueError("Directory number cannot be read from tags")
 
     # detection completeness checks
     if config.album_source in {DetectionSource.filename, DetectionSource.dirname}:
@@ -38,6 +41,16 @@ def check_repository_config(  # noqa: C901, WPS238, WPS231
         if config.artist_match is None or config.artist_match < 1:
             raise ValueError("Artist match number must be set and greater than 0")
 
+    if config.dir_number_source in {DetectionSource.filename, DetectionSource.dirname}:
+        if config.dir_number_match is None or config.dir_number_match < 1:
+            raise ValueError(
+                "Directory number match number must be set and greater than 0",
+            )
+
     if config.title_source in {DetectionSource.filename, DetectionSource.dirname}:
         if config.title_match is None or config.title_match < 1:
             raise ValueError("Title match number must be set and greater than 0")
+
+    if config.track_number_source == DetectionSource.filename:
+        if config.track_number_match is None or config.track_number_match < 1:
+            raise ValueError("Track number match number must be set and greater than 0")

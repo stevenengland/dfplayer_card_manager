@@ -20,6 +20,9 @@ class RepositoryConfig(  # type: ignore[misc]
     artist_source: DetectionSource | None = Field(default=None)
     artist_match: int | None = Field(default=None)
 
+    dir_number_source: DetectionSource | None = Field(default=None)
+    dir_number_match: int | None = Field(default=None)
+
     title_source: DetectionSource | None = Field(default=None)
     title_match: int | None = Field(default=None)
 

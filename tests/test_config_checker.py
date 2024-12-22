@@ -16,7 +16,16 @@ e2e = pytest.mark.skipif("not config.getoption('e2e')")
             create_source_repo_config(
                 RepositoryConfig(track_number_source=DetectionSource.dirname),
             ),
-            "Track number source",
+            "Track number cannot",
+        ),
+        (
+            create_source_repo_config(
+                RepositoryConfig(
+                    track_number_source=DetectionSource.filename,
+                    track_number_match=0,
+                ),
+            ),
+            "Track number match",
         ),
         (
             create_source_repo_config(
@@ -36,8 +45,23 @@ e2e = pytest.mark.skipif("not config.getoption('e2e')")
             ),
             "Title match",
         ),
+        (
+            create_source_repo_config(
+                RepositoryConfig(dir_number_source=DetectionSource.tag),
+            ),
+            "Directory number cannot",
+        ),
+        (
+            create_source_repo_config(
+                RepositoryConfig(
+                    dir_number_source=DetectionSource.filename,
+                    dir_number_match=0,
+                ),
+            ),
+            "Directory number match",
+        ),
     ],
 )
-def test_config_check_raises2(config: RepositoryConfig, expected_error: str):
+def test_config_check_raises(config: RepositoryConfig, expected_error: str):
     with pytest.raises(ValueError, match=expected_error):
         config_checker.check_repository_config(config)
