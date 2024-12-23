@@ -242,6 +242,19 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
             self._config.repository_processing.diff_method or DiffMode.hash_and_tags,
         )
 
+    def write_deletion_to_target_repository(
+        self,
+        dir_number: int,
+        track_number: int,
+    ) -> None:
+        file_to_delete = os.path.join(
+            self._target_repo_root_dir,
+            str(dir_number).zfill(2),
+            str(track_number).zfill(3),
+        )
+        if os.path.isfile(file_to_delete):
+            os.remove(file_to_delete)
+
     def _get_applied_config(self, element: RepositoryElement) -> RepositoryConfig:
         if element.repo_root_dir == self._target_repo_root_dir:
             applied_config = self._config.repository_target

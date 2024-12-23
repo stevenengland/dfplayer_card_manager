@@ -281,3 +281,31 @@ class TestRepositoryComparison:
         # THEN
         assert (50, 50, CompareResult.copy_to_target) in comparison_results
         assert len(comparison_results) == 3
+
+
+class TestDeletionsToTargetRepo:
+
+    @pytest.mark.parametrize(
+        "dir_number, track_number",
+        [
+            (1, 1),
+        ],
+    )
+    def test_deletions_to_target_repo_succeeds(
+        self,
+        sut: DfPlayerCardManager,
+        when,
+        dir_number: int,
+        track_number: int,
+    ):  # noqa: E501
+        # GIVEN
+        target_file_path = os.path.join(
+            "target_root",
+            str(dir_number).zfill(2),
+            str(track_number).zfill(3),
+        )
+        when(os.path).isfile(target_file_path).thenReturn(True)
+        when(os).remove(target_file_path).thenReturn(None)
+        # WHEN
+        sut.write_deletion_to_target_repository(dir_number, track_number)
+        # THEN
