@@ -7,6 +7,7 @@ from src.dfplayer_card_manager_interface import DfPlayerCardManagerInterface
 from src.mp3.audio_file_manager_interface import AudioFileManagerInterface
 from src.repository import (
     config_override,
+    repository_element_checker,
     repository_element_updater,
     repository_finder,
 )
@@ -35,8 +36,16 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
         self._config: Configuration = config or self.read_config()
 
     @property
+    def audio_manager(self):
+        return self._audio_manager
+
+    @property
     def config(self):
         return self._config
+
+    @config.setter
+    def config(self, config):
+        self._config = config
 
     @property
     def source_repo_root_dir(self):
@@ -62,6 +71,7 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
     def config_overrides(self, overrides):
         self._config_overrides = overrides
 
+    # ToDo: tests
     def create_repositories(self) -> None:
         if not os.path.isdir(self._source_repo_root_dir):
             raise ValueError("Source repository root directory is not a directory")
@@ -93,7 +103,10 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
             self._target_repo.elements.append(element)
 
     def complete_repositories(self) -> None:
-        print("Completing source repository")
+        for source_repo_element in self._source_repo.elements:
+            self.update_element(source_repo_element)
+        for target_repo_element in self._target_repo.elements:
+            self.update_element(target_repo_element)
 
     def read_config_overrides(self) -> dict[str, RepositoryConfig]:
         overrides = config_override.get_config_overrides(
@@ -142,13 +155,19 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
         )
 
     def update_element(self, element: RepositoryElement):  # noqa: WPS231
-        if element.repo_root_dir == self._target_repo_root_dir:
-            applied_config = self._config.repository_target
-        elif element.repo_root_dir == self._source_repo_root_dir:
-            applied_config = self._get_applied_config(element)
-        else:
-            raise ValueError("The element does not belong to any of the repositories")
+        applied_config = self._get_applied_config(element)
 
+        # Update portion without file reading
+        repository_element_updater.update_element_by_dir(
+            element=element,
+            config=applied_config,
+        )
+        repository_element_updater.update_element_by_filename(
+            element=element,
+            config=applied_config,
+        )
+
+        # File reading portion of the update
         is_tag_reading_needed = self.is_tag_reading_needed(applied_config)
 
         is_hash_reading_needed = self.is_hash_reading_needed(applied_config)
@@ -186,13 +205,14 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
                 audio_content,
             )
 
-        return element
+        # Final check
+        repository_element_checker.check_element(element)
 
-    def is_hash_reading_needed(self, applied_config) -> bool:
-        return (
-            self._config.repository_processing.diff_method == DiffMode.hash_and_tags
-            or applied_config.diff_method == DiffMode.hash
-        )
+    def is_hash_reading_needed(self, applied_config: RepositoryConfig) -> bool:
+        return self._config.repository_processing.diff_method in {
+            DiffMode.hash_and_tags,
+            DiffMode.hash,
+        }
 
     def is_tag_reading_needed(self, applied_config: RepositoryConfig) -> bool:
         return (
@@ -213,12 +233,17 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
 
         return yaml_config.create_yaml_object(config_file, Configuration)
 
-    def _get_applied_config(self, element) -> RepositoryConfig:
-        applied_config: RepositoryConfig = self._config.repository_source
-        if element.dir in self._config_overrides:
-            applied_config = config_merger.merge_configs(
-                self._config.repository_source,
-                self._config_overrides.get(element.dir, RepositoryConfig()),
-            )
-
+    def _get_applied_config(self, element: RepositoryElement) -> RepositoryConfig:
+        if element.repo_root_dir == self._target_repo_root_dir:
+            applied_config = self._config.repository_target
+        elif element.repo_root_dir == self._source_repo_root_dir:
+            if element.dir in self._config_overrides:
+                applied_config = self._config_overrides.get(
+                    element.dir,
+                    self._config.repository_source,
+                )
+            else:
+                applied_config = self._config.repository_source
+        else:
+            raise ValueError("The element does not belong to any of the repositories")
         return applied_config

@@ -42,7 +42,7 @@ class TestElementUpdates:
     def test_element_updates_by_filename(self):
         # GIVEN
         element = RepositoryElement()
-        element.dir = "01.no.yes.loremipsum"
+        element.file_name = "01.no.yes.loremipsum"
         config = RepositoryConfig(
             valid_subdir_files_pattern=r"^(\d{2})\.(no)\.(yes).*$",
             album_match=3,

@@ -7,6 +7,11 @@ from src.repository.repository_element import RepositoryElement
 class DfPlayerCardManagerInterface(ABC):
     @property
     @abstractmethod
+    def config(self) -> Configuration:
+        pass
+
+    @property
+    @abstractmethod
     def source_repo(self) -> list[RepositoryElement]:
         pass
 

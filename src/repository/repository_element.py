@@ -5,7 +5,7 @@ from pydantic.dataclasses import dataclass
 @dataclass
 class RepositoryElement:  # noqa: WPS230
     tree_id: str | None = Field(default=None)
-    repo_root_dir: str | None = Field(default=None)
+    repo_root_dir: str = Field(default="")
     dir: str = Field(default="")
     file_name: str = Field(default="")
     title: str | None = Field(default=None)

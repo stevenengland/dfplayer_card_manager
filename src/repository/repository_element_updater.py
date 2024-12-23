@@ -63,7 +63,7 @@ def update_element_by_filename(  # noqa: WPS231, C901
         ):
             element.album = None
             return
-        update_element_album_by_dir(
+        update_element_album_by_filename(
             element,
             config.valid_subdir_files_pattern,
             config.album_match,
@@ -73,7 +73,7 @@ def update_element_by_filename(  # noqa: WPS231, C901
         if not config.valid_subdir_files_pattern or not config.artist_match:
             element.artist = None
             return
-        update_element_artist_by_dir(
+        update_element_artist_by_filename(
             element,
             config.valid_subdir_files_pattern,
             config.artist_match,
@@ -86,7 +86,7 @@ def update_element_by_filename(  # noqa: WPS231, C901
         if not config.valid_subdir_files_pattern or not config.dir_number_match:
             element.dir_number = None
             return
-        update_element_dirnum_by_dir(
+        update_element_dirnum_by_filename(
             element,
             config.valid_subdir_files_pattern,
             config.dir_number_match,
@@ -96,7 +96,7 @@ def update_element_by_filename(  # noqa: WPS231, C901
         if not config.valid_subdir_files_pattern or not config.title_match:
             element.title = None
             return
-        update_element_title_by_dir(
+        update_element_title_by_filename(
             element,
             config.valid_subdir_files_pattern,
             config.title_match,
@@ -109,7 +109,7 @@ def update_element_by_filename(  # noqa: WPS231, C901
         if not config.valid_subdir_files_pattern or not config.track_number_match:
             element.track_number = None
             return
-        update_element_tracknum_by_dir(
+        update_element_tracknum_by_filename(
             element,
             config.valid_subdir_files_pattern,
             config.track_number_match,
@@ -252,8 +252,9 @@ def _get_match(
     if field_matched_text:
         if len(field_matched_text.groups()) < field_match:
             return None
-        artist_result = field_matched_text.group(field_match)
-    return artist_result
+        return field_matched_text.group(field_match)
+
+    return None
 
 
 def update_element_by_tags(
