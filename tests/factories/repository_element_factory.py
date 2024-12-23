@@ -23,11 +23,13 @@ def create_repository_element() -> RepositoryElement:
 
 
 @dispatch(RepositoryElement)  # type: ignore[no-redef]
-def create_repository_element(config) -> RepositoryElement:  # noqa: WPS440, F811
+def create_repository_element(  # noqa: WPS440, F811
+    element: RepositoryElement,
+) -> RepositoryElement:
     base_element = create_repository_element()
 
     # merge the base config with the provided config in a generic manner
-    for config_key, config_value in config.__dict__.items():
+    for config_key, config_value in element.__dict__.items():
         if config_value is not None:
             base_element.__dict__[config_key] = config_value
     return base_element

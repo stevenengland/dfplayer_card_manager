@@ -20,6 +20,7 @@ class FsCleaner(FsCleanerInterface):
                 errors.append(entry)
         return errors
 
+    # Must be handled as a warning, not an error
     def get_root_dir_numbering_gaps(self, sd_root_path: str) -> list[int]:
         entries = os.listdir(sd_root_path)
         gaps = []
@@ -35,6 +36,7 @@ class FsCleaner(FsCleanerInterface):
 
         return gaps
 
+    # Must be handled as errors
     def get_subdir_numbering_gaps(self, sd_root_path: str) -> list[tuple[int, int]]:
         entries = os.listdir(sd_root_path)
         subdirs = self._get_valid_subdirs(entries)
