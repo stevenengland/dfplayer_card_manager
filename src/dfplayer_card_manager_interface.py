@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
 from src.config.configuration import Configuration, RepositoryConfig
+from src.repository.compare_results import CompareResult
 from src.repository.repository_element import RepositoryElement
 
 
@@ -35,4 +36,8 @@ class DfPlayerCardManagerInterface(ABC):
 
     @abstractmethod
     def read_config_overrides(self) -> dict[str, RepositoryConfig]:
+        pass
+
+    @abstractmethod
+    def get_repositories_comparison(self) -> list[tuple[int, int, CompareResult]]:
         pass

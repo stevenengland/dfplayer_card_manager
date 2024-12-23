@@ -12,7 +12,12 @@ from src.config.configuration import (
 from src.dfplayer_card_manager import DfPlayerCardManager
 from src.mp3.audio_file_manager import AudioFileManager
 from src.mp3.tag_collection import TagCollection
-from src.repository import config_override, repository_finder
+from src.repository import (
+    config_override,
+    repository_comparator,
+    repository_finder,
+)
+from src.repository.compare_results import CompareResult
 from src.repository.detection_source import DetectionSource
 from src.repository.diff_modes import DiffMode
 from src.repository.repository_element import RepositoryElement
@@ -259,3 +264,20 @@ class TestElementUpdate:
                 expected_element,
                 assertion_key,
             )
+
+
+class TestRepositoryComparison:
+    def test_repository_comparison_succeeds(self, sut: DfPlayerCardManager, when):
+        # GIVEN
+        when(repository_comparator).compare_repository_elements(...).thenReturn(
+            [
+                (50, 50, CompareResult.copy_to_target),
+                (51, 51, CompareResult.delete_from_target),
+                (1, 2, CompareResult.no_change),
+            ],
+        )
+        # WHEN
+        comparison_results = sut.get_repositories_comparison()
+        # THEN
+        assert (50, 50, CompareResult.copy_to_target) in comparison_results
+        assert len(comparison_results) == 3

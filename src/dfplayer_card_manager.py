@@ -7,10 +7,12 @@ from src.dfplayer_card_manager_interface import DfPlayerCardManagerInterface
 from src.mp3.audio_file_manager_interface import AudioFileManagerInterface
 from src.repository import (
     config_override,
+    repository_comparator,
     repository_element_checker,
     repository_element_updater,
     repository_finder,
 )
+from src.repository.compare_results import CompareResult
 from src.repository.detection_source import DetectionSource
 from src.repository.diff_modes import DiffMode
 from src.repository.repository import Repository
@@ -232,6 +234,13 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
             raise FileNotFoundError("Configuration file not found")
 
         return yaml_config.create_yaml_object(config_file, Configuration)
+
+    def get_repositories_comparison(self) -> list[tuple[int, int, CompareResult]]:
+        return repository_comparator.compare_repository_elements(
+            self._source_repo.elements,
+            self._target_repo.elements,
+            self._config.repository_processing.diff_method or DiffMode.hash_and_tags,
+        )
 
     def _get_applied_config(self, element: RepositoryElement) -> RepositoryConfig:
         if element.repo_root_dir == self._target_repo_root_dir:
