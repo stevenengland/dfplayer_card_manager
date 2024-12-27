@@ -6,3 +6,4 @@ multipledispatch
 pydantic
 pyyaml
 types-PyYAML
+typer
