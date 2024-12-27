@@ -5,6 +5,7 @@ from src.config.configuration import RepositoryConfig
 from src.mp3.tag_collection import TagCollection
 from src.repository.detection_source import DetectionSource
 from src.repository.repository_element import RepositoryElement
+from src.repository.valid_file_types import ValidFileType
 
 
 def update_element_by_dir(  # noqa: C901, WPS231
@@ -56,6 +57,9 @@ def update_element_by_filename(  # noqa: WPS231, C901
     element: RepositoryElement,
     config: RepositoryConfig,
 ) -> None:
+
+    update_element_file_type_by_filename(element)
+
     if config.album_source and config.album_source == DetectionSource.filename:
         if (
             not config.valid_subdir_files_pattern  # noqa: WPS204
@@ -236,6 +240,13 @@ def update_element_dirnum_by_filename(
         element.dir_number = int(match_result)
     except ValueError:
         return
+
+
+def update_element_file_type_by_filename(element: RepositoryElement) -> None:
+    if element.file_name.endswith(".mp3"):
+        element.file_type = ValidFileType.mp3
+    else:
+        element.file_type = None
 
 
 def _get_match(

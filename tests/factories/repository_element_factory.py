@@ -2,6 +2,7 @@ from faker import Faker
 from multipledispatch import dispatch
 
 from src.repository.repository_element import RepositoryElement
+from src.repository.valid_file_types import ValidFileType
 
 faker = Faker()
 
@@ -19,6 +20,7 @@ def create_repository_element() -> RepositoryElement:
         album=faker.word(),
         hash=faker.md5(),
         tree_id=faker.uuid4(),
+        file_type=faker.enum(ValidFileType),
     )
 
 

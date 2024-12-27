@@ -7,6 +7,7 @@ from src.mp3.tag_collection import TagCollection
 from src.repository import repository_element_updater
 from src.repository.detection_source import DetectionSource
 from src.repository.repository_element import RepositoryElement
+from src.repository.valid_file_types import ValidFileType
 
 pytestmark = pytest.mark.usefixtures("unstub")
 e2e = pytest.mark.skipif("not config.getoption('e2e')")
@@ -42,7 +43,7 @@ class TestElementUpdates:
     def test_element_updates_by_filename(self):
         # GIVEN
         element = RepositoryElement()
-        element.file_name = "01.no.yes.loremipsum"
+        element.file_name = "01.no.yes.loremipsum.mp3"
         config = RepositoryConfig(
             valid_subdir_files_pattern=r"^(\d{2})\.(no)\.(yes).*$",
             album_match=3,
@@ -67,6 +68,7 @@ class TestElementUpdates:
         assert element.album == "yes"
         assert element.dir_number == 1
         assert element.track_number == 1
+        assert element.file_type == ValidFileType.mp3
 
     def test_element_updates_by_tags(self):
         # GIVEN

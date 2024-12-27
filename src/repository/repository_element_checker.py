@@ -14,3 +14,6 @@ def check_element(element: RepositoryElement) -> None:
         or element.dir_number > 99  # noqa: WPS432
     ):
         raise ValueError("Directory number must be between 0 and 99")
+
+    if not element.file_type:
+        raise ValueError("File type must be set")

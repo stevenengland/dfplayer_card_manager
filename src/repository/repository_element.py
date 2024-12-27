@@ -1,6 +1,8 @@
 from pydantic import Field
 from pydantic.dataclasses import dataclass
 
+from src.repository.valid_file_types import ValidFileType
+
 
 @dataclass
 class RepositoryElement:  # noqa: WPS230
@@ -14,3 +16,4 @@ class RepositoryElement:  # noqa: WPS230
     track_number: int | None = Field(default=None)
     dir_number: int | None = Field(default=None)
     hash: str | None = Field(default=None)
+    file_type: ValidFileType | None = Field(default=None)

@@ -41,6 +41,14 @@ class TestRepositoryElementChecks:
                 ),
                 "Directory number",
             ),
+            (
+                RepositoryElement(
+                    track_number=1,
+                    dir_number=1,
+                    file_type=None,
+                ),
+                "File type",
+            ),
         ],
     )
     def test_element_checks_by_dir(self, element, expected_error):
