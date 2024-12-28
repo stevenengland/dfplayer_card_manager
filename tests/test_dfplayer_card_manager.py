@@ -1,4 +1,5 @@
 import os
+import shutil
 
 import pytest
 from mockito import mock
@@ -20,13 +21,17 @@ from src.repository import (
 from src.repository.compare_results import CompareResult
 from src.repository.detection_source import DetectionSource
 from src.repository.diff_modes import DiffMode
+from src.repository.repository import Repository
 from src.repository.repository_element import RepositoryElement
+from src.repository.valid_file_types import ValidFileType
 from tests.factories.configuration_factory import (
+    create_processing_config,
     create_source_repo_config,
     create_source_repo_config_all_sources_tag,
     create_target_repo_config,
 )
 from tests.factories.repository_element_factory import create_repository_element
+from tests.file_system_helper import FakeFileSystemHelper
 
 pytestmark = pytest.mark.usefixtures("unstub")
 e2e = pytest.mark.skipif("not config.getoption('e2e')")
@@ -42,6 +47,21 @@ def dfplayer_card_manager() -> DfPlayerCardManager:
         "source_root",
         "target_root",
         audio_file_manager_mock,
+        configuration,
+    )
+    return sut  # noqa: WPS331
+
+
+@pytest.fixture(scope="function", name="sut_e2e")
+def dfplayer_card_manager_e2e() -> DfPlayerCardManager:
+    configuration = Configuration()
+    configuration.repository_source = create_source_repo_config()
+    configuration.repository_target = create_target_repo_config()
+    configuration.repository_processing = create_processing_config()
+    sut = DfPlayerCardManager(
+        "source_root",
+        "target_root",
+        AudioFileManager(),
         configuration,
     )
     return sut  # noqa: WPS331
@@ -299,13 +319,68 @@ class TestDeletionsToTargetRepo:
         track_number: int,
     ):  # noqa: E501
         # GIVEN
+        target_repo = Repository()
+        target_repo.elements.append(
+            RepositoryElement(
+                repo_root_dir="target_root",
+                dir=str(dir_number).zfill(2),
+                file_name=str(track_number).zfill(3),
+                dir_number=dir_number,
+                track_number=track_number,
+                file_type=ValidFileType.mp3,
+            ),
+        )
+        sut._target_repo = target_repo  # noqa: WPS437
         target_file_path = os.path.join(
             "target_root",
             str(dir_number).zfill(2),
             str(track_number).zfill(3),
+            str(ValidFileType.mp3),
         )
         when(os.path).isfile(target_file_path).thenReturn(True)
         when(os).remove(target_file_path).thenReturn(None)
         # WHEN
         sut.write_deletion_to_target_repository(dir_number, track_number)
         # THEN
+
+
+class TestCopyToTargetRepo:
+
+    @pytest.mark.skip(reason="https://github.com/pytest-dev/pyfakefs/issues/1105")
+    @e2e
+    def test_copy_to_target_repo_succeeds(
+        self,
+        sut_e2e: DfPlayerCardManager,
+        test_assets_fs: FakeFileSystemHelper,
+    ):
+        # GIVEN
+        source_root_dir = os.path.join(test_assets_fs.test_assets_path, "source_root")
+        target_root_dir = os.path.join(test_assets_fs.test_assets_path, "target_root")
+        test_assets_fs.file_system.create_dir(source_root_dir)
+        test_assets_fs.file_system.create_dir(os.path.join(source_root_dir, "001.test"))
+        shutil.copy(
+            os.path.join(test_assets_fs.test_assets_path, "0001.mp3"),
+            os.path.join(source_root_dir, "001.test", "0001.mp3"),
+        )
+        sut_e2e._source_repo_root_dir = source_root_dir  # noqa: WPS437
+        sut_e2e._target_repo_root_dir = target_root_dir  # noqa: WPS437
+        source_repo = Repository()
+        source_repo.elements.append(
+            RepositoryElement(
+                repo_root_dir=source_root_dir,
+                dir="001.test",
+                file_name="0001.mp3",
+                dir_number=1,
+                track_number=1,
+                file_type=ValidFileType.mp3,
+            ),
+        )
+        sut_e2e._source_repo = source_repo  # noqa: WPS437
+        # WHEN
+        # Copy two times
+        sut_e2e.write_copy_to_target_repository(1, 1)
+
+        # THEN
+        assert os.path.isfile(
+            os.path.join(target_root_dir, "01", "001.mp3"),
+        )

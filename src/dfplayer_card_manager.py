@@ -5,6 +5,7 @@ from src.config import config_checker, config_merger, yaml_config
 from src.config.configuration import Configuration, RepositoryConfig
 from src.dfplayer_card_manager_interface import DfPlayerCardManagerInterface
 from src.mp3.audio_file_manager_interface import AudioFileManagerInterface
+from src.mp3.tag_collection import TagCollection
 from src.repository import (
     config_override,
     repository_comparator,
@@ -247,13 +248,81 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
         dir_number: int,
         track_number: int,
     ) -> None:
+        # find element in target_repo that matches dir_number and track_number
+        element_to_delete = next(
+            (
+                element
+                for element in self._target_repo.elements
+                if element.dir_number == dir_number
+                and element.track_number == track_number
+            ),
+            None,
+        )
+        if element_to_delete is None:
+            raise ValueError("Element to delete not found in the target repository")
+
         file_to_delete = os.path.join(
             self._target_repo_root_dir,
             str(dir_number).zfill(2),
             str(track_number).zfill(3),
+            str(element_to_delete.file_type),
         )
+
         if os.path.isfile(file_to_delete):
             os.remove(file_to_delete)
+
+    def write_copy_to_target_repository(
+        self,
+        dir_number: int,
+        track_number: int,
+    ) -> None:
+        # find the element in the source repository that needs to be copied
+        element_to_copy = next(
+            (
+                element
+                for element in self._source_repo.elements
+                if element.dir_number == dir_number
+                and element.track_number == track_number
+            ),
+            None,
+        )
+
+        if element_to_copy is None:
+            raise ValueError("Element to copy not found in the source repository")
+
+        source_file_path = os.path.join(
+            self._source_repo_root_dir,
+            element_to_copy.dir,
+            element_to_copy.file_name,
+        )
+
+        if not os.path.isfile(source_file_path):
+            raise FileNotFoundError("Source file not found")
+
+        target_file_path = os.path.join(
+            self._target_repo_root_dir,
+            str(dir_number).zfill(2),
+            f"{str(track_number).zfill(3)}.{element_to_copy.file_type}",
+        )
+
+        os.makedirs(os.path.dirname(target_file_path), exist_ok=True)
+
+        tags = (
+            TagCollection(
+                title=element_to_copy.title,
+                artist=element_to_copy.artist,
+                album=element_to_copy.album,
+                track_number=element_to_copy.track_number,
+            )
+            if self._config.repository_processing.diff_method
+            in {DiffMode.hash_and_tags, DiffMode.tags}
+            else None
+        )
+        self._audio_manager.copy_audio(
+            source_file_path,
+            target_file_path,
+            tags,
+        )
 
     def _get_applied_config(self, element: RepositoryElement) -> RepositoryConfig:
         if element.repo_root_dir == self._target_repo_root_dir:

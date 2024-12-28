@@ -41,3 +41,11 @@ class DfPlayerCardManagerInterface(ABC):
     @abstractmethod
     def get_repositories_comparison(self) -> list[tuple[int, int, CompareResult]]:
         pass
+
+    @abstractmethod
+    def write_copy_to_target_repository(
+        self,
+        dir_number: int,
+        track_number: int,
+    ) -> None:
+        pass
