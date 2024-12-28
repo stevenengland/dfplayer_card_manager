@@ -15,9 +15,8 @@ def unstub_all():
     unstub()
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def test_assets_fs(fs):
-    fs.add_real_directory(TEST_ASSETS_DIR)
     fsh = FakeFileSystemHelper(TEST_ASSETS_DIR, fs)
     yield fsh
 
