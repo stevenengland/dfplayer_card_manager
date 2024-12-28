@@ -1,4 +1,5 @@
-from typing import Tuple
+import shutil
+from typing import Optional, Tuple
 
 import eyed3
 import pytest
@@ -33,6 +34,30 @@ class AudioFileManager(AudioFileManagerInterface):
 
         return self._extract_audio_content(file_path, audio)
 
+    def copy_audio(
+        self,
+        source_path: str,
+        target_path: str,
+        tags_to_append: Optional[TagCollection] = None,
+    ) -> None:
+        if not tags_to_append:
+            tags_to_append = TagCollection()
+
+        # copy source file to target file
+        shutil.copyfile(source_path, target_path)
+
+        # read audio from target file
+        audio = self._read_audio(target_path)
+        audio.tag.artist = tags_to_append.artist or audio.tag.artist
+        audio.tag.title = tags_to_append.title or audio.tag.title
+        audio.tag.album = tags_to_append.album or audio.tag.album
+        audio.tag.track_num = (
+            tags_to_append.track_number or audio.tag.track_num[0],
+            None,  # total number of tracks
+        )
+
+        audio.tag.save()
+
     def _check_tags(self, audio: eyed3.AudioFile) -> bool:
         return audio.tag and audio.tag.version[0] == 2
 
@@ -41,7 +66,7 @@ class AudioFileManager(AudioFileManagerInterface):
 
     def _check_file(self, audio: eyed3.AudioFile) -> None:
         if not self._check_audio(audio):
-            raise ValueError("Could not load MP3 file")
+            raise ValueError("Could not load audio file")
         if not self._check_tags(audio):
             raise TagError("Invalid or unsupported audio tag.")
 
