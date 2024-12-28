@@ -4,3 +4,7 @@ coverage.xml
 
 __pycache__/
 .python-version
+
+dist/
+build/
+**/*.egg-info/
