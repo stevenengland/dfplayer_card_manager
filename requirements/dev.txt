@@ -12,3 +12,4 @@ pytest-mock
 pytest-mockito
 pytest-timeout
 wemake-python-styleguide
+wheel
