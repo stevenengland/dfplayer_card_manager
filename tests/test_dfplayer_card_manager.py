@@ -10,7 +10,7 @@ from src.config.configuration import (
     ProcessingConfig,
     RepositoryConfig,
 )
-from src.dfplayer_card_manager import DfPlayerCardManager
+from src.dfplayer_card_manager.dfplayer_card_manager import DfPlayerCardManager
 from src.mp3.audio_file_manager import AudioFileManager
 from src.mp3.tag_collection import TagCollection
 from src.repository import (

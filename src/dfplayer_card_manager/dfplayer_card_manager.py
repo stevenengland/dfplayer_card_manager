@@ -3,7 +3,9 @@ from typing import Optional
 
 from src.config import config_checker, config_merger, yaml_config
 from src.config.configuration import Configuration, RepositoryConfig
-from src.dfplayer_card_manager_interface import DfPlayerCardManagerInterface
+from src.dfplayer_card_manager.dfplayer_card_manager_interface import (
+    DfPlayerCardManagerInterface,
+)
 from src.mp3.audio_file_manager_interface import AudioFileManagerInterface
 from src.mp3.tag_collection import TagCollection
 from src.repository import (
