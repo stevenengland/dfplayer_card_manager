@@ -5,7 +5,10 @@ from file_system_helper import FakeFileSystemHelper
 from mockito import mock
 
 from dfplayer_card_manager.mp3.audio_diff_checker import AudioDiffChecker
-from dfplayer_card_manager.mp3.audio_file_manager import AudioFileManager
+from dfplayer_card_manager.mp3.audio_file_manager import (
+    AudioFileManager,
+    AudioFileManagerInterface,
+)
 from dfplayer_card_manager.mp3.tag_collection import TagCollection
 
 pytestmark = pytest.mark.usefixtures("unstub")
@@ -14,8 +17,8 @@ e2e = pytest.mark.skipif("not config.getoption('e2e')")
 
 @pytest.fixture(scope="function", name="sut")
 def audio_diff_checker() -> AudioDiffChecker:
-    audio_file_manager_mock = mock(AudioFileManager, strict=False)
-    sut = AudioDiffChecker(tag_manager=audio_file_manager_mock)
+    audio_file_manager_mock = mock(AudioFileManagerInterface, strict=False)
+    sut = AudioDiffChecker(audio_file_manager=audio_file_manager_mock)
     return sut  # noqa: WPS331
 
 
@@ -29,7 +32,7 @@ def audio_diff_checker_e2e() -> AudioDiffChecker:
 class TestAudioDiffChecker:
     def test_check_diff_by_tags_succeeds(
         self,
-        sut,
+        sut: AudioDiffChecker,
         when,
     ):
         # GIVEN
@@ -39,7 +42,9 @@ class TestAudioDiffChecker:
         tags_source = TagCollection()
         tags_source.artist = "artist_test"
 
-        when(sut.tag_manager).read_id3_tags(audio_dir_path).thenReturn(tags_target)
+        when(sut.audio_file_manager).read_id3_tags(audio_dir_path).thenReturn(
+            tags_target,
+        )
         # WHEN
         audio_diff_check_result = sut.check_diff_by_tags(audio_dir_path, tags_source)
         # THEN
@@ -47,7 +52,7 @@ class TestAudioDiffChecker:
 
     def test_check_diff_by_tags_fails(
         self,
-        sut,
+        sut: AudioDiffChecker,
         when,
     ):
         # GIVEN
@@ -57,7 +62,9 @@ class TestAudioDiffChecker:
         tags_source = TagCollection()
         tags_source.artist = "artist_test2"
 
-        when(sut.tag_manager).read_id3_tags(audio_dir_path).thenReturn(tags_target)
+        when(sut.audio_file_manager).read_id3_tags(audio_dir_path).thenReturn(
+            tags_target,
+        )
         # WHEN
         audio_diff_check_result = sut.check_diff_by_tags(audio_dir_path, tags_source)
         # THEN

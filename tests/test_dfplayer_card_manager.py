@@ -21,7 +21,9 @@ from dfplayer_card_manager.config.configuration import (
 from dfplayer_card_manager.dfplayer.dfplayer_card_manager import (
     DfPlayerCardManager,
 )
-from dfplayer_card_manager.mp3.audio_file_manager import AudioFileManager
+from dfplayer_card_manager.mp3.audio_file_manager import (
+    AudioFileManagerInterface,
+)
 from dfplayer_card_manager.mp3.tag_collection import TagCollection
 from dfplayer_card_manager.repository import (
     config_override,
@@ -43,7 +45,7 @@ e2e = pytest.mark.skipif("not config.getoption('e2e')")
 
 @pytest.fixture(scope="function", name="sut")
 def dfplayer_card_manager() -> DfPlayerCardManager:
-    audio_file_manager_mock = mock(AudioFileManager, strict=False)
+    audio_file_manager_mock = mock(AudioFileManagerInterface, strict=False)
     configuration = Configuration()
     configuration.repository_source = create_source_repo_config()
     configuration.repository_target = create_target_repo_config()
@@ -65,7 +67,7 @@ def dfplayer_card_manager_e2e() -> DfPlayerCardManager:
     sut = DfPlayerCardManager(
         "source_root",
         "target_root",
-        AudioFileManager(),
+        AudioFileManagerInterface(),
         configuration,
     )
     return sut  # noqa: WPS331

@@ -6,7 +6,10 @@ import eyed3
 import pytest
 from file_system_helper import FakeFileSystemHelper
 
-from dfplayer_card_manager.mp3.audio_file_manager import AudioFileManager
+from dfplayer_card_manager.mp3.audio_file_manager import (
+    AudioFileManager,
+    AudioFileManagerInterface,
+)
 from dfplayer_card_manager.mp3.tag_collection import TagCollection
 from dfplayer_card_manager.mp3.tag_error import TagError
 
@@ -22,7 +25,7 @@ def tag_manager() -> AudioFileManager:
 
 class TestReadAudio:
 
-    def test_read_id3_tags_with_valid_tags(self, sut: AudioFileManager, when):
+    def test_read_id3_tags_with_valid_tags(self, sut: AudioFileManagerInterface, when):
         # GIVEN
         tag_mock = MagicMock()
         tag_mock.tag.version = (2, 4)
@@ -42,7 +45,11 @@ class TestReadAudio:
         assert sut_result.album == "Album Name"
         assert sut_result.track_number == 1
 
-    def test_read_id3_tags_with_invalid_tags(self, sut: AudioFileManager, when):
+    def test_read_id3_tags_with_invalid_tags(
+        self,
+        sut: AudioFileManagerInterface,
+        when,
+    ):
         # GIVEN
         tag_mock = MagicMock()
         tag_mock.tag.version = (9,)
@@ -58,7 +65,7 @@ class TestReadAudio:
     @e2e
     def test_read_id3_tags_from_file_wo_tags(
         self,
-        sut: AudioFileManager,
+        sut: AudioFileManagerInterface,
         test_assets_fs: FakeFileSystemHelper,
     ):
         # GIVEN
@@ -73,7 +80,7 @@ class TestReadAudio:
     @e2e
     def test_read_id3_tags_from_file_w_tags(
         self,
-        sut: AudioFileManager,
+        sut: AudioFileManagerInterface,
         test_assets_fs: FakeFileSystemHelper,
     ):
         # GIVEN
@@ -91,7 +98,7 @@ class TestReadAudio:
     @e2e
     def test_read_audio_content(
         self,
-        sut: AudioFileManager,
+        sut: AudioFileManagerInterface,
         test_assets_fs: FakeFileSystemHelper,
     ):
         # GIVEN
@@ -110,7 +117,7 @@ class TestReadAudio:
     @e2e
     def test_read_audio_content_and_id3_tags(
         self,
-        sut: AudioFileManager,
+        sut: AudioFileManagerInterface,
         test_assets_fs: FakeFileSystemHelper,
     ):
         # GIVEN
@@ -127,7 +134,7 @@ class TestReadAudio:
 class TestCopyingAudio:
     def test_copy_audio(
         self,
-        sut: AudioFileManager,
+        sut: AudioFileManagerInterface,
         when,
     ):
         # GIVEN
@@ -158,7 +165,7 @@ class TestCopyingAudio:
     @e2e
     def test_copy_audio_with_fs(
         self,
-        sut: AudioFileManager,
+        sut: AudioFileManagerInterface,
         test_assets_fs: FakeFileSystemHelper,
     ):
         # GIVEN
