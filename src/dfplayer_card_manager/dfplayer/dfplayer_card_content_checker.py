@@ -2,7 +2,7 @@ import os
 import re
 
 
-class DfPlayerCardChecker:
+class DfPlayerCardContentChecker:
     def get_unwanted_root_dir_entries(  # noqa: WPS231
         self,
         sd_root_path: str,

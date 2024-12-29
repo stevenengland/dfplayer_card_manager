@@ -18,7 +18,7 @@ from dfplayer_card_manager.config.configuration import (
     ProcessingConfig,
     RepositoryConfig,
 )
-from dfplayer_card_manager.dfplayer_card_manager.dfplayer_card_manager import (
+from dfplayer_card_manager.dfplayer.dfplayer_card_manager import (
     DfPlayerCardManager,
 )
 from dfplayer_card_manager.mp3.audio_file_manager import AudioFileManager

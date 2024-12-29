@@ -4,16 +4,16 @@ import pytest
 from file_system_helper import FakeFileSystemHelper
 from mockito import verify
 
-from dfplayer_card_manager.repository.dfplayer_card_checker import (
-    DfPlayerCardChecker,
+from dfplayer_card_manager.dfplayer.dfplayer_card_content_checker import (
+    DfPlayerCardContentChecker,
 )
 
 e2e = pytest.mark.skipif("not config.getoption('e2e')")
 
 
 @pytest.fixture(scope="function", name="sut")
-def sd_card_cleaner() -> DfPlayerCardChecker:
-    sut = DfPlayerCardChecker()
+def sd_card_cleaner() -> DfPlayerCardContentChecker:
+    sut = DfPlayerCardContentChecker()
     return sut  # noqa: WPS331
 
 
@@ -95,7 +95,7 @@ class TestUnwantedDirsAndFiles:
     @e2e
     def test_delete_unwanted_root_dir_entries_on_real_fs(
         self,
-        sut: DfPlayerCardChecker,
+        sut: DfPlayerCardContentChecker,
         test_assets_fs: FakeFileSystemHelper,
     ):
         # GIVEN
@@ -114,7 +114,7 @@ class TestUnwantedDirsAndFiles:
     @e2e
     def test_delete_unwanted_subdir_entries_on_real_fs(
         self,
-        sut: DfPlayerCardChecker,
+        sut: DfPlayerCardContentChecker,
         test_assets_fs: FakeFileSystemHelper,
     ):
         # GIVEN

@@ -10,7 +10,7 @@ from dfplayer_card_manager.config.configuration import (
     Configuration,
     RepositoryConfig,
 )
-from dfplayer_card_manager.dfplayer_card_manager.dfplayer_card_manager_interface import (
+from dfplayer_card_manager.dfplayer.dfplayer_card_manager_interface import (
     DfPlayerCardManagerInterface,
 )
 from dfplayer_card_manager.mp3.audio_file_manager_interface import (

@@ -25,7 +25,7 @@ import typer
 from rich import print
 from typing_extensions import Annotated
 
-from dfplayer_card_manager.dfplayer_card_manager.dfplayer_card_manager_error import (
+from dfplayer_card_manager.dfplayer.dfplayer_card_manager_error import (
     DfPlayerCardManagerError,
 )
 from dfplayer_card_manager.repository import fat_checker
