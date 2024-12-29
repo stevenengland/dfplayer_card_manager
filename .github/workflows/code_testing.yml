@@ -1,0 +1,56 @@
+---
+name: Code Testing
+
+"on":
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - "*.md"
+      - "*version.txt"
+      - "vscode/**"
+      - "docs/**"
+      - ".github/**"
+      - "!.github/**/*test*.yml"
+      - "!.github/**/*env*.txt"
+      # - "!.github/**/*release*.yml"
+  schedule:
+    - cron: "0 7 * * 5" # At 07 AM on Friday
+
+env:
+  FORCE_COLOR: "1" # Make tools pretty.
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+  PIP_NO_PYTHON_VERSION_WARNING: "1"
+
+# Cancel previous PR/branch runs when a new commit is pushed
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Performs quick checks before the expensive test runs
+  check_and_unit-test:
+    if: contains(github.event.head_commit.message, '[skip ci]') == false
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        # with:
+        # python-version: '3.13' # The version of Python is per default detected from .python-version file
+
+      - name: Install dependencies
+        shell: bash
+        run: "python ./tools/create_venv.py"
+
+      - name: Perform code checks
+        shell: bash
+        run: "python ./tools/checks.py"
+
+      - name: Perform Unit and Coverage tests
+        shell: bash
+        run: "python ./tools/tests.py e2e"
