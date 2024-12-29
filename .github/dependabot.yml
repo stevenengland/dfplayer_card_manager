@@ -5,14 +5,16 @@ updates:
     directory: "/"
     schedule:
       interval: daily
+    open-pull-requests-limit: 5
     commit-message:
       prefix: "fix"
       prefix-development: "chore"
       include: "scope"
   - package-ecosystem: pip
-    directory: "/.github/workflows"
+    directory: "/requirements"
     schedule:
       interval: daily
+    open-pull-requests-limit: 10
     commit-message:
       prefix: "fix"
       prefix-development: "chore"
