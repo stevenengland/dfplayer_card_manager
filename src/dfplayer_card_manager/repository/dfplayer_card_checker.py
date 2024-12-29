@@ -1,12 +1,8 @@
 import os
 import re
 
-from dfplayer_card_manager.repository.fs_cleaner_interface import (
-    FsCleanerInterface,
-)
 
-
-class FsCleaner(FsCleanerInterface):
+class DfPlayerCardChecker:
     def get_unwanted_root_dir_entries(  # noqa: WPS231
         self,
         sd_root_path: str,
