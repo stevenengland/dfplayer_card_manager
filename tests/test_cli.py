@@ -1,7 +1,7 @@
 import pytest
 from typer.testing import CliRunner
 
-from src.cli import app
+from src.cli.cli import app
 from src.repository import fat_checker
 
 
