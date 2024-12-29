@@ -28,7 +28,7 @@ from typing_extensions import Annotated
 from dfplayer_card_manager.dfplayer.dfplayer_card_manager_error import (
     DfPlayerCardManagerError,
 )
-from dfplayer_card_manager.repository import fat_checker
+from dfplayer_card_manager.fat import fat_checker
 
 app = typer.Typer()
 

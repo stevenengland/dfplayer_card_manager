@@ -4,7 +4,7 @@ import pytest
 from FATtools.mkfat import exfat_mkfs
 from FATtools.Volume import vclose, vopen
 
-from dfplayer_card_manager.repository.fat_sorter import FatSorter
+from dfplayer_card_manager.fat.fat_sorter import FatSorter
 
 e2e = pytest.mark.skipif("not config.getoption('e2e')")
 

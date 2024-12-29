@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from dfplayer_card_manager.repository.fat_checker import check_is_fat32
+from dfplayer_card_manager.fat.fat_checker import check_is_fat32
 
 pytestmark = pytest.mark.usefixtures("unstub")
 e2e = pytest.mark.skipif("not config.getoption('e2e')")

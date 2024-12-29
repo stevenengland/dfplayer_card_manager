@@ -3,9 +3,7 @@ from io import BytesIO
 
 from FATtools.Volume import vclose, vopen
 
-from dfplayer_card_manager.repository.fat_sorter_interface import (
-    FatSorterInterface,
-)
+from dfplayer_card_manager.fat.fat_sorter_interface import FatSorterInterface
 
 
 class FatSorter(FatSorterInterface):
