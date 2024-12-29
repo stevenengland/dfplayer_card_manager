@@ -1,12 +1,15 @@
 import os
 
 import pytest
+from file_system_helper import FakeFileSystemHelper
 
-from src.config.configuration import Configuration, RepositoryConfig
-from src.config.yaml_config import create_yaml_object
-from src.repository.detection_source import DetectionSource
-from src.repository.diff_modes import DiffMode
-from tests.file_system_helper import FakeFileSystemHelper
+from dfplayer_card_manager.config.configuration import (
+    Configuration,
+    RepositoryConfig,
+)
+from dfplayer_card_manager.config.yaml_config import create_yaml_object
+from dfplayer_card_manager.repository.detection_source import DetectionSource
+from dfplayer_card_manager.repository.diff_modes import DiffMode
 
 pytestmark = pytest.mark.usefixtures("unstub")
 e2e = pytest.mark.skipif("not config.getoption('e2e')")

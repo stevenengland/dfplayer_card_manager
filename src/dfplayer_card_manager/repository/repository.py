@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 
-from src.repository.repository_element import RepositoryElement
+from dfplayer_card_manager.repository.repository_element import (
+    RepositoryElement,
+)
 
 
 @dataclass

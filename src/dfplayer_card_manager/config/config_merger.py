@@ -1,4 +1,4 @@
-from src.config.configuration import RepositoryConfig
+from dfplayer_card_manager.config.configuration import RepositoryConfig
 
 
 def merge_configs(

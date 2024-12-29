@@ -2,12 +2,14 @@ import hashlib
 
 import pytest
 
-from src.config.configuration import RepositoryConfig
-from src.mp3.tag_collection import TagCollection
-from src.repository import repository_element_updater
-from src.repository.detection_source import DetectionSource
-from src.repository.repository_element import RepositoryElement
-from src.repository.valid_file_types import ValidFileType
+from dfplayer_card_manager.config.configuration import RepositoryConfig
+from dfplayer_card_manager.mp3.tag_collection import TagCollection
+from dfplayer_card_manager.repository import repository_element_updater
+from dfplayer_card_manager.repository.detection_source import DetectionSource
+from dfplayer_card_manager.repository.repository_element import (
+    RepositoryElement,
+)
+from dfplayer_card_manager.repository.valid_file_types import ValidFileType
 
 pytestmark = pytest.mark.usefixtures("unstub")
 e2e = pytest.mark.skipif("not config.getoption('e2e')")

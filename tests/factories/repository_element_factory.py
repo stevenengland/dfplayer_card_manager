@@ -1,8 +1,10 @@
 from faker import Faker
 from multipledispatch import dispatch
 
-from src.repository.repository_element import RepositoryElement
-from src.repository.valid_file_types import ValidFileType
+from dfplayer_card_manager.repository.repository_element import (
+    RepositoryElement,
+)
+from dfplayer_card_manager.repository.valid_file_types import ValidFileType
 
 faker = Faker()
 

@@ -4,11 +4,11 @@ from unittest.mock import MagicMock, Mock
 
 import eyed3
 import pytest
+from file_system_helper import FakeFileSystemHelper
 
-from src.mp3.audio_file_manager import AudioFileManager
-from src.mp3.tag_collection import TagCollection
-from src.mp3.tag_error import TagError
-from tests.file_system_helper import FakeFileSystemHelper
+from dfplayer_card_manager.mp3.audio_file_manager import AudioFileManager
+from dfplayer_card_manager.mp3.tag_collection import TagCollection
+from dfplayer_card_manager.mp3.tag_error import TagError
 
 pytestmark = pytest.mark.usefixtures("unstub")
 e2e = pytest.mark.skipif("not config.getoption('e2e')")

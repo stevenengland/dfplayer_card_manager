@@ -25,10 +25,10 @@ import typer
 from rich import print
 from typing_extensions import Annotated
 
-from src.dfplayer_card_manager.dfplayer_card_manager_error import (
+from dfplayer_card_manager.dfplayer_card_manager.dfplayer_card_manager_error import (
     DfPlayerCardManagerError,
 )
-from src.repository import fat_checker
+from dfplayer_card_manager.repository import fat_checker
 
 app = typer.Typer()
 

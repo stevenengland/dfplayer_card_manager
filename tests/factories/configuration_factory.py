@@ -1,10 +1,13 @@
 from faker import Faker
 from multipledispatch import dispatch
 
-from src.config.config_merger import merge_configs
-from src.config.configuration import ProcessingConfig, RepositoryConfig
-from src.repository.detection_source import DetectionSource
-from src.repository.diff_modes import DiffMode
+from dfplayer_card_manager.config.config_merger import merge_configs
+from dfplayer_card_manager.config.configuration import (
+    ProcessingConfig,
+    RepositoryConfig,
+)
+from dfplayer_card_manager.repository.detection_source import DetectionSource
+from dfplayer_card_manager.repository.diff_modes import DiffMode
 
 faker = Faker()
 

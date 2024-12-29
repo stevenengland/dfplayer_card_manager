@@ -1,8 +1,10 @@
 import pytest
+from factories.repository_element_factory import create_repository_element
 
-from src.repository import repository_element_checker
-from src.repository.repository_element import RepositoryElement
-from tests.factories.repository_element_factory import create_repository_element
+from dfplayer_card_manager.repository import repository_element_checker
+from dfplayer_card_manager.repository.repository_element import (
+    RepositoryElement,
+)
 
 pytestmark = pytest.mark.usefixtures("unstub")
 e2e = pytest.mark.skipif("not config.getoption('e2e')")

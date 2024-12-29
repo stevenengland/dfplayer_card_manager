@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 
-def main() -> None:
+def main() -> None:  # noqa: WPS213
     # Check if running inside a virtual environment
     if "VIRTUAL_ENV" in os.environ:
         print("Active venv session detected. Please call 'deactivate' first.")
@@ -33,12 +33,11 @@ def main() -> None:
     )
 
     # Install dependencies
-    requirements_file = base_dir / "requirements" / "dev.txt"
     print(">> Installing dependencies")
 
     if os.name == "posix":
         subprocess.run(  # noqa: S607, S603
-            [str(venv_dir / "bin" / "pip"), "install", "-r", str(requirements_file)],
+            [str(venv_dir / "bin" / "pip"), "install", "-e", f"{str(base_dir)}[dev]"],
             check=True,
         )
     else:
@@ -46,8 +45,8 @@ def main() -> None:
             [
                 str(venv_dir / "Scripts" / "pip"),
                 "install",
-                "-r",
-                str(requirements_file),
+                "-e",
+                f"{str(base_dir)}[dev]",
             ],
             check=True,
         )

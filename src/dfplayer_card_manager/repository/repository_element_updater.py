@@ -1,11 +1,13 @@
 import hashlib
 import re
 
-from src.config.configuration import RepositoryConfig
-from src.mp3.tag_collection import TagCollection
-from src.repository.detection_source import DetectionSource
-from src.repository.repository_element import RepositoryElement
-from src.repository.valid_file_types import ValidFileType
+from dfplayer_card_manager.config.configuration import RepositoryConfig
+from dfplayer_card_manager.mp3.tag_collection import TagCollection
+from dfplayer_card_manager.repository.detection_source import DetectionSource
+from dfplayer_card_manager.repository.repository_element import (
+    RepositoryElement,
+)
+from dfplayer_card_manager.repository.valid_file_types import ValidFileType
 
 
 def update_element_by_dir(  # noqa: C901, WPS231

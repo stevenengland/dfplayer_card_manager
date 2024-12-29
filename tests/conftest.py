@@ -1,9 +1,8 @@
 from pathlib import PurePath
 
 import pytest
+from file_system_helper import FakeFileSystemHelper
 from mockito import unstub
-
-from tests.file_system_helper import FakeFileSystemHelper
 
 BASE_DIR = PurePath(__file__).parent.parent
 TEST_ASSETS_DIR = BASE_DIR.joinpath("tests", "test_assets")

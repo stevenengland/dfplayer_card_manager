@@ -1,9 +1,9 @@
 import pytest
+from factories.configuration_factory import create_source_repo_config
 
-from src.config import config_checker
-from src.config.configuration import RepositoryConfig
-from src.repository.detection_source import DetectionSource
-from tests.factories.configuration_factory import create_source_repo_config
+from dfplayer_card_manager.config import config_checker
+from dfplayer_card_manager.config.configuration import RepositoryConfig
+from dfplayer_card_manager.repository.detection_source import DetectionSource
 
 pytestmark = pytest.mark.usefixtures("unstub")
 e2e = pytest.mark.skipif("not config.getoption('e2e')")

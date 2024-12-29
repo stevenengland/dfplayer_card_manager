@@ -2,36 +2,40 @@ import os
 import shutil
 
 import pytest
-from mockito import mock
-
-from src.config import yaml_config
-from src.config.configuration import (
-    Configuration,
-    ProcessingConfig,
-    RepositoryConfig,
-)
-from src.dfplayer_card_manager.dfplayer_card_manager import DfPlayerCardManager
-from src.mp3.audio_file_manager import AudioFileManager
-from src.mp3.tag_collection import TagCollection
-from src.repository import (
-    config_override,
-    repository_comparator,
-    repository_finder,
-)
-from src.repository.compare_results import CompareResult
-from src.repository.detection_source import DetectionSource
-from src.repository.diff_modes import DiffMode
-from src.repository.repository import Repository
-from src.repository.repository_element import RepositoryElement
-from src.repository.valid_file_types import ValidFileType
-from tests.factories.configuration_factory import (
+from factories.configuration_factory import (
     create_processing_config,
     create_source_repo_config,
     create_source_repo_config_all_sources_tag,
     create_target_repo_config,
 )
-from tests.factories.repository_element_factory import create_repository_element
-from tests.file_system_helper import FakeFileSystemHelper
+from factories.repository_element_factory import create_repository_element
+from file_system_helper import FakeFileSystemHelper
+from mockito import mock
+
+from dfplayer_card_manager.config import yaml_config
+from dfplayer_card_manager.config.configuration import (
+    Configuration,
+    ProcessingConfig,
+    RepositoryConfig,
+)
+from dfplayer_card_manager.dfplayer_card_manager.dfplayer_card_manager import (
+    DfPlayerCardManager,
+)
+from dfplayer_card_manager.mp3.audio_file_manager import AudioFileManager
+from dfplayer_card_manager.mp3.tag_collection import TagCollection
+from dfplayer_card_manager.repository import (
+    config_override,
+    repository_comparator,
+    repository_finder,
+)
+from dfplayer_card_manager.repository.compare_results import CompareResult
+from dfplayer_card_manager.repository.detection_source import DetectionSource
+from dfplayer_card_manager.repository.diff_modes import DiffMode
+from dfplayer_card_manager.repository.repository import Repository
+from dfplayer_card_manager.repository.repository_element import (
+    RepositoryElement,
+)
+from dfplayer_card_manager.repository.valid_file_types import ValidFileType
 
 pytestmark = pytest.mark.usefixtures("unstub")
 e2e = pytest.mark.skipif("not config.getoption('e2e')")

@@ -1,25 +1,36 @@
 import os
 from typing import Optional
 
-from src.config import config_checker, config_merger, yaml_config
-from src.config.configuration import Configuration, RepositoryConfig
-from src.dfplayer_card_manager.dfplayer_card_manager_interface import (
+from dfplayer_card_manager.config import (
+    config_checker,
+    config_merger,
+    yaml_config,
+)
+from dfplayer_card_manager.config.configuration import (
+    Configuration,
+    RepositoryConfig,
+)
+from dfplayer_card_manager.dfplayer_card_manager.dfplayer_card_manager_interface import (
     DfPlayerCardManagerInterface,
 )
-from src.mp3.audio_file_manager_interface import AudioFileManagerInterface
-from src.mp3.tag_collection import TagCollection
-from src.repository import (
+from dfplayer_card_manager.mp3.audio_file_manager_interface import (
+    AudioFileManagerInterface,
+)
+from dfplayer_card_manager.mp3.tag_collection import TagCollection
+from dfplayer_card_manager.repository import (
     config_override,
     repository_comparator,
     repository_element_checker,
     repository_element_updater,
     repository_finder,
 )
-from src.repository.compare_results import CompareResult
-from src.repository.detection_source import DetectionSource
-from src.repository.diff_modes import DiffMode
-from src.repository.repository import Repository
-from src.repository.repository_element import RepositoryElement
+from dfplayer_card_manager.repository.compare_results import CompareResult
+from dfplayer_card_manager.repository.detection_source import DetectionSource
+from dfplayer_card_manager.repository.diff_modes import DiffMode
+from dfplayer_card_manager.repository.repository import Repository
+from dfplayer_card_manager.repository.repository_element import (
+    RepositoryElement,
+)
 
 
 class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214

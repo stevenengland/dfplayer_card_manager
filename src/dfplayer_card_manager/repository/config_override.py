@@ -1,7 +1,7 @@
 import os
 
-from src.config import yaml_config
-from src.config.configuration import RepositoryConfig
+from dfplayer_card_manager.config import yaml_config
+from dfplayer_card_manager.config.configuration import RepositoryConfig
 
 
 def get_config_overrides(

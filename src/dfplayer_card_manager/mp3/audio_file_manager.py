@@ -4,9 +4,11 @@ from typing import Optional, Tuple
 import eyed3
 import pytest
 
-from src.mp3.audio_file_manager_interface import AudioFileManagerInterface
-from src.mp3.tag_collection import TagCollection
-from src.mp3.tag_error import TagError
+from dfplayer_card_manager.mp3.audio_file_manager_interface import (
+    AudioFileManagerInterface,
+)
+from dfplayer_card_manager.mp3.tag_collection import TagCollection
+from dfplayer_card_manager.mp3.tag_error import TagError
 
 pytestmark = pytest.mark.usefixtures("unstub")
 

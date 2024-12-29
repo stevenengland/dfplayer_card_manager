@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional, Tuple
 
-from src.mp3.tag_collection import TagCollection
+from dfplayer_card_manager.mp3.tag_collection import TagCollection
 
 
 class AudioFileManagerInterface(ABC):

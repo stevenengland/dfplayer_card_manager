@@ -3,9 +3,9 @@ import os
 import pytest
 from mockito import ANY
 
-from src.config import yaml_config
-from src.config.configuration import RepositoryConfig
-from src.repository import config_override
+from dfplayer_card_manager.config import yaml_config
+from dfplayer_card_manager.config.configuration import RepositoryConfig
+from dfplayer_card_manager.repository import config_override
 
 pytestmark = pytest.mark.usefixtures("unstub")
 e2e = pytest.mark.skipif("not config.getoption('e2e')")

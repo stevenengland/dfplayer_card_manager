@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from src.repository.detection_source import DetectionSource
+from dfplayer_card_manager.repository.detection_source import DetectionSource
 
 
 @dataclass

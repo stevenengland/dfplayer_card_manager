@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 
-from src.repository.detection_source import DetectionSource
-from src.repository.diff_modes import DiffMode
+from dfplayer_card_manager.repository.detection_source import DetectionSource
+from dfplayer_card_manager.repository.diff_modes import DiffMode
 
 
 class RepositoryConfig(  # type: ignore[misc]

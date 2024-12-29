@@ -1,6 +1,8 @@
-from src.repository.compare_results import CompareResult
-from src.repository.diff_modes import DiffMode
-from src.repository.repository_element import RepositoryElement
+from dfplayer_card_manager.repository.compare_results import CompareResult
+from dfplayer_card_manager.repository.diff_modes import DiffMode
+from dfplayer_card_manager.repository.repository_element import (
+    RepositoryElement,
+)
 
 
 def compare_repository_elements(

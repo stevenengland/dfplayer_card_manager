@@ -1,8 +1,8 @@
 import pytest
 from typer.testing import CliRunner
 
-from src.cli.cli import app
-from src.repository import fat_checker
+from dfplayer_card_manager.cli.cli import app
+from dfplayer_card_manager.repository import fat_checker
 
 
 @pytest.fixture(scope="function", name="cli_runner")

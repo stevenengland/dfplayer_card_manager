@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from src.repository.repository_finder import (
+from dfplayer_card_manager.repository.repository_finder import (
     get_repository_tree,
     get_valid_root_dirs,
     get_valid_subdir_files,

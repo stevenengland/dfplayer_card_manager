@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from src.mp3.tag_collection import TagCollection
+from dfplayer_card_manager.mp3.tag_collection import TagCollection
 
 
 class AudioDiffCheckerInterface(ABC):

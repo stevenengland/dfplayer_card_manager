@@ -1,7 +1,7 @@
 from pydantic import Field
 from pydantic.dataclasses import dataclass
 
-from src.repository.valid_file_types import ValidFileType
+from dfplayer_card_manager.repository.valid_file_types import ValidFileType
 
 
 @dataclass

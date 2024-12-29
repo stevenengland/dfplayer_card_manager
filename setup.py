@@ -64,7 +64,7 @@ setup(
     description="A package for managing SD cards that are meant to be used in DFROBOT DfPlayer Mini card readers.",
     entry_points={
         "console_scripts": [
-            "dfplayer-card-manager=src.cli.cli:app",
+            "dfplayer-card-manager=dfplayer_card_manager.cli.cli:app",
         ],
     },
     extras_require={"dev": requirements["dev_requires"]},

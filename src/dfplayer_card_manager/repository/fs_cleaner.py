@@ -1,7 +1,9 @@
 import os
 import re
 
-from src.repository.fs_cleaner_interface import FsCleanerInterface
+from dfplayer_card_manager.repository.fs_cleaner_interface import (
+    FsCleanerInterface,
+)
 
 
 class FsCleaner(FsCleanerInterface):

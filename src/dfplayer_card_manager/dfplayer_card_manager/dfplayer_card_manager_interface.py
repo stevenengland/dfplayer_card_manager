@@ -1,8 +1,13 @@
 from abc import ABC, abstractmethod
 
-from src.config.configuration import Configuration, RepositoryConfig
-from src.repository.compare_results import CompareResult
-from src.repository.repository_element import RepositoryElement
+from dfplayer_card_manager.config.configuration import (
+    Configuration,
+    RepositoryConfig,
+)
+from dfplayer_card_manager.repository.compare_results import CompareResult
+from dfplayer_card_manager.repository.repository_element import (
+    RepositoryElement,
+)
 
 
 class DfPlayerCardManagerInterface(ABC):

@@ -1,7 +1,7 @@
 import pytest
 
-from src.config import config_merger
-from src.config.configuration import RepositoryConfig
+from dfplayer_card_manager.config import config_merger
+from dfplayer_card_manager.config.configuration import RepositoryConfig
 
 pytestmark = pytest.mark.usefixtures("unstub")
 e2e = pytest.mark.skipif("not config.getoption('e2e')")

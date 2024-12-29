@@ -1,10 +1,10 @@
 import os
 
 import pytest
+from file_system_helper import FakeFileSystemHelper
 from mockito import verify
 
-from src.repository.fs_cleaner import FsCleaner
-from tests.file_system_helper import FakeFileSystemHelper
+from dfplayer_card_manager.repository.fs_cleaner import FsCleaner
 
 e2e = pytest.mark.skipif("not config.getoption('e2e')")
 

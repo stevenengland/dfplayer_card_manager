@@ -1,12 +1,12 @@
 import os
 
 import pytest
+from file_system_helper import FakeFileSystemHelper
 from mockito import mock
 
-from src.mp3.audio_diff_checker import AudioDiffChecker
-from src.mp3.audio_file_manager import AudioFileManager
-from src.mp3.tag_collection import TagCollection
-from tests.file_system_helper import FakeFileSystemHelper
+from dfplayer_card_manager.mp3.audio_diff_checker import AudioDiffChecker
+from dfplayer_card_manager.mp3.audio_file_manager import AudioFileManager
+from dfplayer_card_manager.mp3.tag_collection import TagCollection
 
 pytestmark = pytest.mark.usefixtures("unstub")
 e2e = pytest.mark.skipif("not config.getoption('e2e')")

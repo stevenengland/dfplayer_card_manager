@@ -1,8 +1,10 @@
 import hashlib
 
-from src.mp3.audio_diff_checker_interface import AudioDiffCheckerInterface
-from src.mp3.audio_file_manager import AudioFileManager
-from src.mp3.tag_collection import TagCollection
+from dfplayer_card_manager.mp3.audio_diff_checker_interface import (
+    AudioDiffCheckerInterface,
+)
+from dfplayer_card_manager.mp3.audio_file_manager import AudioFileManager
+from dfplayer_card_manager.mp3.tag_collection import TagCollection
 
 
 class AudioDiffChecker(AudioDiffCheckerInterface):

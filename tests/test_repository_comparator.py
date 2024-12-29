@@ -1,12 +1,16 @@
 import copy
 
 import pytest
+from factories.repository_element_factory import create_repository_element
 
-from src.repository.compare_results import CompareResult
-from src.repository.diff_modes import DiffMode
-from src.repository.repository_comparator import compare_repository_elements
-from src.repository.repository_element import RepositoryElement
-from tests.factories.repository_element_factory import create_repository_element
+from dfplayer_card_manager.repository.compare_results import CompareResult
+from dfplayer_card_manager.repository.diff_modes import DiffMode
+from dfplayer_card_manager.repository.repository_comparator import (
+    compare_repository_elements,
+)
+from dfplayer_card_manager.repository.repository_element import (
+    RepositoryElement,
+)
 
 pytestmark = pytest.mark.usefixtures("unstub")
 e2e = pytest.mark.skipif("not config.getoption('e2e')")

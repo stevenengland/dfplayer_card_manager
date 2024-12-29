@@ -1,5 +1,5 @@
-from src.config.configuration import RepositoryConfig
-from src.repository.detection_source import DetectionSource
+from dfplayer_card_manager.config.configuration import RepositoryConfig
+from dfplayer_card_manager.repository.detection_source import DetectionSource
 
 
 def check_repository_config(  # noqa: C901, WPS238, WPS231
