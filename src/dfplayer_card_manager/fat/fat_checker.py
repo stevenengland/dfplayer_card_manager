@@ -21,16 +21,20 @@ def _check_fat32_windows(sd_card_path: str) -> bool:
     if not os.path.exists(sd_card_path):
         return False
 
-    # Alternative: Get-Volume -FilePath sd_card_path | Format-List FileSystemType
     subprocess_result = subprocess.run(  # noqa: S607
-        ["fsutil", "fsinfo", "volumeinfo", sd_card_path],
+        [
+            "powershell",
+            "-NoProfile",
+            "-Command",
+            f"Get-Volume -FilePath {sd_card_path} | Format-List FileSystemType",
+        ],
         capture_output=True,
         text=True,
         check=True,
         shell=False,  # noqa: S603
     )
 
-    return "File System Name : FAT32" in subprocess_result.stdout
+    return "FileSystemType : FAT32" in subprocess_result.stdout
 
 
 def _check_fat32_unix(sd_card_path: str) -> bool:

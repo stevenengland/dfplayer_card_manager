@@ -68,7 +68,7 @@ class TestFat32CheckerWindows:
         when(platform).system().thenReturn("Windows")
         when(os.path).exists(...).thenReturn(True)
 
-        mock_subprocess_run = MagicMock(stdout="File System Name : FAT32")
+        mock_subprocess_run = MagicMock(stdout="\n\nFileSystemType : FAT32")
         when(subprocess).run(...).thenReturn(mock_subprocess_run)
 
         is_fat32_filesystem = check_is_fat32("E:\\")
