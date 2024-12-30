@@ -5,13 +5,16 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from dfplayer_card_manager.fat.fat_checker import check_is_fat32
+from dfplayer_card_manager.fat.fat_checker import (
+    check_has_correct_allocation_unit_size,
+    check_is_fat32,
+)
 
 pytestmark = pytest.mark.usefixtures("unstub")
 e2e = pytest.mark.skipif("not config.getoption('e2e')")
 
 
-class TestFatCheckerUnix:
+class TestFat32CheckerUnix:
     def test_check_fat32_unix_exists_and_is_fat32(
         self,
         when,
@@ -56,7 +59,7 @@ class TestFatCheckerUnix:
         assert not is_fat32_filesystem
 
 
-class TestFatCheckerWindows:
+class TestFat32CheckerWindows:
     def test_check_fat32_windows_exists_and_is_fat32(
         self,
         when,
@@ -95,3 +98,105 @@ class TestFatCheckerWindows:
 
         is_fat32_filesystem = check_is_fat32("E:\\")
         assert not is_fat32_filesystem
+
+
+class TestAllocationUnitSizeDetectionWindows:
+    def test_check_allocation_unit_size_windows_exists_and_has_correct_allocation_unit_size(
+        self,
+        when,
+    ):
+        # GIVEN
+        when(platform).system().thenReturn("Windows")
+        when(os.path).exists(...).thenReturn(True)
+
+        mock_subprocess_run = MagicMock(
+            stdout="\nAllocationUnitSize : 32768\n\n",
+        )
+        when(subprocess).run(...).thenReturn(mock_subprocess_run)
+
+        has_correct_allocation_unit_size = check_has_correct_allocation_unit_size(
+            "E:\\",
+        )
+        assert has_correct_allocation_unit_size
+
+    def test_check_allocation_unit_size_windows_does_not_exist(
+        self,
+        when,
+    ):
+        # GIVEN
+        when(platform).system().thenReturn("Windows")
+        when(os.path).exists(...).thenReturn(False)
+
+        has_correct_allocation_unit_size = check_has_correct_allocation_unit_size(
+            "E:\\",
+        )
+        assert not has_correct_allocation_unit_size
+
+    def test_check_allocation_unit_size_windows_exists_and_has_incorrect_allocation_unit_size(
+        self,
+        when,
+    ):
+        # GIVEN
+        when(platform).system().thenReturn("Windows")
+        when(os.path).exists(...).thenReturn(True)
+
+        mock_subprocess_run = MagicMock(
+            stdout="\nAllocationUnitSize : 16384\n\n",
+        )
+        when(subprocess).run(...).thenReturn(mock_subprocess_run)
+
+        has_correct_allocation_unit_size = check_has_correct_allocation_unit_size(
+            "E:\\",
+        )
+        assert not has_correct_allocation_unit_size
+
+
+class TestAllocationUnitSizeDetectionUnix:
+    def test_check_allocation_unit_size_unix_exists_and_has_correct_allocation_unit_size(
+        self,
+        when,
+    ):
+        # GIVEN
+        when(platform).system().thenReturn("Linux")
+        when(os.path).exists(...).thenReturn(True)
+
+        mock_subprocess_run = MagicMock(
+            stdout="  File: /media/administer/TOSHIBA/\n  Size: 32768     	Blocks: 64         IO Block: 32768  directory",  # noqa: E501
+        )
+        when(subprocess).run(...).thenReturn(mock_subprocess_run)
+
+        has_correct_allocation_unit_size = check_has_correct_allocation_unit_size(
+            "/mnt/sdcard",
+        )
+        assert has_correct_allocation_unit_size
+
+    def test_check_allocation_unit_size_unix_does_not_exist(
+        self,
+        when,
+    ):
+        # GIVEN
+        when(platform).system().thenReturn("Linux")
+        when(os.path).exists(...).thenReturn(False)
+
+        has_correct_allocation_unit_size = check_has_correct_allocation_unit_size(
+            "/mnt/sdcard",
+        )
+        assert not has_correct_allocation_unit_size
+
+    def test_check_allocation_unit_size_unix_exists_and_has_incorrect_allocation_unit_size(
+        self,
+        when,
+    ):
+        # GIVEN
+        when(platform).system().thenReturn("Linux")
+        when(os.path).exists(...).thenReturn(True)
+
+        mock_subprocess_run = MagicMock(
+            stdout="  File: /media/administer/TOSHIBA/\n  Size: 16384     	Blocks: 64         IO Block: 16384  directory",  # noqa: E501
+        )
+        when(subprocess).run(...).thenReturn(mock_subprocess_run)
+
+        has_correct_allocation_unit_size = check_has_correct_allocation_unit_size(
+            "/mnt/sdcard",
+        )
+        assert not has_correct_allocation_unit_size
