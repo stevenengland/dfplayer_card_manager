@@ -49,7 +49,7 @@ def _check_fat32_unix(sd_card_path: str) -> bool:
     second_line = lines[1]
     columns = second_line.split()
     fs_type = columns[1].lower()
-    return fs_type in {"vfat", "fat32", "msdos"}  # ToDo: only FAT32?
+    return fs_type == "fat32"  # ToDo: only FAT32?
 
 
 def _check_allocation_unit_size_windows(sd_card_path: str) -> bool:

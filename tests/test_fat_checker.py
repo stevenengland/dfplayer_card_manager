@@ -24,7 +24,7 @@ class TestFat32CheckerUnix:
         when(os.path).exists(...).thenReturn(True)
 
         mock_subprocess_run = MagicMock(
-            stdout="Filesystem     Type 1K-blocks  Used Available Use% Mounted on\n/dev/sda2      vfat    523244   336    522908   1% /boot/efi",  # noqa: E501
+            stdout="Filesystem     Type 1K-blocks  Used Available Use% Mounted on\n/dev/sda2      FAT32    523244   336    522908   1% /boot/efi",  # noqa: E501
         )
         when(subprocess).run(...).thenReturn(mock_subprocess_run)
 
