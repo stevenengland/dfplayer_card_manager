@@ -30,11 +30,13 @@ def _check_fat32_windows(sd_card_path: str) -> bool:
         ],
         capture_output=True,
         text=True,
-        check=True,
         shell=False,  # noqa: S603
     )
 
-    return "FileSystemType : FAT32" in subprocess_result.stdout
+    return (
+        subprocess_result.returncode == 0
+        and "FileSystemType : FAT32" in subprocess_result.stdout
+    )
 
 
 def _check_fat32_unix(sd_card_path: str) -> bool:
@@ -45,7 +47,6 @@ def _check_fat32_unix(sd_card_path: str) -> bool:
         ["df", "-T", sd_card_path],
         capture_output=True,
         text=True,
-        check=True,
         shell=False,  # noqa: S603
     )
 
@@ -53,7 +54,7 @@ def _check_fat32_unix(sd_card_path: str) -> bool:
     second_line = lines[1]
     columns = second_line.split()
     fs_type = columns[1].lower()
-    return fs_type == "fat32"  # ToDo: only FAT32?
+    return subprocess_result.returncode == 0 and fs_type == "fat32"  # ToDo: only FAT32?
 
 
 def _check_allocation_unit_size_windows(sd_card_path: str) -> bool:
@@ -69,11 +70,13 @@ def _check_allocation_unit_size_windows(sd_card_path: str) -> bool:
         ],
         capture_output=True,
         text=True,
-        check=True,
         shell=False,  # noqa: S603
     )
 
-    return "AllocationUnitSize : 32768" in subprocess_result.stdout
+    return (
+        subprocess_result.returncode == 0
+        and "AllocationUnitSize : 32768" in subprocess_result.stdout
+    )
 
 
 def _check_allocation_unit_size_unix(sd_card_path: str) -> bool:
@@ -84,8 +87,10 @@ def _check_allocation_unit_size_unix(sd_card_path: str) -> bool:
         ["stat", sd_card_path],
         capture_output=True,
         text=True,
-        check=True,
         shell=False,  # noqa: S603
     )
 
-    return "IO Block: 32768" in subprocess_result.stdout
+    return (
+        subprocess_result.returncode == 0
+        and "IO Block: 32768" in subprocess_result.stdout
+    )
