@@ -2,6 +2,8 @@ import os
 import platform
 import subprocess  # noqa: S404
 
+from dfplayer_card_manager.fat.fat_error import FatError  # noqa: S404
+
 
 def check_is_fat32(sd_card_path: str) -> bool:
     """Check if the SD card path exists and is fat32."""
@@ -33,6 +35,9 @@ def _check_fat32_windows(sd_card_path: str) -> bool:
         shell=False,  # noqa: S603
     )
 
+    if subprocess_result.returncode != 0:
+        raise FatError(subprocess_result.stderr)
+
     return (
         subprocess_result.returncode == 0
         and "FileSystemType : FAT32" in subprocess_result.stdout
@@ -54,6 +59,10 @@ def _check_fat32_unix(sd_card_path: str) -> bool:
     second_line = lines[1]
     columns = second_line.split()
     fs_type = columns[1].lower()
+
+    if subprocess_result.returncode != 0:
+        raise FatError(subprocess_result.stderr)
+
     return subprocess_result.returncode == 0 and fs_type == "fat32"  # ToDo: only FAT32?
 
 

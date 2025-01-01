@@ -13,7 +13,12 @@ e2e = pytest.mark.skipif("not config.getoption('e2e')")
 
 @pytest.fixture(scope="function", name="sut")
 def sd_card_cleaner() -> DfPlayerCardContentChecker:
-    sut = DfPlayerCardContentChecker()
+    sut = DfPlayerCardContentChecker(
+        valid_root_dir_pattern=r"^\d{2}$",
+        valid_subdir_files_pattern=r"^(\d{3})\.mp3$",
+        valid_subdir_files_track_number_match=1,
+        root_dir_exceptions={"mp3", "advertisment"},
+    )
     return sut  # noqa: WPS331
 
 
@@ -169,17 +174,17 @@ class TestUnwantedDirsAndFiles:
         )
         when(os).listdir(os.path.join(sd_root_path, "01")).thenReturn(
             [
-                "001",
-                "002",
-                "004",
-                "005",
+                "001.mp3",
+                "002.mp3",
+                "004.mp3",
+                "005.mp3",
             ],
         )
         when(os).listdir(os.path.join(sd_root_path, "02")).thenReturn(
             [
-                "001",
-                "003",
-                "006",
+                "001.mp3",
+                "003.mp3",
+                "006.mp3",
             ],
         )
         # WHEN

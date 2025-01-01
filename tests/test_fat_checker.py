@@ -53,6 +53,7 @@ class TestFat32CheckerUnix:
 
         mock_subprocess_run = MagicMock(
             stdout="Filesystem     Type 1K-blocks  Used Available Use% Mounted on\n/dev/sda2      ext4    523244   336    522908   1% /boot/efi",  # noqa: E501
+            returncode=0,
         )
         when(subprocess).run(...).thenReturn(mock_subprocess_run)
 
@@ -86,7 +87,9 @@ class TestFat32CheckerWindows:
         when(platform).system().thenReturn("Windows")
         when(os.path).exists(...).thenReturn(False)
 
+        # WHEN
         is_fat32_filesystem = check_is_fat32("E:\\")
+        # THEN
         assert not is_fat32_filesystem
 
     def test_check_fat32_windows_exists_and_is_not_fat32(
@@ -97,7 +100,7 @@ class TestFat32CheckerWindows:
         when(platform).system().thenReturn("Windows")
         when(os.path).exists(...).thenReturn(True)
 
-        mock_subprocess_run = MagicMock(stdout="File System Name : NTFS")
+        mock_subprocess_run = MagicMock(stdout="File System Name : NTFS", returncode=0)
         when(subprocess).run(...).thenReturn(mock_subprocess_run)
 
         is_fat32_filesystem = check_is_fat32("E:\\")
@@ -199,6 +202,7 @@ class TestAllocationUnitSizeDetectionUnix:
 
         mock_subprocess_run = MagicMock(
             stdout="  File: /media/administer/TOSHIBA/\n  Size: 16384     	Blocks: 64         IO Block: 16384  directory",  # noqa: E501
+            returncode=0,
         )
         when(subprocess).run(...).thenReturn(mock_subprocess_run)
 
