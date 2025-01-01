@@ -22,6 +22,7 @@
 # and target-folder (mandatory).
 
 import os
+import traceback
 
 import typer
 from typing_extensions import Annotated
@@ -99,6 +100,7 @@ def check(
         raise typer.Abort(check_exc)
     except Exception as check_exc:
         print_error(f"An unexpected exception occurred: {check_exc}")
+        traceback.print_exc()
         raise typer.Abort(check_exc)
 
 
@@ -113,7 +115,7 @@ def clean(sd_card_path: str, dry_run: bool = False):
         typer.echo("Clean")
 
 
-def _check(sd_card_path: str):
+def _check(sd_card_path: str):  # noqa: C901, WPS213
     # CHeck if the SD card path exists and is fat32
     if fat_checker.check_is_fat32(sd_card_path):
         print_ok(f"{sd_card_path} is a path within a FAT32 filesystem.")
@@ -136,11 +138,26 @@ def _check(sd_card_path: str):
 
     root_gaps = content_checker.get_root_dir_numbering_gaps(sd_card_path)
     if root_gaps:
-        print_warning(f"{sd_card_path} misses some dirs/has gaps:")
-        for gap in root_gaps:
-            print_warning(f"-> {str(gap).zfill(2)}")
+        print_warning(
+            f"{sd_card_path} misses some root level dirs/has gaps. Missing dirs:",
+        )
+        for root_gap in root_gaps:
+            print_warning(f"-> {str(root_gap).zfill(2)}")
     else:
         print_ok(f"{sd_card_path} has no missing dirs/gaps in the root dir.")
+
+    subdir_gaps = content_checker.get_subdir_numbering_gaps(sd_card_path)
+    if subdir_gaps:
+        print_warning(
+            f"{sd_card_path} misses some files/has gaps in the subdirs. Missing files:",
+        )
+        for subdir_gap in subdir_gaps:
+
+            print_warning(
+                f"-> {str(subdir_gap[0]).zfill(2)}{os.sep}{str(subdir_gap[1]).zfill(3)}",  # noqa: WPS221
+            )
+    else:
+        print_ok(f"{sd_card_path} has no missing files/gaps in the subdirs.")
 
 
 if __name__ == "__main__":

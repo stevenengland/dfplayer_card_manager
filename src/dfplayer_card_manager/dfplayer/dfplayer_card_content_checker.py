@@ -129,6 +129,8 @@ class DfPlayerCardContentChecker:  # noqa: WPS214
                         ),
                     )
         numbers.sort()
+        if not numbers:
+            return []
         return [
             (int(sub_dir), expected_number)
             for expected_number in range(1, numbers[-1])

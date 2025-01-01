@@ -107,7 +107,7 @@ class TestChecks:
         assert fat32_check_output.exit_code == 0
         assert "is sorted" in fat32_check_output.stdout
 
-    def test_fat_check_returns_gaps(
+    def test_sd_root_dir_numbering_returns_gaps(
         self,
         cli_runner,
         when,
@@ -118,6 +118,6 @@ class TestChecks:
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
         # THEN
         assert fat32_check_output.exit_code == 0
-        assert "misses some dirs/has gaps" in fat32_check_output.stdout
+        assert "Missing dirs:" in fat32_check_output.stdout
         assert "01" in fat32_check_output.stdout
         assert "03" in fat32_check_output.stdout

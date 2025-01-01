@@ -196,3 +196,19 @@ class TestUnwantedDirsAndFiles:
             (2, 4),
             (2, 5),
         ]
+
+    def test_get_subdir_numbering_gaps_empty(self, sut, when):
+        # GIVEN
+        sd_root_path = "/sdcard"
+        when(os).listdir(sd_root_path).thenReturn(
+            [
+                "01",
+            ],
+        )
+        when(os).listdir(os.path.join(sd_root_path, "01")).thenReturn(
+            [],
+        )
+        # WHEN
+        gaps = sut.get_subdir_numbering_gaps(sd_root_path)
+        # THEN
+        assert not gaps
