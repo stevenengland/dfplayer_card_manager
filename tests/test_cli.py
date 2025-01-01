@@ -34,6 +34,11 @@ def get_cli_runner(monkeypatch) -> CliRunner:
         "get_unwanted_root_dir_entries",
         lambda _entries: [],
     )
+    monkeypatch.setattr(
+        content_checker,
+        "get_unwanted_subdir_entries",
+        lambda _entries: [],
+    )
     return CliRunner()
 
 
@@ -203,3 +208,20 @@ class TestChecks:  # noqa: WPS214
         # THEN
         assert fat32_check_output.exit_code == 0
         assert "has no unwanted entries in the root dir" in fat32_check_output.stdout
+
+    def test_unwanted_subdir_entries(
+        self,
+        cli_runner,
+        when,
+    ):
+        # GIVEN
+        when(content_checker).get_unwanted_subdir_entries(...).thenReturn(
+            [("01", "001"), ("03", "003")],
+        )
+        # WHEN
+        fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
+        # THEN
+        assert fat32_check_output.exit_code == 0
+        assert "has unwanted entries in its subdirs" in fat32_check_output.stdout
+        assert f"01{os.sep}001" in fat32_check_output.stdout
+        assert f"03{os.sep}003" in fat32_check_output.stdout

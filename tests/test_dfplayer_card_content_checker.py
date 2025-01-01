@@ -23,7 +23,11 @@ def sd_card_cleaner() -> DfPlayerCardContentChecker:
 
 
 class TestUnwantedDirsAndFiles:
-    def test_sd_root_dir_errors_are_reported(self, sut, when):
+    def test_sd_root_dir_errors_are_reported(
+        self,
+        sut: DfPlayerCardContentChecker,
+        when,
+    ):
         # GIVEN
         sd_root_path = "/sdcard"
         when(os).listdir(sd_root_path).thenReturn(
@@ -54,7 +58,7 @@ class TestUnwantedDirsAndFiles:
     @e2e
     def test_sd_root_dir_errors_are_reported_on_real_fs(
         self,
-        sut,
+        sut: DfPlayerCardContentChecker,
         test_assets_fs: FakeFileSystemHelper,
     ):
         # GIVEN
@@ -145,7 +149,7 @@ class TestUnwantedDirsAndFiles:
         assert not os.path.exists(f"{sd_root_path}/01/fail.mp3")
         assert not os.path.exists(f"{sd_root_path}/02/.test")
 
-    def test_get_root_dir_numbering_gaps(self, sut, when):
+    def test_get_root_dir_numbering_gaps(self, sut: DfPlayerCardContentChecker, when):
         # GIVEN
         sd_root_path = "/sdcard"
         when(os).listdir(sd_root_path).thenReturn(
@@ -163,7 +167,7 @@ class TestUnwantedDirsAndFiles:
         # THEN
         assert gaps == [4, 6, 7, 8]
 
-    def test_get_subdir_numbering_gaps(self, sut, when):
+    def test_get_subdir_numbering_gaps(self, sut: DfPlayerCardContentChecker, when):
         # GIVEN
         sd_root_path = "/sdcard"
         when(os).listdir(sd_root_path).thenReturn(
@@ -197,7 +201,11 @@ class TestUnwantedDirsAndFiles:
             (2, 5),
         ]
 
-    def test_get_subdir_numbering_gaps_empty(self, sut, when):
+    def test_get_subdir_numbering_gaps_empty(
+        self,
+        sut: DfPlayerCardContentChecker,
+        when,
+    ):
         # GIVEN
         sd_root_path = "/sdcard"
         when(os).listdir(sd_root_path).thenReturn(
@@ -212,3 +220,34 @@ class TestUnwantedDirsAndFiles:
         gaps = sut.get_subdir_numbering_gaps(sd_root_path)
         # THEN
         assert not gaps
+
+    def test_get_unwanted_subdir_entries(self, sut: DfPlayerCardContentChecker, when):
+        # GIVEN
+        sd_root_path = "/sdcard"
+        when(os).listdir(sd_root_path).thenReturn(
+            [
+                "01",
+                "02",
+            ],
+        )
+        when(os).listdir(os.path.join(sd_root_path, "01")).thenReturn(
+            [
+                "001.mp3",
+                "002.mp3",
+                "0004.mp3",
+                "05.mp3",
+            ],
+        )
+        when(os).listdir(os.path.join(sd_root_path, "02")).thenReturn(
+            [
+                ".test",
+            ],
+        )
+        # WHEN
+        errors = sut.get_unwanted_subdir_entries(sd_root_path)
+        # THEN
+        assert errors == [
+            ("01", "0004.mp3"),
+            ("01", "05.mp3"),
+            ("02", ".test"),
+        ]

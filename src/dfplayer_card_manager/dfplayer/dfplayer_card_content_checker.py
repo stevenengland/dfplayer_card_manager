@@ -34,6 +34,23 @@ class DfPlayerCardContentChecker:  # noqa: WPS214
                 errors.append(entry)
         return errors
 
+    def get_unwanted_subdir_entries(self, sd_root_path: str) -> list[tuple[str, str]]:
+        entries = os.listdir(sd_root_path)
+        subdirs = self._get_valid_subdirs(entries)
+        errors = []
+
+        for sub_dir in subdirs:
+            sub_dir_path = os.path.join(sd_root_path, sub_dir)
+            files = os.listdir(sub_dir_path)
+            unwanted_entries = [
+                (sub_dir, dir_entry)
+                for dir_entry in files
+                if not re.match(self._valid_subdir_files_pattern, dir_entry)
+            ]
+            errors.extend(unwanted_entries)
+
+        return errors
+
     # Must be handled as a warning, not an error
     def get_root_dir_numbering_gaps(self, sd_root_path: str) -> list[int]:
         entries = os.listdir(sd_root_path)
