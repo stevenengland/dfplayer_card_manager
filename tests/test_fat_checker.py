@@ -5,7 +5,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from dfplayer_card_manager.fat.fat_checker import (
+from dfplayer_card_manager.fat.fat_checker import (  # noqa: WPS450
+    _sanitize_windows_path,
     check_has_correct_allocation_unit_size,
     check_is_fat32,
 )
@@ -210,3 +211,20 @@ class TestAllocationUnitSizeDetectionUnix:
             "/mnt/sdcard",
         )
         assert not has_correct_allocation_unit_size
+
+
+class TestPathSanitation:
+    @pytest.mark.parametrize(
+        "path",
+        [
+            "E:",
+            "E:\\",
+        ],
+    )
+    def test_sanitize_windows_path(self, path):
+        # GIVEN
+        path = "E:\\"
+        # WHEN
+        sanitized_path = _sanitize_windows_path(path)
+        # THEN
+        assert sanitized_path == f"E:{os.sep}"
