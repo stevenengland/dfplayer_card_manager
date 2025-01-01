@@ -29,17 +29,30 @@ from dfplayer_card_manager.dfplayer.dfplayer_card_manager_error import (
     DfPlayerCardManagerError,
 )
 from dfplayer_card_manager.fat import fat_checker
+from dfplayer_card_manager.fat.fat_sorter import FatSorter
+from dfplayer_card_manager.fat.fat_sorter_interface import FatSorterInterface
 
+fat_sorter: FatSorterInterface = FatSorter()
 app = typer.Typer()
 
 
 # ToDo: Help text
 @app.command()
-def check(sd_card_path: Annotated[str, typer.Argument(help="The path to the SD card")]):
+def check(
+    sd_card_path: Annotated[  # noqa: WPS320
+        str,
+        typer.Argument(help="The path to the SD card. Like /media/SDCARD or D:\\"),
+    ],
+):
     try:
         _check(sd_card_path)
+    except DfPlayerCardManagerError as check_exc:
+        print(f"[red]Checking failed: {check_exc.message}[/red]")
+        raise typer.Abort(check_exc)
     except Exception as check_exc:
-        print(f"[red]{check_exc}[/red]")
+        print(
+            f"[red]An unexpected exception occurred: {check_exc.with_traceback(None)}[/red]",
+        )
         raise typer.Abort(check_exc)
 
 
@@ -56,8 +69,24 @@ def clean(sd_card_path: str, dry_run: bool = False):
 
 def _check(sd_card_path: str):
     # CHeck if the SD card path exists and is fat32
-    if not fat_checker.check_is_fat32(sd_card_path):
-        raise DfPlayerCardManagerError(f"{sd_card_path} is not a fat32 filesystem.")
+    if fat_checker.check_is_fat32(sd_card_path):
+        print(f"[green]{sd_card_path} is a path within a FAT32 filesystem.[/green]")
+    else:
+        raise DfPlayerCardManagerError(
+            f"{sd_card_path} is not a path within a FAT32 filesystem.",
+        )
+    if fat_checker.check_has_correct_allocation_unit_size(sd_card_path):
+        print(
+            f"[green]{sd_card_path} has the correct allocation unit size of 32 kilobytes.[/green]",
+        )
+    else:
+        print(
+            f"[yellow]{sd_card_path} does not have the correct allocation unit size of 32 kilobytes.[/yellow]",
+        )
+    if fat_sorter.is_fat_root_sorted(sd_card_path):
+        print(f"[green]{sd_card_path} is sorted.[/green]")
+    else:
+        print(f"[yellow]{sd_card_path} is not sorted.[/yellow]")
 
 
 if __name__ == "__main__":
