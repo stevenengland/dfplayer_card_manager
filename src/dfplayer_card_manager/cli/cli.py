@@ -21,8 +21,9 @@
 # It also prints a help text explaining the cli parameters. Two arguments are: source-folder (default = .)
 # and target-folder (mandatory).
 
+import os
+
 import typer
-from rich import print
 from typing_extensions import Annotated
 
 from dfplayer_card_manager.cli.printing import (
@@ -88,6 +89,9 @@ def check(
         typer.Argument(help="The path to the SD card. Like /media/SDCARD or D:\\"),
     ],
 ):
+    if not os.path.exists(sd_card_path):
+        print_error(f"{sd_card_path} does not exist (yet?).")
+        raise typer.Abort()
     try:
         _check(sd_card_path)
     except (DfPlayerCardManagerError, FatError) as check_exc:
@@ -134,11 +138,9 @@ def _check(sd_card_path: str):
     if root_gaps:
         print_warning(f"{sd_card_path} misses some dirs/has gaps:")
         for gap in root_gaps:
-            print(f"[yellow]-> {str(gap).zfill(2)}[/yellow]")
+            print_warning(f"-> {str(gap).zfill(2)}")
     else:
-        print(
-            f"[green]{sd_card_path} has no missing dirs/gaps in the root dir.[/green]",
-        )
+        print_ok(f"{sd_card_path} has no missing dirs/gaps in the root dir.")
 
 
 if __name__ == "__main__":

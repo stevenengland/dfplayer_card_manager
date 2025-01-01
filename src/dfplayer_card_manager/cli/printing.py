@@ -1,3 +1,6 @@
+from rich import print
+
+
 def print_ok(message: str) -> None:
     print(f"[green]{message}[/green]")
 
