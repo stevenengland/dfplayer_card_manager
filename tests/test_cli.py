@@ -1,7 +1,7 @@
 import pytest
 from typer.testing import CliRunner
 
-from dfplayer_card_manager.cli.cli import app
+from dfplayer_card_manager.cli.cli import app, fat_sorter
 from dfplayer_card_manager.fat import fat_checker
 
 pytestmark = pytest.mark.usefixtures("unstub")
@@ -16,6 +16,7 @@ def get_cli_runner(monkeypatch) -> CliRunner:
         "check_has_correct_allocation_unit_size",
         lambda _filesystem_path: True,
     )
+    monkeypatch.setattr(fat_sorter, "is_fat_root_sorted", lambda _filesystem_path: True)
     return CliRunner()
 
 
@@ -74,3 +75,16 @@ class TestChecks:
         # THEN
         assert fat32_check_output.exit_code == 0
         assert "has the correct allocation unit size" in fat32_check_output.stdout
+
+    def test_fat_check_returns_false_sorted(
+        self,
+        cli_runner,
+        when,
+    ):
+        # GIVEN
+        when(fat_sorter).is_fat_root_sorted(...).thenReturn(False)
+        # WHEN
+        fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
+        # THEN
+        assert fat32_check_output.exit_code == 0
+        assert "is not sorted" in fat32_check_output.stdout

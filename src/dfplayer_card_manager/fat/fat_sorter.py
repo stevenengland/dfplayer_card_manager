@@ -1,4 +1,5 @@
 # -*- coding: cp1252 -*-
+import os
 from io import BytesIO
 
 from FATtools.FAT import Dirtable
@@ -15,8 +16,11 @@ class FatSorter(FatSorterInterface):
         vclose(root)
 
     def sort_fat_volume(self, root_dir: str | BytesIO) -> None:
+        root: Dirtable = None
+        if isinstance(root_dir, str):
+            root_dir = root_dir.rstrip(os.sep)
         try:
-            root: Dirtable = vopen(root_dir, "r+b")
+            root = vopen(root_dir, "r+b")
         except Exception as exception:
             raise FatError(exception)
         else:
@@ -27,11 +31,15 @@ class FatSorter(FatSorterInterface):
                 )
                 subdir.sort()
         finally:
-            vclose(root)
+            if root:
+                vclose(root)
 
-    def is_fat_root_sorted(self, root_dir: str | BytesIO) -> bool:
+    def is_fat_root_sorted(self, root_dir: str | BytesIO) -> bool:  # noqa: WPS231
+        root: Dirtable = None
+        if isinstance(root_dir, str):
+            root_dir = root_dir.rstrip(os.sep)
         try:
-            root: Dirtable = vopen(root_dir, "r+b")
+            root = vopen(root_dir, "r+b")
         except Exception as exception:
             raise FatError(exception)
         else:
@@ -43,7 +51,8 @@ class FatSorter(FatSorterInterface):
                 if not self._is_dir_sorted(subdir.listdir()):
                     return False
         finally:
-            vclose(root)
+            if root:
+                vclose(root)
         return True
 
     def _is_dir_sorted(self, dirs: list[str]) -> bool:
