@@ -1,26 +1,3 @@
-# - Create Delta List
-# What would be done?
-# also identify gaps, unwanted files and foldersks
-
-# - Write to SD Card
-# Check if unwanted files exist on the SD card and warn the user
-# Check if Gaps exist in the root directory and subdirs and warn the user
-# Check if file needs to be written to SD card
-# Check if file exists on SD card (function needs foldernumber / file number)
-# Check if file is the same (hash of content) on the SD card
-# check tags (function needs tags, foldernumber / file number)
-# 1. Write a file to the SD card with
-# if anything was written, call sort_fat_root
-
-
-# - check root for unwanted files
-# check if file is in the root
-# check if file is in a subdirectory
-
-# create a cli interface that first reads command line arguments handles defaults and mandatory arguments.
-# It also prints a help text explaining the cli parameters. Two arguments are: source-folder (default = .)
-# and target-folder (mandatory).
-
 import os
 import traceback
 
