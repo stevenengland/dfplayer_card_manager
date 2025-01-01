@@ -1,3 +1,5 @@
+import os
+
 import pytest
 from typer.testing import CliRunner
 
@@ -22,10 +24,20 @@ def get_cli_runner(monkeypatch) -> CliRunner:
         "get_root_dir_numbering_gaps",
         lambda _dirs: [],
     )
+    monkeypatch.setattr(
+        content_checker,
+        "get_subdir_numbering_gaps",
+        lambda _dirs: [],
+    )
+    monkeypatch.setattr(
+        content_checker,
+        "get_unwanted_root_dir_entries",
+        lambda _entries: [],
+    )
     return CliRunner()
 
 
-class TestChecks:
+class TestChecks:  # noqa: WPS214
     def test_fat_check_returns_false(
         self,
         cli_runner,
@@ -121,3 +133,73 @@ class TestChecks:
         assert "Missing dirs:" in fat32_check_output.stdout
         assert "01" in fat32_check_output.stdout
         assert "03" in fat32_check_output.stdout
+
+    def test_sd_root_dir_numbering_returns_no_gaps(
+        self,
+        cli_runner,
+        when,
+    ):
+        # GIVEN
+        when(content_checker).get_root_dir_numbering_gaps(...).thenReturn([])
+        # WHEN
+        fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
+        # THEN
+        assert fat32_check_output.exit_code == 0
+        assert "has no missing dirs/gaps" in fat32_check_output.stdout
+
+    def test_sd_subdir_numbering_returns_gaps(
+        self,
+        cli_runner,
+        when,
+    ):
+        # GIVEN
+        when(content_checker).get_subdir_numbering_gaps(...).thenReturn([("01", "001")])
+        # WHEN
+        fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
+        # THEN
+        assert fat32_check_output.exit_code == 0
+        assert "Missing files:" in fat32_check_output.stdout
+        assert f"01{os.sep}001" in fat32_check_output.stdout
+
+    def test_sd_subdir_numbering_returns_no_gaps(
+        self,
+        cli_runner,
+        when,
+    ):
+        # GIVEN
+        when(content_checker).get_subdir_numbering_gaps(...).thenReturn([])
+        # WHEN
+        fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
+        # THEN
+        assert fat32_check_output.exit_code == 0
+        assert "has no missing files/gaps" in fat32_check_output.stdout
+
+    def test_unwanted_root_dir_entries(
+        self,
+        cli_runner,
+        when,
+    ):
+        # GIVEN
+        when(content_checker).get_unwanted_root_dir_entries(...).thenReturn(
+            ["01", "03"],
+        )
+        # WHEN
+        fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
+        # THEN
+        assert fat32_check_output.exit_code == 0
+        assert "has unwanted entries in the root dir" in fat32_check_output.stdout
+        assert "01" in fat32_check_output.stdout
+        assert "03" in fat32_check_output.stdout
+
+    def test_no_unwanted_root_dir_entries(
+        self,
+        cli_runner,
+        when,
+    ):
+        # GIVEN
+        when(content_checker).get_unwanted_root_dir_entries(...).thenReturn([])
+        # WHEN
+        fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
+        # THEN
+        assert fat32_check_output.exit_code == 0
+        assert "has no unwanted entries in the root dir" in fat32_check_output.stdout

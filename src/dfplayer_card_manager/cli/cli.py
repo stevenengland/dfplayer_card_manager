@@ -115,7 +115,7 @@ def clean(sd_card_path: str, dry_run: bool = False):
         typer.echo("Clean")
 
 
-def _check(sd_card_path: str):  # noqa: C901, WPS213
+def _check(sd_card_path: str):  # noqa: C901, WPS213, WPS231
     # CHeck if the SD card path exists and is fat32
     if fat_checker.check_is_fat32(sd_card_path):
         print_ok(f"{sd_card_path} is a path within a FAT32 filesystem.")
@@ -135,6 +135,18 @@ def _check(sd_card_path: str):  # noqa: C901, WPS213
         print_ok(f"{sd_card_path} is sorted.")
     else:
         print_warning(f"{sd_card_path} is not sorted.")
+
+    unwanted_root_dir_entries = content_checker.get_unwanted_root_dir_entries(
+        sd_card_path,
+    )
+    if unwanted_root_dir_entries:
+        print_warning(
+            f"{sd_card_path} has unwanted entries in the root dir:",
+        )
+        for unwanted_root_dir_entry in unwanted_root_dir_entries:
+            print_warning(f"-> {unwanted_root_dir_entry}")
+    else:
+        print_ok(f"{sd_card_path} has no unwanted entries in the root dir.")
 
     root_gaps = content_checker.get_root_dir_numbering_gaps(sd_card_path)
     if root_gaps:
