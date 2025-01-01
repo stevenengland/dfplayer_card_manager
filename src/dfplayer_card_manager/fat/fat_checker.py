@@ -1,6 +1,9 @@
 import os
 import platform
+import re
 import subprocess  # noqa: S404
+
+from dfplayer_card_manager.fat.fat_error import FatError  # noqa: S404
 
 
 def check_is_fat32(sd_card_path: str) -> bool:
@@ -18,6 +21,7 @@ def check_has_correct_allocation_unit_size(sd_card_path: str) -> bool:
 
 
 def _check_fat32_windows(sd_card_path: str) -> bool:
+    sd_card_path = _sanitize_windows_path(sd_card_path)
     if not os.path.exists(sd_card_path):
         return False
 
@@ -32,6 +36,9 @@ def _check_fat32_windows(sd_card_path: str) -> bool:
         text=True,
         shell=False,  # noqa: S603
     )
+
+    if subprocess_result.returncode != 0:
+        raise FatError(subprocess_result.stderr)
 
     return (
         subprocess_result.returncode == 0
@@ -54,10 +61,15 @@ def _check_fat32_unix(sd_card_path: str) -> bool:
     second_line = lines[1]
     columns = second_line.split()
     fs_type = columns[1].lower()
+
+    if subprocess_result.returncode != 0:
+        raise FatError(subprocess_result.stderr)
+
     return subprocess_result.returncode == 0 and fs_type == "fat32"  # ToDo: only FAT32?
 
 
 def _check_allocation_unit_size_windows(sd_card_path: str) -> bool:
+    sd_card_path = _sanitize_windows_path(sd_card_path)
     if not os.path.exists(sd_card_path):
         return False
 
@@ -94,3 +106,9 @@ def _check_allocation_unit_size_unix(sd_card_path: str) -> bool:
         subprocess_result.returncode == 0
         and "IO Block: 32768" in subprocess_result.stdout
     )
+
+
+def _sanitize_windows_path(path: str) -> str:
+    if re.match("^[a-zA-Z]:$", path):
+        return path + os.sep
+    return path.rstrip(os.sep) + os.sep
