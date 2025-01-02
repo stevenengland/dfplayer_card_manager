@@ -68,13 +68,8 @@ def check(
         typer.Argument(help="The path to the SD card. Like /media/SDCARD or D:\\"),
     ],
 ):
-    # If windows, sanitize path
-    if os.name == "nt":
-        sd_card_path = path_sanitizer.sanitize_windows_volume_path(sd_card_path)
+    sd_card_path = _sd_card_path_pre_processing(sd_card_path)
 
-    if not os.path.exists(sd_card_path):
-        print_error(f"{sd_card_path} does not exist (yet?).")
-        raise typer.Abort()
     try:
         _check(sd_card_path)
     except (DfPlayerCardManagerError, FatError) as check_exc:
@@ -88,12 +83,8 @@ def check(
 
 @app.command()
 def sort(sd_card_path: str):
-    if os.name == "nt":
-        sd_card_path = path_sanitizer.sanitize_windows_volume_path(sd_card_path)
+    sd_card_path = _sd_card_path_pre_processing(sd_card_path)
 
-    if not os.path.exists(sd_card_path):
-        print_error(f"{sd_card_path} does not exist (yet?).")
-        raise typer.Abort()
     try:
         _sort(sd_card_path)
     except (DfPlayerCardManagerError, FatError) as check_exc:
@@ -107,15 +98,22 @@ def sort(sd_card_path: str):
 
 @app.command()
 def clean(sd_card_path: str, dry_run: bool = False):
-    if os.name == "nt":
-        sd_card_path = path_sanitizer.sanitize_windows_volume_path(sd_card_path)
-    # Check if the SD card path exists and is fat32
-    check(sd_card_path)
+    sd_card_path = _sd_card_path_pre_processing(sd_card_path)
 
     if dry_run:
         typer.echo("Dry run")
     else:
         typer.echo("Clean")
+
+
+def _sd_card_path_pre_processing(sd_card_path: str) -> str:
+    if os.name == "nt":
+        sd_card_path = path_sanitizer.sanitize_windows_volume_path(sd_card_path)
+
+    if not os.path.exists(sd_card_path):
+        print_error(f"{sd_card_path} does not exist (yet?).")
+        raise typer.Abort()
+    return sd_card_path
 
 
 def _sort(sd_card_path: str):
