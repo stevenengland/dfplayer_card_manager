@@ -23,6 +23,7 @@ from dfplayer_card_manager.fat import fat_checker
 from dfplayer_card_manager.fat.fat_error import FatError
 from dfplayer_card_manager.fat.fat_sorter import FatSorter
 from dfplayer_card_manager.fat.fat_sorter_interface import FatSorterInterface
+from dfplayer_card_manager.os import path_sanitizer
 from dfplayer_card_manager.repository.detection_source import DetectionSource
 
 
@@ -67,6 +68,10 @@ def check(
         typer.Argument(help="The path to the SD card. Like /media/SDCARD or D:\\"),
     ],
 ):
+    # If windows, sanitize path
+    if os.name == "nt":
+        sd_card_path = path_sanitizer.sanitize_windows_volume_path(sd_card_path)
+
     if not os.path.exists(sd_card_path):
         print_error(f"{sd_card_path} does not exist (yet?).")
         raise typer.Abort()
@@ -83,6 +88,9 @@ def check(
 
 @app.command()
 def sort(sd_card_path: str):
+    if os.name == "nt":
+        sd_card_path = path_sanitizer.sanitize_windows_volume_path(sd_card_path)
+
     if not os.path.exists(sd_card_path):
         print_error(f"{sd_card_path} does not exist (yet?).")
         raise typer.Abort()
@@ -99,6 +107,8 @@ def sort(sd_card_path: str):
 
 @app.command()
 def clean(sd_card_path: str, dry_run: bool = False):
+    if os.name == "nt":
+        sd_card_path = path_sanitizer.sanitize_windows_volume_path(sd_card_path)
     # Check if the SD card path exists and is fat32
     check(sd_card_path)
 
