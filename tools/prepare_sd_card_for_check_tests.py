@@ -21,6 +21,7 @@ def main() -> None:
         "03",
         "05",
         "04",
+        "07",
         ".git",
         os.path.join("01", "001"),
         os.path.join("05", "002"),
