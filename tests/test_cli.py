@@ -258,3 +258,30 @@ class TestSort:
         # THEN
         assert fat32_check_output.exit_code == 0
         assert "has been sorted" in fat32_check_output.stdout
+
+
+class TestCleanDryRun:
+    def test_clean_dry_run(
+        self,
+        cli_runner,
+        when,
+    ):
+        # GIVEN
+        when(content_checker).get_unwanted_root_dir_entries(...).thenReturn(
+            ["01", "03"],
+        )
+        when(content_checker).get_unwanted_subdir_entries(...).thenReturn(
+            [("01", "001"), ("03", "003")],
+        )
+        # WHEN
+        fat32_check_output = cli_runner.invoke(
+            app,
+            ["clean", "tests/test_assets", "--dry-run"],
+        )
+        # THEN
+        assert fat32_check_output.exit_code == 0
+        assert "Would remove" in fat32_check_output.stdout
+        assert "01" in fat32_check_output.stdout
+        assert "03" in fat32_check_output.stdout
+        assert f"01{os.sep}001" in fat32_check_output.stdout
+        assert f"03{os.sep}003" in fat32_check_output.stdout

@@ -100,8 +100,23 @@ def sort(sd_card_path: str):
 def clean(sd_card_path: str, dry_run: bool = False):
     sd_card_path = _sd_card_path_pre_processing(sd_card_path)
 
+    unwanted_entries: list[str] = []
     if dry_run:
-        typer.echo("Dry run")
+        unwanted_entries.extend(
+            os.path.join(sd_card_path, unwanted_root_entry)
+            for unwanted_root_entry in content_checker.get_unwanted_root_dir_entries(
+                sd_card_path,
+            )
+        )
+        unwanted_entries.extend(
+            os.path.join(sd_card_path, unwanted_subdir, unwanted_file)
+            for unwanted_subdir, unwanted_file in content_checker.get_unwanted_subdir_entries(
+                sd_card_path,
+            )
+        )
+        print_warning("Would remove:")
+        for unwanted_entry in unwanted_entries:
+            print_warning(unwanted_entry, is_bullet=True)
     else:
         typer.echo("Clean")
 
