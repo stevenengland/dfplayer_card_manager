@@ -225,3 +225,32 @@ class TestChecks:  # noqa: WPS214
         assert "has unwanted entries in its subdirs" in fat32_check_output.stdout
         assert f"01{os.sep}001" in fat32_check_output.stdout
         assert f"03{os.sep}003" in fat32_check_output.stdout
+
+
+class TestSort:
+    def test_sort_returns_if_is_already_sorted(
+        self,
+        cli_runner,
+        when,
+    ):
+        # GIVEN
+        when(fat_sorter).is_fat_root_sorted(...).thenReturn(True)
+        # WHEN
+        fat32_check_output = cli_runner.invoke(app, ["sort", "tests/test_assets"])
+        # THEN
+        assert fat32_check_output.exit_code == 0
+        assert "is sorted" in fat32_check_output.stdout
+
+    def test_sort_is_applied_if_is_not_sorted_yet(
+        self,
+        cli_runner,
+        when,
+    ):
+        # GIVEN
+        when(fat_sorter).is_fat_root_sorted(...).thenReturn(False)
+        when(fat_sorter).sort_fat_volume(...).thenReturn(None)
+        # WHEN
+        fat32_check_output = cli_runner.invoke(app, ["sort", "tests/test_assets"])
+        # THEN
+        assert fat32_check_output.exit_code == 0
+        assert "has been sorted" in fat32_check_output.stdout

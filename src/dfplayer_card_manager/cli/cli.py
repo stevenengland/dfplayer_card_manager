@@ -82,6 +82,22 @@ def check(
 
 
 @app.command()
+def sort(sd_card_path: str):
+    if not os.path.exists(sd_card_path):
+        print_error(f"{sd_card_path} does not exist (yet?).")
+        raise typer.Abort()
+    try:
+        _sort(sd_card_path)
+    except (DfPlayerCardManagerError, FatError) as check_exc:
+        print_error(f"Sorting failed: {check_exc.message}")
+        raise typer.Abort(check_exc)
+    except Exception as check_exc:
+        print_error(f"An unexpected exception occurred: {check_exc}")
+        traceback.print_exc()
+        raise typer.Abort(check_exc)
+
+
+@app.command()
 def clean(sd_card_path: str, dry_run: bool = False):
     # Check if the SD card path exists and is fat32
     check(sd_card_path)
@@ -90,6 +106,14 @@ def clean(sd_card_path: str, dry_run: bool = False):
         typer.echo("Dry run")
     else:
         typer.echo("Clean")
+
+
+def _sort(sd_card_path: str):
+    if fat_sorter.is_fat_root_sorted(sd_card_path):
+        print_ok(f"{sd_card_path} is sorted, nothing to do.")
+        exit(0)
+    fat_sorter.sort_fat_volume(sd_card_path)
+    print_ok(f"{sd_card_path} has been sorted.")
 
 
 def _check(sd_card_path: str):  # noqa: C901, WPS213, WPS231
@@ -108,6 +132,7 @@ def _check(sd_card_path: str):  # noqa: C901, WPS213, WPS231
         print_warning(
             f"{sd_card_path} does not have the correct allocation unit size of 32 kilobytes.",
         )
+
     if fat_sorter.is_fat_root_sorted(sd_card_path):
         print_ok(f"{sd_card_path} is sorted.")
     else:
