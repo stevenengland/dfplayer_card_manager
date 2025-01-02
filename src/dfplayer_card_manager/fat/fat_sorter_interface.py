@@ -4,7 +4,7 @@ from io import BytesIO
 
 class FatSorterInterface(ABC):
     @abstractmethod
-    def is_fat_root_sorted(self, root_dir: str | BytesIO) -> bool:
+    def is_fat_volume_sorted(self, root_dir: str | BytesIO) -> bool:
         pass
 
     @abstractmethod

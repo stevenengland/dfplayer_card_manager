@@ -109,7 +109,7 @@ def clean(sd_card_path: str, dry_run: bool = False):
 
 
 def _sort(sd_card_path: str):
-    if fat_sorter.is_fat_root_sorted(sd_card_path):
+    if fat_sorter.is_fat_volume_sorted(sd_card_path):
         print_ok(f"{sd_card_path} is sorted, nothing to do.")
         exit(0)
     fat_sorter.sort_fat_volume(sd_card_path)
@@ -133,7 +133,7 @@ def _check(sd_card_path: str):  # noqa: C901, WPS213, WPS231
             f"{sd_card_path} does not have the correct allocation unit size of 32 kilobytes.",
         )
 
-    if fat_sorter.is_fat_root_sorted(sd_card_path):
+    if fat_sorter.is_fat_volume_sorted(sd_card_path):
         print_ok(f"{sd_card_path} is sorted.")
     else:
         print_warning(f"{sd_card_path} is not sorted.")

@@ -18,7 +18,11 @@ def get_cli_runner(monkeypatch) -> CliRunner:
         "check_has_correct_allocation_unit_size",
         lambda _filesystem_path: True,
     )
-    monkeypatch.setattr(fat_sorter, "is_fat_root_sorted", lambda _filesystem_path: True)
+    monkeypatch.setattr(
+        fat_sorter,
+        "is_fat_volume_sorted",
+        lambda _filesystem_path: True,
+    )
     monkeypatch.setattr(
         content_checker,
         "get_root_dir_numbering_gaps",
@@ -104,7 +108,7 @@ class TestChecks:  # noqa: WPS214
         when,
     ):
         # GIVEN
-        when(fat_sorter).is_fat_root_sorted(...).thenReturn(False)
+        when(fat_sorter).is_fat_volume_sorted(...).thenReturn(False)
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
         # THEN
@@ -117,7 +121,7 @@ class TestChecks:  # noqa: WPS214
         when,
     ):
         # GIVEN
-        when(fat_sorter).is_fat_root_sorted(...).thenReturn(True)
+        when(fat_sorter).is_fat_volume_sorted(...).thenReturn(True)
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
         # THEN
@@ -234,7 +238,7 @@ class TestSort:
         when,
     ):
         # GIVEN
-        when(fat_sorter).is_fat_root_sorted(...).thenReturn(True)
+        when(fat_sorter).is_fat_volume_sorted(...).thenReturn(True)
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["sort", "tests/test_assets"])
         # THEN
@@ -247,7 +251,7 @@ class TestSort:
         when,
     ):
         # GIVEN
-        when(fat_sorter).is_fat_root_sorted(...).thenReturn(False)
+        when(fat_sorter).is_fat_volume_sorted(...).thenReturn(False)
         when(fat_sorter).sort_fat_volume(...).thenReturn(None)
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["sort", "tests/test_assets"])

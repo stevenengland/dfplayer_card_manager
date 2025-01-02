@@ -34,8 +34,7 @@ class FatSorter(FatSorterInterface):
             if root:
                 vclose(root)
 
-    # ToDo: Rename to something more meaningful since it sorts a complete tree
-    def is_fat_root_sorted(self, root_dir: str | BytesIO) -> bool:  # noqa: WPS231
+    def is_fat_volume_sorted(self, root_dir: str | BytesIO) -> bool:  # noqa: WPS231
         root: Dirtable = None
         if isinstance(root_dir, str):
             root_dir = root_dir.rstrip(os.sep)
