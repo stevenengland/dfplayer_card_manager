@@ -86,13 +86,13 @@ class TestFatNeedsSorting:
             vclose(bio_root_dirtable)
 
         # WHEN
-        is_sorted_before = sut.is_fat_root_sorted(bio)
+        is_sorted_before = sut.is_fat_volume_sorted(bio)
         sut.sort_fat_volume(bio)
-        is_sorted_after = sut.is_fat_root_sorted(bio)
+        is_sorted_after = sut.is_fat_volume_sorted(bio)
 
         # THEN
         assert not is_sorted_before
         assert is_sorted_after
 
     def test_is_fat_root_sorted2(self, sut: FatSorter, when):  # noqa: WPS231
-        sut.is_fat_root_sorted("E:\\")
+        sut.is_fat_volume_sorted("E:\\")

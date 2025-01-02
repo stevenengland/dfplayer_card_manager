@@ -18,7 +18,11 @@ def get_cli_runner(monkeypatch) -> CliRunner:
         "check_has_correct_allocation_unit_size",
         lambda _filesystem_path: True,
     )
-    monkeypatch.setattr(fat_sorter, "is_fat_root_sorted", lambda _filesystem_path: True)
+    monkeypatch.setattr(
+        fat_sorter,
+        "is_fat_volume_sorted",
+        lambda _filesystem_path: True,
+    )
     monkeypatch.setattr(
         content_checker,
         "get_root_dir_numbering_gaps",
@@ -104,7 +108,7 @@ class TestChecks:  # noqa: WPS214
         when,
     ):
         # GIVEN
-        when(fat_sorter).is_fat_root_sorted(...).thenReturn(False)
+        when(fat_sorter).is_fat_volume_sorted(...).thenReturn(False)
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
         # THEN
@@ -117,7 +121,7 @@ class TestChecks:  # noqa: WPS214
         when,
     ):
         # GIVEN
-        when(fat_sorter).is_fat_root_sorted(...).thenReturn(True)
+        when(fat_sorter).is_fat_volume_sorted(...).thenReturn(True)
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
         # THEN
@@ -223,5 +227,61 @@ class TestChecks:  # noqa: WPS214
         # THEN
         assert fat32_check_output.exit_code == 0
         assert "has unwanted entries in its subdirs" in fat32_check_output.stdout
+        assert f"01{os.sep}001" in fat32_check_output.stdout
+        assert f"03{os.sep}003" in fat32_check_output.stdout
+
+
+class TestSort:
+    def test_sort_returns_if_is_already_sorted(
+        self,
+        cli_runner,
+        when,
+    ):
+        # GIVEN
+        when(fat_sorter).is_fat_volume_sorted(...).thenReturn(True)
+        # WHEN
+        fat32_check_output = cli_runner.invoke(app, ["sort", "tests/test_assets"])
+        # THEN
+        assert fat32_check_output.exit_code == 0
+        assert "is sorted" in fat32_check_output.stdout
+
+    def test_sort_is_applied_if_is_not_sorted_yet(
+        self,
+        cli_runner,
+        when,
+    ):
+        # GIVEN
+        when(fat_sorter).is_fat_volume_sorted(...).thenReturn(False)
+        when(fat_sorter).sort_fat_volume(...).thenReturn(None)
+        # WHEN
+        fat32_check_output = cli_runner.invoke(app, ["sort", "tests/test_assets"])
+        # THEN
+        assert fat32_check_output.exit_code == 0
+        assert "has been sorted" in fat32_check_output.stdout
+
+
+class TestCleanDryRun:
+    def test_clean_dry_run(
+        self,
+        cli_runner,
+        when,
+    ):
+        # GIVEN
+        when(content_checker).get_unwanted_root_dir_entries(...).thenReturn(
+            ["01", "03"],
+        )
+        when(content_checker).get_unwanted_subdir_entries(...).thenReturn(
+            [("01", "001"), ("03", "003")],
+        )
+        # WHEN
+        fat32_check_output = cli_runner.invoke(
+            app,
+            ["clean", "tests/test_assets", "--dry-run"],
+        )
+        # THEN
+        assert fat32_check_output.exit_code == 0
+        assert "Would remove" in fat32_check_output.stdout
+        assert "01" in fat32_check_output.stdout
+        assert "03" in fat32_check_output.stdout
         assert f"01{os.sep}001" in fat32_check_output.stdout
         assert f"03{os.sep}003" in fat32_check_output.stdout

@@ -80,15 +80,16 @@ class DfPlayerCardContentChecker:  # noqa: WPS214
 
         return gaps
 
-    def delete_unwanted_root_dir_entries(self, sd_root_path) -> None:
+    def delete_unwanted_root_dir_entries(self, sd_root_path) -> list[str]:
         unwanted_entries = self.get_unwanted_root_dir_entries(sd_root_path)
         for file_path in unwanted_entries:
             self._delete_entry(os.path.join(sd_root_path, file_path))
+        return unwanted_entries
 
-    def delete_unwanted_subdir_entries(self, sd_root_path) -> None:
+    def delete_unwanted_subdir_entries(self, sd_root_path) -> list[str]:
         entries = os.listdir(sd_root_path)
         subdirs = self._get_valid_subdirs(entries)
-
+        deleted_entries = []
         for sub_dir in subdirs:
             sub_dir_path = os.path.join(sd_root_path, sub_dir)
             files = os.listdir(sub_dir_path)
@@ -99,6 +100,8 @@ class DfPlayerCardContentChecker:  # noqa: WPS214
             ]
             for file_path in unwanted_entries:
                 self._delete_entry(os.path.join(sub_dir_path, file_path))
+                deleted_entries.append(os.path.join(sub_dir_path, file_path))
+        return deleted_entries
 
     def _delete_entry(self, file_path: str) -> None:
         if os.path.isfile(file_path):

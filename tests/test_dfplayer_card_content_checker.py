@@ -95,11 +95,12 @@ class TestUnwantedDirsAndFiles:
         when(os).rmdir(...).thenReturn(None)
 
         # WHEN
-        sut.delete_unwanted_root_dir_entries("/sdcard")
+        unwanted = sut.delete_unwanted_root_dir_entries("/sdcard")
 
         # THEN
         verify(os).remove("/sdcard/01.file")
         verify(os).rmdir("/sdcard/003.dir")
+        assert unwanted == file_paths
 
     @e2e
     def test_delete_unwanted_root_dir_entries_on_real_fs(
@@ -119,6 +120,43 @@ class TestUnwantedDirsAndFiles:
         # THEN
         assert not os.path.exists(f"{sd_root_path}/01.file")
         assert not os.path.exists(f"{sd_root_path}/003")
+
+    def test_delete_unwanted_subdir_entries(
+        self,
+        sut: DfPlayerCardContentChecker,
+        when,
+    ):
+        # GIVEN
+        sd_root_path = "/sdcard"
+        when(os).listdir(sd_root_path).thenReturn(
+            [
+                "01",
+                "02",
+            ],
+        )
+        when(os).listdir(os.path.join(sd_root_path, "01")).thenReturn(
+            [
+                "001.mp3",
+                "fail.mp3",
+            ],
+        )
+        when(os).listdir(os.path.join(sd_root_path, "02")).thenReturn(
+            [
+                "001.mp3",
+                ".test",
+            ],
+        )
+        when(os).remove(...).thenReturn(None)
+        when(os.path).isfile(...).thenReturn(True)
+        # WHEN
+        unwanted = sut.delete_unwanted_subdir_entries(sd_root_path)
+        # THEN
+        verify(os).remove(f"{sd_root_path}{os.sep}01{os.sep}fail.mp3")
+        verify(os).remove(f"{sd_root_path}{os.sep}02{os.sep}.test")
+        assert unwanted == [
+            f"{sd_root_path}{os.sep}01{os.sep}fail.mp3",
+            f"{sd_root_path}{os.sep}02{os.sep}.test",
+        ]
 
     @e2e
     def test_delete_unwanted_subdir_entries_on_real_fs(
