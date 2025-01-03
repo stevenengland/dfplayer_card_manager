@@ -67,9 +67,17 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
     def source_repo_root_dir(self):
         return self._source_repo_root_dir
 
+    @source_repo_root_dir.setter
+    def source_repo_root_dir(self, source_repo_root_dir):
+        self._source_repo_root_dir = source_repo_root_dir
+
     @property
     def target_repo_root_dir(self):
         return self._target_repo_root_dir
+
+    @target_repo_root_dir.setter
+    def target_repo_root_dir(self, target_repo_root_dir):
+        self._target_repo_root_dir = target_repo_root_dir
 
     @property
     def source_repo(self):

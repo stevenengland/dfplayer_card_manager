@@ -10,7 +10,7 @@ from dfplayer_card_manager.repository.repository_element import (
 )
 
 
-class DfPlayerCardManagerInterface(ABC):
+class DfPlayerCardManagerInterface(ABC):  # noqa: WPS214
     @property
     @abstractmethod
     def config(self) -> Configuration:
@@ -23,7 +23,17 @@ class DfPlayerCardManagerInterface(ABC):
 
     @property
     @abstractmethod
+    def source_repo_root_dir(self) -> str:
+        pass
+
+    @property
+    @abstractmethod
     def target_repo(self) -> list[RepositoryElement]:
+        pass
+
+    @property
+    @abstractmethod
+    def target_repo_root_dir(self) -> str:
         pass
 
     @property

@@ -3,8 +3,14 @@ import os
 import pytest
 from typer.testing import CliRunner
 
-from dfplayer_card_manager.cli.cli import app, content_checker, fat_sorter
+from dfplayer_card_manager.cli.cli import (
+    app,
+    card_manager,
+    content_checker,
+    fat_sorter,
+)
 from dfplayer_card_manager.fat import fat_checker
+from dfplayer_card_manager.repository.compare_results import CompareResult
 
 pytestmark = pytest.mark.usefixtures("unstub")
 e2e = pytest.mark.skipif("not config.getoption('e2e')")
@@ -285,3 +291,35 @@ class TestCleanDryRun:
         assert "03" in fat32_check_output.stdout
         assert f"01{os.sep}001" in fat32_check_output.stdout
         assert f"03{os.sep}003" in fat32_check_output.stdout
+
+
+class TestSyncing:
+    def test_syncing_dry_run(
+        self,
+        cli_runner,
+        when,
+    ):
+        # GIVEN
+        when(card_manager).create_repositories().thenReturn(None)
+        when(card_manager).get_repositories_comparison().thenReturn(
+            [
+                (1, 1, CompareResult.copy_to_target),
+                (2, 2, CompareResult.delete_from_target),
+            ],
+        )
+
+        # WHEN
+        sync_output = cli_runner.invoke(
+            app,
+            [
+                "sync",
+                "tests/test_assets/repositories/target",
+                "tests/test_assets/repositories/source",
+                "--dry-run",
+            ],
+        )
+
+        # THEN
+        assert sync_output.exit_code == 0
+        assert "copy_to_target" in sync_output.stdout
+        assert "delete_from_target" in sync_output.stdout

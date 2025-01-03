@@ -1,5 +1,6 @@
 import os
 import traceback
+from typing import Callable
 
 import typer
 from typing_extensions import Annotated
@@ -16,13 +17,20 @@ from dfplayer_card_manager.config.configuration import (
 from dfplayer_card_manager.dfplayer.dfplayer_card_content_checker import (
     DfPlayerCardContentChecker,
 )
+from dfplayer_card_manager.dfplayer.dfplayer_card_manager import (
+    DfPlayerCardManager,
+)
 from dfplayer_card_manager.dfplayer.dfplayer_card_manager_error import (
     DfPlayerCardManagerError,
+)
+from dfplayer_card_manager.dfplayer.dfplayer_card_manager_interface import (
+    DfPlayerCardManagerInterface,
 )
 from dfplayer_card_manager.fat import fat_checker
 from dfplayer_card_manager.fat.fat_error import FatError
 from dfplayer_card_manager.fat.fat_sorter import FatSorter
 from dfplayer_card_manager.fat.fat_sorter_interface import FatSorterInterface
+from dfplayer_card_manager.mp3.audio_file_manager import AudioFileManager
 from dfplayer_card_manager.os import path_sanitizer
 from dfplayer_card_manager.repository.detection_source import DetectionSource
 
@@ -52,11 +60,22 @@ def setup_content_checker() -> DfPlayerCardContentChecker:
     )
 
 
+def setup_card_manager() -> DfPlayerCardManagerInterface:
+
+    return DfPlayerCardManager(
+        source_repo_root_dir="",
+        target_repo_root_dir="",
+        audio_manager=AudioFileManager(),
+        config=config,
+    )
+
+
 # SETUP
 
 config: Configuration = setup_config()
 fat_sorter: FatSorterInterface = setup_fat_sorter()
 content_checker: DfPlayerCardContentChecker = setup_content_checker()
+card_manager: DfPlayerCardManagerInterface = setup_card_manager()
 app = typer.Typer()
 
 
@@ -70,39 +89,68 @@ def check(
 ):
     sd_card_path = _sd_card_path_pre_processing(sd_card_path)
 
-    try:
-        _check(sd_card_path)
-    except (DfPlayerCardManagerError, FatError) as check_exc:
-        print_error(f"Checking failed: {check_exc.message}")
-        raise typer.Abort(check_exc)
-    except Exception as check_exc:
-        print_error(f"An unexpected exception occurred: {check_exc}")
-        traceback.print_exc()
-        raise typer.Abort(check_exc)
+    _try(_check, sd_card_path, error_prepend="Checking failed.")
 
 
 @app.command()
-def sort(sd_card_path: str):
+def sort(
+    sd_card_path: Annotated[  # noqa: WPS320
+        str,
+        typer.Argument(help="The path to the SD card. Like /media/SDCARD or D:\\"),
+    ],
+):
     sd_card_path = _sd_card_path_pre_processing(sd_card_path)
 
-    try:
-        _sort(sd_card_path)
-    except (DfPlayerCardManagerError, FatError) as check_exc:
-        print_error(f"Sorting failed: {check_exc.message}")
-        raise typer.Abort(check_exc)
-    except Exception as check_exc:
-        print_error(f"An unexpected exception occurred: {check_exc}")
-        traceback.print_exc()
-        raise typer.Abort(check_exc)
+    _try(_sort, sd_card_path, error_prepend="Sorting failed.")
 
 
 @app.command()
-def clean(sd_card_path: str, dry_run: bool = False):
+def clean(
+    sd_card_path: Annotated[  # noqa: WPS320
+        str,
+        typer.Argument(help="The path to the SD card. Like /media/SDCARD or D:\\"),
+    ],
+    dry_run: bool = False,
+):
     sd_card_path = _sd_card_path_pre_processing(sd_card_path)
     if dry_run:
         _print_unwanted_entries_dry_run(sd_card_path)
     else:
-        _remove_unwanted_entries(sd_card_path)
+        _try(_remove_unwanted_entries, sd_card_path, error_prepend="Cleaning failed.")
+
+
+@app.command()
+def sync(
+    sd_card_path: Annotated[  # noqa: WPS320
+        str,
+        typer.Argument(help="The path to the SD card. Like /media/SDCARD or D:\\"),
+    ],
+    repository_path: Annotated[  # noqa: WPS320
+        str,
+        typer.Argument(
+            help=r"The path to the repository. Like /home/user/music or C:\\Users\\me\\Music",
+        ),
+    ],
+    dry_run: bool = False,
+):
+    sd_card_path = _sd_card_path_pre_processing(sd_card_path)
+    repository_path = _sd_card_path_pre_processing(repository_path)
+
+    card_manager.target_repo_root_dir = sd_card_path
+    card_manager.source_repo_root_dir = repository_path
+
+    _try(
+        card_manager.create_repositories,
+        None,
+        error_prepend="Creating repositories failed.",
+    )
+
+    repo_comparison_result = card_manager.get_repositories_comparison()
+
+    if dry_run:
+        # for each repo_comparison_result, print the result
+        for repo_comparison in repo_comparison_result:
+            print(repo_comparison[2])
 
 
 def _print_unwanted_entries_dry_run(sd_card_path: str):
@@ -234,6 +282,27 @@ def _check(sd_card_path: str):  # noqa: C901, WPS213, WPS231
             )
     else:
         print_ok(f"{sd_card_path} has no missing files/gaps in the subdirs.")
+
+
+def _try(func: Callable[..., None], *args: object, error_prepend: str = "") -> None:  # type: ignore[misc]
+    try:
+        if args[0] is not None:
+            func(*args)
+        else:
+            func()
+    except (DfPlayerCardManagerError, FatError) as check_exc:
+        if error_prepend:
+            print_error(f"{error_prepend}")
+        print_error(f"Error: {check_exc.message}")
+        _abort(check_exc)
+    except Exception as exc:
+        print_error(f"An unexpected exception occurred: {exc}")
+        traceback.print_exc()
+        _abort(exc)
+
+
+def _abort(*args: object) -> None:
+    raise typer.Abort(*args)
 
 
 if __name__ == "__main__":
