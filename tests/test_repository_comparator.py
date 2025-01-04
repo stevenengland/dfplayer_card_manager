@@ -56,8 +56,23 @@ def test_repository_comparison():
         DiffMode.hash_and_tags,
     )
     # THEN
-    assert (50, 50, CompareResultAction.copy_to_target) in comparison_results
-    assert (51, 51, CompareResultAction.delete_from_target) in comparison_results
-    assert (1, 2, CompareResultAction.no_change) in comparison_results
-    assert (1, 3, CompareResultAction.copy_to_target) in comparison_results
-    assert (1, 4, CompareResultAction.no_change) in comparison_results
+    assert len(comparison_results) == 5
+    # assert that a specific comparison result is in the list
+    expected_results = [
+        (50, 50, CompareResultAction.copy_to_target),
+        (51, 51, CompareResultAction.delete_from_target),
+        (1, 2, CompareResultAction.no_change),
+        (1, 3, CompareResultAction.copy_to_target),
+        (1, 4, CompareResultAction.no_change),
+    ]
+    for comparison_index, (dir_num, title_num, action) in enumerate(expected_results):
+        assert comparison_results[comparison_index].dir_num == dir_num
+        assert comparison_results[comparison_index].track_num == title_num
+        assert comparison_results[comparison_index].action == action
+
+    assert comparison_results[0].source_element == el_in_source_but_not_in_target
+    assert comparison_results[0].target_element is None
+    assert comparison_results[1].source_element is None
+    assert comparison_results[1].target_element == el_in_target_but_not_in_source
+    assert comparison_results[2].source_element == element_all_the_same
+    assert comparison_results[2].target_element == element_all_the_same

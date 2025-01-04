@@ -30,6 +30,7 @@ from dfplayer_card_manager.repository import (
     repository_comparator,
     repository_finder,
 )
+from dfplayer_card_manager.repository.compare_result import CompareResult
 from dfplayer_card_manager.repository.compare_result_actions import (
     CompareResultAction,
 )
@@ -299,15 +300,21 @@ class TestRepositoryComparison:
         # GIVEN
         when(repository_comparator).compare_repository_elements(...).thenReturn(
             [
-                (50, 50, CompareResultAction.copy_to_target),
-                (51, 51, CompareResultAction.delete_from_target),
-                (1, 2, CompareResultAction.no_change),
+                CompareResult(
+                    dir_num=50,
+                    track_num=50,
+                    action=CompareResultAction.copy_to_target,
+                ),
+                CompareResult(),
+                CompareResult(),
             ],
         )
         # WHEN
         comparison_results = sut.get_repositories_comparison()
         # THEN
-        assert (50, 50, CompareResultAction.copy_to_target) in comparison_results
+        assert comparison_results[0].dir_num == 50
+        assert comparison_results[0].track_num == 50
+        assert comparison_results[0].action == CompareResultAction.copy_to_target
         assert len(comparison_results) == 3
 
 

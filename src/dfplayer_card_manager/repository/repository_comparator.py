@@ -1,3 +1,4 @@
+from dfplayer_card_manager.repository.compare_result import CompareResult
 from dfplayer_card_manager.repository.compare_result_actions import (
     CompareResultAction,
 )
@@ -11,7 +12,7 @@ def compare_repository_elements(
     source: list[RepositoryElement],
     target: list[RepositoryElement],
     diff_mode: DiffMode,
-) -> list[tuple[int, int, CompareResultAction]]:
+) -> list[CompareResult]:
     comparison_results = []
 
     source_dict = {
@@ -25,16 +26,26 @@ def compare_repository_elements(
         if element.dir_number is not None and element.track_number is not None
     }
 
-    for source_key in source_dict:
+    for source_key, _source_target in source_dict.items():
         if source_key not in target_dict:
             comparison_results.append(
-                (source_key[0], source_key[1], CompareResultAction.copy_to_target),
+                CompareResult(
+                    dir_num=source_key[0],
+                    track_num=source_key[1],
+                    source_element=source_dict[source_key],
+                    action=CompareResultAction.copy_to_target,
+                ),
             )
 
     for target_key, _target_value in target_dict.items():
         if target_key not in source_dict:
             comparison_results.append(
-                (target_key[0], target_key[1], CompareResultAction.delete_from_target),
+                CompareResult(
+                    dir_num=target_key[0],
+                    track_num=target_key[1],
+                    target_element=target_dict[target_key],
+                    action=CompareResultAction.delete_from_target,
+                ),
             )
         else:
             if _should_copy_to_target(
@@ -43,11 +54,22 @@ def compare_repository_elements(
                 target_dict[target_key],
             ):
                 comparison_results.append(
-                    (target_key[0], target_key[1], CompareResultAction.copy_to_target),
+                    CompareResult(
+                        dir_num=target_key[0],
+                        track_num=target_key[1],
+                        target_element=target_dict[target_key],
+                        action=CompareResultAction.copy_to_target,
+                    ),
                 )
             else:
                 comparison_results.append(
-                    (target_key[0], target_key[1], CompareResultAction.no_change),
+                    CompareResult(
+                        dir_num=target_key[0],
+                        track_num=target_key[1],
+                        source_element=source_dict[target_key],
+                        target_element=target_dict[target_key],
+                        action=CompareResultAction.no_change,
+                    ),
                 )
 
     return comparison_results
