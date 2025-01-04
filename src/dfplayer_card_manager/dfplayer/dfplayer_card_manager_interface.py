@@ -4,7 +4,9 @@ from dfplayer_card_manager.config.configuration import (
     Configuration,
     RepositoryConfig,
 )
-from dfplayer_card_manager.repository.compare_results import CompareResult
+from dfplayer_card_manager.repository.compare_result_actions import (
+    CompareResultAction,
+)
 from dfplayer_card_manager.repository.repository_element import (
     RepositoryElement,
 )
@@ -54,7 +56,7 @@ class DfPlayerCardManagerInterface(ABC):  # noqa: WPS214
         pass
 
     @abstractmethod
-    def get_repositories_comparison(self) -> list[tuple[int, int, CompareResult]]:
+    def get_repositories_comparison(self) -> list[tuple[int, int, CompareResultAction]]:
         pass
 
     @abstractmethod

@@ -10,7 +10,9 @@ from dfplayer_card_manager.cli.cli import (
     fat_sorter,
 )
 from dfplayer_card_manager.fat import fat_checker
-from dfplayer_card_manager.repository.compare_results import CompareResult
+from dfplayer_card_manager.repository.compare_result_actions import (
+    CompareResultAction,
+)
 
 pytestmark = pytest.mark.usefixtures("unstub")
 e2e = pytest.mark.skipif("not config.getoption('e2e')")
@@ -303,8 +305,8 @@ class TestSyncing:
         when(card_manager).create_repositories().thenReturn(None)
         when(card_manager).get_repositories_comparison().thenReturn(
             [
-                (1, 1, CompareResult.copy_to_target),
-                (2, 2, CompareResult.delete_from_target),
+                (1, 1, CompareResultAction.copy_to_target),
+                (2, 2, CompareResultAction.delete_from_target),
             ],
         )
 

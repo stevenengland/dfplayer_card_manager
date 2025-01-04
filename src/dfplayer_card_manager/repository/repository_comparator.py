@@ -1,4 +1,6 @@
-from dfplayer_card_manager.repository.compare_results import CompareResult
+from dfplayer_card_manager.repository.compare_result_actions import (
+    CompareResultAction,
+)
 from dfplayer_card_manager.repository.diff_modes import DiffMode
 from dfplayer_card_manager.repository.repository_element import (
     RepositoryElement,
@@ -9,7 +11,7 @@ def compare_repository_elements(
     source: list[RepositoryElement],
     target: list[RepositoryElement],
     diff_mode: DiffMode,
-) -> list[tuple[int, int, CompareResult]]:
+) -> list[tuple[int, int, CompareResultAction]]:
     comparison_results = []
 
     source_dict = {
@@ -26,13 +28,13 @@ def compare_repository_elements(
     for source_key in source_dict:
         if source_key not in target_dict:
             comparison_results.append(
-                (source_key[0], source_key[1], CompareResult.copy_to_target),
+                (source_key[0], source_key[1], CompareResultAction.copy_to_target),
             )
 
     for target_key, _target_value in target_dict.items():
         if target_key not in source_dict:
             comparison_results.append(
-                (target_key[0], target_key[1], CompareResult.delete_from_target),
+                (target_key[0], target_key[1], CompareResultAction.delete_from_target),
             )
         else:
             if _should_copy_to_target(
@@ -41,11 +43,11 @@ def compare_repository_elements(
                 target_dict[target_key],
             ):
                 comparison_results.append(
-                    (target_key[0], target_key[1], CompareResult.copy_to_target),
+                    (target_key[0], target_key[1], CompareResultAction.copy_to_target),
                 )
             else:
                 comparison_results.append(
-                    (target_key[0], target_key[1], CompareResult.no_change),
+                    (target_key[0], target_key[1], CompareResultAction.no_change),
                 )
 
     return comparison_results

@@ -24,7 +24,9 @@ from dfplayer_card_manager.repository import (
     repository_element_updater,
     repository_finder,
 )
-from dfplayer_card_manager.repository.compare_results import CompareResult
+from dfplayer_card_manager.repository.compare_result_actions import (
+    CompareResultAction,
+)
 from dfplayer_card_manager.repository.detection_source import DetectionSource
 from dfplayer_card_manager.repository.diff_modes import DiffMode
 from dfplayer_card_manager.repository.repository import Repository
@@ -257,7 +259,7 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
 
         return yaml_config.create_yaml_object(config_file, Configuration)
 
-    def get_repositories_comparison(self) -> list[tuple[int, int, CompareResult]]:
+    def get_repositories_comparison(self) -> list[tuple[int, int, CompareResultAction]]:
         return repository_comparator.compare_repository_elements(
             self._source_repo.elements,
             self._target_repo.elements,

@@ -3,7 +3,9 @@ import copy
 import pytest
 from factories.repository_element_factory import create_repository_element
 
-from dfplayer_card_manager.repository.compare_results import CompareResult
+from dfplayer_card_manager.repository.compare_result_actions import (
+    CompareResultAction,
+)
 from dfplayer_card_manager.repository.diff_modes import DiffMode
 from dfplayer_card_manager.repository.repository_comparator import (
     compare_repository_elements,
@@ -54,8 +56,8 @@ def test_repository_comparison():
         DiffMode.hash_and_tags,
     )
     # THEN
-    assert (50, 50, CompareResult.copy_to_target) in comparison_results
-    assert (51, 51, CompareResult.delete_from_target) in comparison_results
-    assert (1, 2, CompareResult.no_change) in comparison_results
-    assert (1, 3, CompareResult.copy_to_target) in comparison_results
-    assert (1, 4, CompareResult.no_change) in comparison_results
+    assert (50, 50, CompareResultAction.copy_to_target) in comparison_results
+    assert (51, 51, CompareResultAction.delete_from_target) in comparison_results
+    assert (1, 2, CompareResultAction.no_change) in comparison_results
+    assert (1, 3, CompareResultAction.copy_to_target) in comparison_results
+    assert (1, 4, CompareResultAction.no_change) in comparison_results
