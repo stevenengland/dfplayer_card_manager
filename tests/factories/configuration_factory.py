@@ -3,6 +3,7 @@ from multipledispatch import dispatch
 
 from dfplayer_card_manager.config.config_merger import merge_configs
 from dfplayer_card_manager.config.configuration import (
+    Configuration,
     ProcessingConfig,
     RepositoryConfig,
 )
@@ -54,3 +55,11 @@ def create_target_repo_config() -> RepositoryConfig:
 
 def create_processing_config() -> ProcessingConfig:
     return ProcessingConfig(diff_method=faker.enum(DiffMode))
+
+
+def create_config() -> Configuration:
+    return Configuration(
+        repository_source=create_source_repo_config(),
+        repository_target=create_target_repo_config(),
+        repository_processing=create_processing_config(),
+    )
