@@ -102,6 +102,7 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
         if not os.path.isdir(self._target_repo_root_dir):
             raise ValueError("Target repository root directory is not a directory")
 
+        config_checker.check_config(self._config)
         config_checker.check_repository_config(self._config.repository_source)
         config_checker.check_repository_config(self._config.repository_target)
         self._config_overrides = self.read_config_overrides()

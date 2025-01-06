@@ -5,9 +5,7 @@ from dfplayer_card_manager.config.configuration import (
     RepositoryConfig,
 )
 from dfplayer_card_manager.repository.compare_result import CompareResult
-from dfplayer_card_manager.repository.repository_element import (
-    RepositoryElement,
-)
+from dfplayer_card_manager.repository.repository import Repository
 
 
 class DfPlayerCardManagerInterface(ABC):  # noqa: WPS214
@@ -18,7 +16,7 @@ class DfPlayerCardManagerInterface(ABC):  # noqa: WPS214
 
     @property
     @abstractmethod
-    def source_repo(self) -> list[RepositoryElement]:
+    def source_repo(self) -> Repository:
         pass
 
     @property
@@ -28,7 +26,7 @@ class DfPlayerCardManagerInterface(ABC):  # noqa: WPS214
 
     @property
     @abstractmethod
-    def target_repo(self) -> list[RepositoryElement]:
+    def target_repo(self) -> Repository:
         pass
 
     @property

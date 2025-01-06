@@ -5,77 +5,26 @@ from typing import Callable
 import typer
 from typing_extensions import Annotated
 
+from dfplayer_card_manager.cli import cli_setup
 from dfplayer_card_manager.cli.printing import (
+    print_action,
     print_error,
+    print_neutral,
     print_ok,
+    print_task,
     print_warning,
-)
-from dfplayer_card_manager.config.configuration import (
-    Configuration,
-    RepositoryConfig,
-)
-from dfplayer_card_manager.dfplayer.dfplayer_card_content_checker import (
-    DfPlayerCardContentChecker,
-)
-from dfplayer_card_manager.dfplayer.dfplayer_card_manager import (
-    DfPlayerCardManager,
 )
 from dfplayer_card_manager.dfplayer.dfplayer_card_manager_error import (
     DfPlayerCardManagerError,
 )
-from dfplayer_card_manager.dfplayer.dfplayer_card_manager_interface import (
-    DfPlayerCardManagerInterface,
-)
 from dfplayer_card_manager.fat import fat_checker
 from dfplayer_card_manager.fat.fat_error import FatError
-from dfplayer_card_manager.fat.fat_sorter import FatSorter
-from dfplayer_card_manager.fat.fat_sorter_interface import FatSorterInterface
-from dfplayer_card_manager.mp3.audio_file_manager import AudioFileManager
 from dfplayer_card_manager.os import path_sanitizer
-from dfplayer_card_manager.repository.detection_source import DetectionSource
-
-
-# SETUP Functions
-def setup_config() -> Configuration:
-    tmp_config = Configuration()
-    tmp_config.repository_target = RepositoryConfig(
-        valid_root_dir_pattern=r"^\d{2}$",
-        valid_subdir_files_pattern=r"^(\d{3})\.mp3$",
-        track_number_source=DetectionSource.filename,
-        track_number_match=1,
-    )
-    return tmp_config
-
-
-def setup_fat_sorter() -> FatSorterInterface:
-    return FatSorter()
-
-
-def setup_content_checker() -> DfPlayerCardContentChecker:
-    return DfPlayerCardContentChecker(
-        valid_root_dir_pattern=r"^\d{2}$",
-        valid_subdir_files_pattern=r"^(\d{3})\.mp3$",
-        valid_subdir_files_track_number_match=1,
-        root_dir_exceptions={"mp3", "advertisment"},
-    )
-
-
-def setup_card_manager() -> DfPlayerCardManagerInterface:
-
-    return DfPlayerCardManager(
-        source_repo_root_dir="",
-        target_repo_root_dir="",
-        audio_manager=AudioFileManager(),
-        config=config,
-    )
-
 
 # SETUP
 
-config: Configuration = setup_config()
-fat_sorter: FatSorterInterface = setup_fat_sorter()
-content_checker: DfPlayerCardContentChecker = setup_content_checker()
-card_manager: DfPlayerCardManagerInterface = setup_card_manager()
+# ToDo: Switch to ctx: Context .obj = CliContextObj for more flexibility
+cli_context = cli_setup.setup_cli_context()
 app = typer.Typer()
 
 
@@ -87,8 +36,9 @@ def check(
         typer.Argument(help="The path to the SD card. Like /media/SDCARD or D:\\"),
     ],
 ):
+    # ToDo: switch to callback for parameter evaluation
     sd_card_path = _sd_card_path_pre_processing(sd_card_path)
-
+    print_task(f"Checking {sd_card_path}")
     _try(_check, sd_card_path, error_prepend="Checking failed.")
 
 
@@ -101,6 +51,7 @@ def sort(
 ):
     sd_card_path = _sd_card_path_pre_processing(sd_card_path)
 
+    print_task(f"Sorting {sd_card_path}")
     _try(_sort, sd_card_path, error_prepend="Sorting failed.")
 
 
@@ -113,6 +64,7 @@ def clean(
     dry_run: bool = False,
 ):
     sd_card_path = _sd_card_path_pre_processing(sd_card_path)
+    print_task(f"Cleaning {sd_card_path}")
     if dry_run:
         _print_unwanted_entries_dry_run(sd_card_path)
     else:
@@ -136,39 +88,42 @@ def sync(
     sd_card_path = _sd_card_path_pre_processing(sd_card_path)
     repository_path = _sd_card_path_pre_processing(repository_path)
 
-    card_manager.target_repo_root_dir = sd_card_path
-    card_manager.source_repo_root_dir = repository_path
+    cli_context.card_manager.target_repo_root_dir = sd_card_path
+    cli_context.card_manager.source_repo_root_dir = repository_path
 
+    print_task("Creating repositories")
     _try(
-        card_manager.create_repositories,
+        cli_context.card_manager.create_repositories,
         None,
         error_prepend="Creating repositories failed.",
     )
 
-    repo_comparison_result = card_manager.get_repositories_comparison()
-
-    if dry_run:
-        # for each repo_comparison_result, print the result
-        for repo_comparison in repo_comparison_result:
-            print(repo_comparison[2])
+    repo_comparison_result = cli_context.card_manager.get_repositories_comparison()
+    if not repo_comparison_result:
+        print_ok("Nothing to do.")
+        exit(0)
+    for compared_item in repo_comparison_result:
+        print_action(compared_item)
+        if not dry_run:
+            pass
 
 
 def _print_unwanted_entries_dry_run(sd_card_path: str):
     unwanted_entries: list[str] = []
     unwanted_entries.extend(
         os.path.join(sd_card_path, unwanted_root_entry)
-        for unwanted_root_entry in content_checker.get_unwanted_root_dir_entries(
+        for unwanted_root_entry in cli_context.content_checker.get_unwanted_root_dir_entries(
             sd_card_path,
         )
     )
     unwanted_entries.extend(
         os.path.join(sd_card_path, unwanted_subdir, unwanted_file)
-        for unwanted_subdir, unwanted_file in content_checker.get_unwanted_subdir_entries(
+        for unwanted_subdir, unwanted_file in cli_context.content_checker.get_unwanted_subdir_entries(
             sd_card_path,
         )
     )
     if unwanted_entries:
-        print_warning("Would remove:")
+        print_neutral("Would remove:")
     else:
         print_ok("Nothing to remove.")
     for unwanted_entry_dry in unwanted_entries:
@@ -176,9 +131,11 @@ def _print_unwanted_entries_dry_run(sd_card_path: str):
 
 
 def _remove_unwanted_entries(sd_card_path: str):
-    unwanted_entries = content_checker.delete_unwanted_root_dir_entries(sd_card_path)
+    unwanted_entries = cli_context.content_checker.delete_unwanted_root_dir_entries(
+        sd_card_path,
+    )
     unwanted_entries.extend(
-        content_checker.delete_unwanted_subdir_entries(sd_card_path),
+        cli_context.content_checker.delete_unwanted_subdir_entries(sd_card_path),
     )
     if unwanted_entries:
         print_warning("Removed:")
@@ -199,10 +156,10 @@ def _sd_card_path_pre_processing(sd_card_path: str) -> str:
 
 
 def _sort(sd_card_path: str):
-    if fat_sorter.is_fat_volume_sorted(sd_card_path):
+    if cli_context.fat_sorter.is_fat_volume_sorted(sd_card_path):
         print_ok(f"{sd_card_path} is sorted, nothing to do.")
         exit(0)
-    fat_sorter.sort_fat_volume(sd_card_path)
+    cli_context.fat_sorter.sort_fat_volume(sd_card_path)
     print_ok(f"{sd_card_path} has been sorted.")
 
 
@@ -223,13 +180,15 @@ def _check(sd_card_path: str):  # noqa: C901, WPS213, WPS231
             f"{sd_card_path} does not have the correct allocation unit size of 32 kilobytes.",
         )
 
-    if fat_sorter.is_fat_volume_sorted(sd_card_path):
+    if cli_context.fat_sorter.is_fat_volume_sorted(sd_card_path):
         print_ok(f"{sd_card_path} is sorted.")
     else:
         print_warning(f"{sd_card_path} is not sorted.")
 
-    unwanted_root_dir_entries = content_checker.get_unwanted_root_dir_entries(
-        sd_card_path,
+    unwanted_root_dir_entries = (
+        cli_context.content_checker.get_unwanted_root_dir_entries(
+            sd_card_path,
+        )
     )
     if unwanted_root_dir_entries:
         print_warning(
@@ -243,7 +202,9 @@ def _check(sd_card_path: str):  # noqa: C901, WPS213, WPS231
     else:
         print_ok(f"{sd_card_path} has no unwanted entries in the root dir.")
 
-    unwanted_subdir_entries = content_checker.get_unwanted_subdir_entries(sd_card_path)
+    unwanted_subdir_entries = cli_context.content_checker.get_unwanted_subdir_entries(
+        sd_card_path,
+    )
     if unwanted_subdir_entries:
         print_warning(
             f"{sd_card_path} has unwanted entries in its subdirs:",
@@ -256,7 +217,7 @@ def _check(sd_card_path: str):  # noqa: C901, WPS213, WPS231
     else:
         print_ok(f"{sd_card_path} has no unwanted entries in the subdirs.")
 
-    root_gaps = content_checker.get_root_dir_numbering_gaps(sd_card_path)
+    root_gaps = cli_context.content_checker.get_root_dir_numbering_gaps(sd_card_path)
     if root_gaps:
         print_warning(
             f"{sd_card_path} misses some root level dirs/has gaps. Missing dirs:",
@@ -269,7 +230,7 @@ def _check(sd_card_path: str):  # noqa: C901, WPS213, WPS231
     else:
         print_ok(f"{sd_card_path} has no missing dirs/gaps in the root dir.")
 
-    subdir_gaps = content_checker.get_subdir_numbering_gaps(sd_card_path)
+    subdir_gaps = cli_context.content_checker.get_subdir_numbering_gaps(sd_card_path)
     if subdir_gaps:
         print_warning(
             f"{sd_card_path} misses some files/has gaps in the subdirs. Missing files:",

@@ -1,15 +1,13 @@
 import os
 
 import pytest
+from factories.repository_element_factory import create_repository_element
+from file_system_helper import FakeFileSystemHelper
 from typer.testing import CliRunner
 
-from dfplayer_card_manager.cli.cli import (
-    app,
-    card_manager,
-    content_checker,
-    fat_sorter,
-)
+from dfplayer_card_manager.cli.cli import app, cli_context
 from dfplayer_card_manager.fat import fat_checker
+from dfplayer_card_manager.repository.compare_result import CompareResult
 from dfplayer_card_manager.repository.compare_result_actions import (
     CompareResultAction,
 )
@@ -27,27 +25,27 @@ def get_cli_runner(monkeypatch) -> CliRunner:
         lambda _filesystem_path: True,
     )
     monkeypatch.setattr(
-        fat_sorter,
+        cli_context.fat_sorter,
         "is_fat_volume_sorted",
         lambda _filesystem_path: True,
     )
     monkeypatch.setattr(
-        content_checker,
+        cli_context.content_checker,
         "get_root_dir_numbering_gaps",
         lambda _dirs: [],
     )
     monkeypatch.setattr(
-        content_checker,
+        cli_context.content_checker,
         "get_subdir_numbering_gaps",
         lambda _dirs: [],
     )
     monkeypatch.setattr(
-        content_checker,
+        cli_context.content_checker,
         "get_unwanted_root_dir_entries",
         lambda _entries: [],
     )
     monkeypatch.setattr(
-        content_checker,
+        cli_context.content_checker,
         "get_unwanted_subdir_entries",
         lambda _entries: [],
     )
@@ -116,7 +114,7 @@ class TestChecks:  # noqa: WPS214
         when,
     ):
         # GIVEN
-        when(fat_sorter).is_fat_volume_sorted(...).thenReturn(False)
+        when(cli_context.fat_sorter).is_fat_volume_sorted(...).thenReturn(False)
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
         # THEN
@@ -129,7 +127,7 @@ class TestChecks:  # noqa: WPS214
         when,
     ):
         # GIVEN
-        when(fat_sorter).is_fat_volume_sorted(...).thenReturn(True)
+        when(cli_context.fat_sorter).is_fat_volume_sorted(...).thenReturn(True)
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
         # THEN
@@ -142,7 +140,9 @@ class TestChecks:  # noqa: WPS214
         when,
     ):
         # GIVEN
-        when(content_checker).get_root_dir_numbering_gaps(...).thenReturn(["01", "03"])
+        when(cli_context.content_checker).get_root_dir_numbering_gaps(...).thenReturn(
+            ["01", "03"],
+        )
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
         # THEN
@@ -157,7 +157,9 @@ class TestChecks:  # noqa: WPS214
         when,
     ):
         # GIVEN
-        when(content_checker).get_root_dir_numbering_gaps(...).thenReturn([])
+        when(cli_context.content_checker).get_root_dir_numbering_gaps(...).thenReturn(
+            [],
+        )
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
         # THEN
@@ -170,7 +172,9 @@ class TestChecks:  # noqa: WPS214
         when,
     ):
         # GIVEN
-        when(content_checker).get_subdir_numbering_gaps(...).thenReturn([("01", "001")])
+        when(cli_context.content_checker).get_subdir_numbering_gaps(...).thenReturn(
+            [("01", "001")],
+        )
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
         # THEN
@@ -184,7 +188,7 @@ class TestChecks:  # noqa: WPS214
         when,
     ):
         # GIVEN
-        when(content_checker).get_subdir_numbering_gaps(...).thenReturn([])
+        when(cli_context.content_checker).get_subdir_numbering_gaps(...).thenReturn([])
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
         # THEN
@@ -197,7 +201,7 @@ class TestChecks:  # noqa: WPS214
         when,
     ):
         # GIVEN
-        when(content_checker).get_unwanted_root_dir_entries(...).thenReturn(
+        when(cli_context.content_checker).get_unwanted_root_dir_entries(...).thenReturn(
             ["01", "03"],
         )
         # WHEN
@@ -214,7 +218,9 @@ class TestChecks:  # noqa: WPS214
         when,
     ):
         # GIVEN
-        when(content_checker).get_unwanted_root_dir_entries(...).thenReturn([])
+        when(cli_context.content_checker).get_unwanted_root_dir_entries(...).thenReturn(
+            []
+        )
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
         # THEN
@@ -227,7 +233,7 @@ class TestChecks:  # noqa: WPS214
         when,
     ):
         # GIVEN
-        when(content_checker).get_unwanted_subdir_entries(...).thenReturn(
+        when(cli_context.content_checker).get_unwanted_subdir_entries(...).thenReturn(
             [("01", "001"), ("03", "003")],
         )
         # WHEN
@@ -246,7 +252,7 @@ class TestSort:
         when,
     ):
         # GIVEN
-        when(fat_sorter).is_fat_volume_sorted(...).thenReturn(True)
+        when(cli_context.fat_sorter).is_fat_volume_sorted(...).thenReturn(True)
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["sort", "tests/test_assets"])
         # THEN
@@ -259,8 +265,8 @@ class TestSort:
         when,
     ):
         # GIVEN
-        when(fat_sorter).is_fat_volume_sorted(...).thenReturn(False)
-        when(fat_sorter).sort_fat_volume(...).thenReturn(None)
+        when(cli_context.fat_sorter).is_fat_volume_sorted(...).thenReturn(False)
+        when(cli_context.fat_sorter).sort_fat_volume(...).thenReturn(None)
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["sort", "tests/test_assets"])
         # THEN
@@ -275,10 +281,10 @@ class TestCleanDryRun:
         when,
     ):
         # GIVEN
-        when(content_checker).get_unwanted_root_dir_entries(...).thenReturn(
+        when(cli_context.content_checker).get_unwanted_root_dir_entries(...).thenReturn(
             ["01", "03"],
         )
-        when(content_checker).get_unwanted_subdir_entries(...).thenReturn(
+        when(cli_context.content_checker).get_unwanted_subdir_entries(...).thenReturn(
             [("01", "001"), ("03", "003")],
         )
         # WHEN
@@ -302,11 +308,21 @@ class TestSyncing:
         when,
     ):
         # GIVEN
-        when(card_manager).create_repositories().thenReturn(None)
-        when(card_manager).get_repositories_comparison().thenReturn(
+        when(cli_context.card_manager).create_repositories().thenReturn(None)
+        when(cli_context.card_manager).get_repositories_comparison().thenReturn(
             [
-                (1, 1, CompareResultAction.copy_to_target),
-                (2, 2, CompareResultAction.delete_from_target),
+                CompareResult(
+                    dir_num=1,
+                    track_num=1,
+                    action=CompareResultAction.copy_to_target,
+                    source_element=create_repository_element(),
+                ),
+                CompareResult(
+                    dir_num=2,
+                    track_num=2,
+                    action=CompareResultAction.delete_from_target,
+                    target_element=create_repository_element(),
+                ),
             ],
         )
 
@@ -323,5 +339,28 @@ class TestSyncing:
 
         # THEN
         assert sync_output.exit_code == 0
-        assert "copy_to_target" in sync_output.stdout
-        assert "delete_from_target" in sync_output.stdout
+        assert f"+++ |01{os.sep}001| <--" in sync_output.stdout
+        assert f"--- |02{os.sep}002| <-- X" in sync_output.stdout
+
+    @e2e
+    def test_syncing_dry_run_e2e(
+        self,
+        cli_runner,
+        when,
+        test_assets_fs: FakeFileSystemHelper,
+    ):
+        # GIVEN
+
+        # WHEN
+        sync_output = cli_runner.invoke(
+            app,
+            [
+                "sync",
+                os.path.join(test_assets_fs.test_assets_path, "repositories", "target"),
+                os.path.join(test_assets_fs.test_assets_path, "repositories", "source"),
+                "--dry-run",
+            ],
+        )
+
+        # THEN
+        assert sync_output.exit_code == 0
