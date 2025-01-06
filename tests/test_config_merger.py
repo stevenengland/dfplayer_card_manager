@@ -1,7 +1,11 @@
 import pytest
 
 from dfplayer_card_manager.config import config_merger
-from dfplayer_card_manager.config.configuration import RepositoryConfig
+from dfplayer_card_manager.config.configuration import (
+    ProcessingConfig,
+    RepositoryConfig,
+)
+from dfplayer_card_manager.repository.diff_modes import DiffMode
 
 pytestmark = pytest.mark.usefixtures("unstub")
 e2e = pytest.mark.skipif("not config.getoption('e2e')")
@@ -40,3 +44,21 @@ class TestConfigMerging:
         assert merged_config_2.album_match == 1
         assert merged_config_2.valid_subdir_pattern == "override_subdirs_2"
         assert merged_config_2.valid_subdir_files_pattern == "test_files_original"
+
+    def test_processing_config_get_merged(self):
+        # GIVEN
+        config = ProcessingConfig()
+        config.diff_method = DiffMode.hash
+        config.overrides_file_name = "original_file_name"
+
+        overrides = ProcessingConfig()
+        overrides.overrides_file_name = "override_file_name"
+
+        # WHEN
+        merged_config = config_merger.merge_configs(
+            config,
+            overrides,
+        )
+        # THEN
+        assert merged_config.diff_method == DiffMode.hash
+        assert merged_config.overrides_file_name == "override_file_name"

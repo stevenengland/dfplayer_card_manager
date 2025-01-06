@@ -1,21 +1,32 @@
-from dfplayer_card_manager.config.configuration import RepositoryConfig
+from multipledispatch import dispatch
+
+from dfplayer_card_manager.config.configuration import (
+    ProcessingConfig,
+    RepositoryConfig,
+)
 
 
+@dispatch()
 def merge_configs(
     config: RepositoryConfig,
     overrides: RepositoryConfig,
 ) -> RepositoryConfig:
-    merged = RepositoryConfig()
-    # First copy the original config attributes that are not None
-    for original_config_key in config.__annotations__:
-        if getattr(config, original_config_key) is not None:
-            setattr(merged, original_config_key, getattr(config, original_config_key))
-    # Then override the attributes that are not None in the overrides
-    for overrides_config_key in overrides.__annotations__:
-        if getattr(overrides, overrides_config_key) is not None:
-            setattr(
-                merged,
-                overrides_config_key,
-                getattr(overrides, overrides_config_key),
-            )
+    return _merge_common(config, overrides, RepositoryConfig())
+
+
+@dispatch()  # type: ignore[no-redef]
+def merge_configs(  # noqa: WPS440, F811
+    config: ProcessingConfig,
+    overrides: ProcessingConfig,
+) -> ProcessingConfig:
+    return _merge_common(config, overrides, ProcessingConfig())
+
+
+def _merge_common(config, overrides, merged):
+    for config_key in config.__annotations__:
+        if getattr(config, config_key) is not None:
+            setattr(merged, config_key, getattr(config, config_key))
+    for overrides_key in overrides.__annotations__:
+        if getattr(overrides, overrides_key) is not None:
+            setattr(merged, overrides_key, getattr(overrides, overrides_key))
     return merged
