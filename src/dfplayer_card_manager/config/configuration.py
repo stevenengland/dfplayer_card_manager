@@ -32,9 +32,7 @@ class RepositoryConfig(  # type: ignore[misc]
 
 class ProcessingConfig(BaseModel):  # type: ignore[misc]
     diff_method: DiffMode | None = Field(default=None)
-    overrides_file_name: str = Field(
-        default=".dfplayer_card_manager.yaml",
-    )
+    overrides_file_name: str | None = Field(default=None)
 
 
 class Configuration(BaseModel):  # type: ignore[misc]

@@ -1,5 +1,7 @@
 from dfplayer_card_manager.config.configuration import (
     Configuration,
+    OverrideConfig,
+    ProcessingConfig,
     RepositoryConfig,
 )
 from dfplayer_card_manager.repository.detection_source import DetectionSource
@@ -12,6 +14,27 @@ def check_config(config: Configuration) -> None:
         raise ValueError("Config for source repository must be set")
     if config.repository_processing is None:
         raise ValueError("Config for processing repository must be set")
+
+    check_repository_config(config.repository_target)
+    check_repository_config(config.repository_source)
+    check_processing_config(config.repository_processing)
+
+
+def check_override_config(config: OverrideConfig) -> None:
+    if config.repository_source is None:
+        raise ValueError("Config for source repository must be set")
+    if config.repository_processing is None:
+        raise ValueError("Config for processing repository must be set")
+
+    check_repository_config(config.repository_source)
+    check_processing_config(config.repository_processing)
+
+
+def check_processing_config(config: ProcessingConfig) -> None:
+    if config.diff_method is None:
+        raise ValueError("Diff method must be set")
+    if not config.overrides_file_name:
+        raise ValueError("Overrides file name must be set")
 
 
 def check_repository_config(

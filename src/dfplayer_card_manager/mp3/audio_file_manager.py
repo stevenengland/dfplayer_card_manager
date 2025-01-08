@@ -12,6 +12,8 @@ from dfplayer_card_manager.mp3.tag_error import TagError
 
 pytestmark = pytest.mark.usefixtures("unstub")
 
+eyed3.log.setLevel("ERROR")
+
 
 class AudioFileManager(AudioFileManagerInterface):
 
@@ -21,6 +23,7 @@ class AudioFileManager(AudioFileManagerInterface):
     ) -> Tuple[bytes, TagCollection]:
         # ToDo: Refactor this method to use only one read audio method
         audio = self._read_audio(file_path)
+        self._check_tags(audio)
 
         tag_collection = self._extract_tags(audio)
         audio_content = self._extract_audio_content(file_path, audio)
@@ -28,6 +31,7 @@ class AudioFileManager(AudioFileManagerInterface):
 
     def read_id3_tags(self, file_path: str) -> TagCollection:
         audio = self._read_audio(file_path)
+        self._check_tags(audio)
 
         return self._extract_tags(audio)
 
@@ -60,21 +64,14 @@ class AudioFileManager(AudioFileManagerInterface):
 
         audio.tag.save()
 
-    def _check_tags(self, audio: eyed3.AudioFile) -> bool:
-        return audio.tag and audio.tag.version[0] == 2
-
-    def _check_audio(self, audio: eyed3.AudioFile) -> bool:
-        return bool(audio)
-
-    def _check_file(self, audio: eyed3.AudioFile) -> None:
-        if not self._check_audio(audio):
-            raise ValueError("Could not load audio file")
-        if not self._check_tags(audio):
-            raise TagError("Invalid or unsupported audio tag.")
+    def _check_tags(self, audio: eyed3.AudioFile) -> None:
+        if not audio.tag or audio.tag.version[0] != 2:
+            raise TagError(f"Invalid or unsupported audio tag for file {audio.path}")
 
     def _read_audio(self, file_path: str) -> eyed3.AudioFile:
         audio = eyed3.load(file_path)
-        self._check_file(audio)
+        if not audio:
+            raise TagError(f"Could not load audio file {file_path}")
         return audio
 
     def _extract_tags(self, audio: eyed3.AudioFile) -> TagCollection:

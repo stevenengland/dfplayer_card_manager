@@ -6,7 +6,7 @@ from dfplayer_card_manager.config.configuration import (
 )
 
 
-@dispatch()
+@dispatch(RepositoryConfig, RepositoryConfig)
 def merge_configs(
     config: RepositoryConfig,
     overrides: RepositoryConfig,
@@ -14,7 +14,7 @@ def merge_configs(
     return _merge_common(config, overrides, RepositoryConfig())
 
 
-@dispatch()  # type: ignore[no-redef]
+@dispatch(ProcessingConfig, ProcessingConfig)  # type: ignore[no-redef]
 def merge_configs(  # noqa: WPS440, F811
     config: ProcessingConfig,
     overrides: ProcessingConfig,

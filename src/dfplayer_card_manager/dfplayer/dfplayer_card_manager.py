@@ -1,11 +1,7 @@
 import os
 from typing import Optional
 
-from dfplayer_card_manager.config import (
-    config_checker,
-    config_merger,
-    yaml_config,
-)
+from dfplayer_card_manager.config import config_checker, config_merger
 from dfplayer_card_manager.config.configuration import (
     Configuration,
     RepositoryConfig,
@@ -49,7 +45,7 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
         self._source_repo_root_dir = source_repo_root_dir
         self._target_repo_root_dir = target_repo_root_dir
 
-        self._config: Configuration = config or self.read_config()
+        self._config: Configuration = config
 
     @property
     def audio_manager(self):
@@ -102,7 +98,6 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
         if not os.path.isdir(self._target_repo_root_dir):
             raise ValueError("Target repository root directory is not a directory")
 
-        config_checker.check_config(self._config)
         config_checker.check_repository_config(self._config.repository_source)
         config_checker.check_repository_config(self._config.repository_target)
         self._config_overrides = self.read_config_overrides()
@@ -195,7 +190,7 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
         # File reading portion of the update
         is_tag_reading_needed = self.is_tag_reading_needed(applied_config)
 
-        is_hash_reading_needed = self.is_hash_reading_needed(applied_config)
+        is_hash_reading_needed = self.is_hash_reading_needed()
 
         if is_tag_reading_needed and is_hash_reading_needed:
             audio_content, id3_tags = (
@@ -233,7 +228,7 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
         # Final check
         repository_element_checker.check_element(element)
 
-    def is_hash_reading_needed(self, applied_config: RepositoryConfig) -> bool:
+    def is_hash_reading_needed(self) -> bool:
         return self._config.repository_processing.diff_method in {
             DiffMode.hash_and_tags,
             DiffMode.hash,
@@ -241,22 +236,12 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
 
     def is_tag_reading_needed(self, applied_config: RepositoryConfig) -> bool:
         return (
-            self._config.repository_processing.diff_method  # noqa: WPS222
-            == DiffMode.hash_and_tags
-            or self._config.repository_processing.diff_method == DiffMode.tags
-            or applied_config.title_source == DetectionSource.tag
+            applied_config.title_source == DetectionSource.tag  # noqa: WPS222
             or applied_config.artist_source == DetectionSource.tag
             or applied_config.album_source == DetectionSource.tag
             or applied_config.dir_number_source == DetectionSource.tag
             or applied_config.track_number_source == DetectionSource.tag
         )
-
-    def read_config(self) -> Configuration:
-        config_file = Configuration().repository_processing.overrides_file_name
-        if not os.path.isfile(config_file):
-            raise FileNotFoundError("Configuration file not found")
-
-        return yaml_config.create_yaml_object(config_file, Configuration)
 
     def get_repositories_comparison(self) -> list[CompareResult]:
         return repository_comparator.compare_repository_elements(

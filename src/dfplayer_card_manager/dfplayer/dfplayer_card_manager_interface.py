@@ -44,14 +44,6 @@ class DfPlayerCardManagerInterface(ABC):  # noqa: WPS214
         pass
 
     @abstractmethod
-    def read_config(self) -> Configuration:
-        pass
-
-    @abstractmethod
-    def read_config_overrides(self) -> dict[str, RepositoryConfig]:
-        pass
-
-    @abstractmethod
     def get_repositories_comparison(self) -> list[CompareResult]:
         pass
 

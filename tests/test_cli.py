@@ -219,7 +219,7 @@ class TestChecks:  # noqa: WPS214
     ):
         # GIVEN
         when(cli_context.content_checker).get_unwanted_root_dir_entries(...).thenReturn(
-            []
+            [],
         )
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
@@ -363,4 +363,5 @@ class TestSyncing:
         )
 
         # THEN
+        print(sync_output.stdout)
         assert sync_output.exit_code == 0

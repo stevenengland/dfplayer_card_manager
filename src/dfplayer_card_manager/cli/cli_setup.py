@@ -1,4 +1,5 @@
 from dfplayer_card_manager.cli.cli_context import CliContext
+from dfplayer_card_manager.config import config_checker
 from dfplayer_card_manager.config.configuration import (
     Configuration,
     ProcessingConfig,
@@ -25,18 +26,21 @@ from dfplayer_card_manager.repository.diff_modes import DiffMode
 
 def setup_cli_context() -> CliContext:
     cli_context = CliContext()
-    cli_context.configuration = setup_default_config()
-    cli_context.fat_sorter = setup_fat_sorter()
-    cli_context.content_checker = setup_content_checker(
+    cli_context.configuration = (
+        _setup_default_config()
+    )  # only partially overriden in sync command
+    config_checker.check_config(cli_context.configuration)
+    cli_context.fat_sorter = _setup_fat_sorter()
+    cli_context.content_checker = _setup_content_checker(
         config=cli_context.configuration.repository_target,
     )
-    cli_context.card_manager = setup_card_manager(
+    cli_context.card_manager = _setup_card_manager(
         config=cli_context.configuration,
     )
     return cli_context
 
 
-def setup_default_config() -> Configuration:
+def _setup_default_config() -> Configuration:
     tmp_config = Configuration()
     tmp_config.repository_target = RepositoryConfig(
         valid_subdir_pattern=r"^\d{2}$",
@@ -60,15 +64,16 @@ def setup_default_config() -> Configuration:
     )
     tmp_config.repository_processing = ProcessingConfig(
         diff_method=DiffMode.hash_and_tags,
+        overrides_file_name="dfplayer_card_manager.yaml",
     )
     return tmp_config
 
 
-def setup_fat_sorter() -> FatSorterInterface:
+def _setup_fat_sorter() -> FatSorterInterface:
     return FatSorter()
 
 
-def setup_content_checker(config: RepositoryConfig) -> DfPlayerCardContentChecker:
+def _setup_content_checker(config: RepositoryConfig) -> DfPlayerCardContentChecker:
     if (
         not config.valid_subdir_files_pattern
         or not config.track_number_match
@@ -83,7 +88,7 @@ def setup_content_checker(config: RepositoryConfig) -> DfPlayerCardContentChecke
     )
 
 
-def setup_card_manager(config: Configuration) -> DfPlayerCardManagerInterface:
+def _setup_card_manager(config: Configuration) -> DfPlayerCardManagerInterface:
 
     return DfPlayerCardManager(
         source_repo_root_dir="",

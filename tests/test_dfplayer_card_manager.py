@@ -12,7 +12,6 @@ from factories.repository_element_factory import create_repository_element
 from file_system_helper import FakeFileSystemHelper
 from mockito import mock
 
-from dfplayer_card_manager.config import yaml_config
 from dfplayer_card_manager.config.configuration import (
     Configuration,
     ProcessingConfig,
@@ -74,30 +73,6 @@ def dfplayer_card_manager_e2e() -> DfPlayerCardManager:
         configuration,
     )
     return sut  # noqa: WPS331
-
-
-class TestConfigReading:
-    def test_config_reading_succeeds(self, sut: DfPlayerCardManager, when):
-        # GIVEN
-        init_config = Configuration()
-        init_config.repository_processing.diff_method = DiffMode.tags
-        when(os.path).isfile(
-            Configuration().repository_processing.overrides_file_name,
-        ).thenReturn(True)
-        when(yaml_config).create_yaml_object(...).thenReturn(init_config)
-        # WHEN
-        config = sut.read_config()
-        # THEN
-        assert config.repository_processing.diff_method == DiffMode.tags
-
-    def test_config_reading_raises(self, sut: DfPlayerCardManager, when):
-        # GIVEN
-        when(os.path).isfile(
-            Configuration().repository_processing.overrides_file_name,
-        ).thenReturn(False)
-        # WHEN
-        with pytest.raises(FileNotFoundError):
-            sut.read_config()
 
 
 class TestRepositoryTreeCreation:

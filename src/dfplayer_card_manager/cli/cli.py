@@ -14,11 +14,13 @@ from dfplayer_card_manager.cli.printing import (
     print_task,
     print_warning,
 )
+from dfplayer_card_manager.config import config_merger, config_reader
 from dfplayer_card_manager.dfplayer.dfplayer_card_manager_error import (
     DfPlayerCardManagerError,
 )
 from dfplayer_card_manager.fat import fat_checker
 from dfplayer_card_manager.fat.fat_error import FatError
+from dfplayer_card_manager.mp3.tag_error import TagError
 from dfplayer_card_manager.os import path_sanitizer
 
 # SETUP
@@ -91,6 +93,9 @@ def sync(
     cli_context.card_manager.target_repo_root_dir = sd_card_path
     cli_context.card_manager.source_repo_root_dir = repository_path
 
+    print_task("Reading configuration file if any")
+    _set_config_override(repository_path)
+
     print_task("Creating repositories")
     _try(
         cli_context.card_manager.create_repositories,
@@ -106,6 +111,32 @@ def sync(
         print_action(compared_item)
         if not dry_run:
             pass
+
+
+def _set_config_override(repository_path: str) -> None:
+    try:
+        config_override = config_reader.read_override_config(
+            os.path.join(
+                repository_path,
+                cli_context.configuration.repository_processing.overrides_file_name,
+            ),
+        )
+    except FileNotFoundError:
+        print_neutral("No configuration found, using default configuration.")
+    except DfPlayerCardManagerError as config_exc:
+        print_error(f"Error reading configuration: {config_exc.message}")
+        _abort(config_exc)
+    else:
+        cli_context.card_manager.config.repository_source = config_merger.merge_configs(
+            cli_context.configuration.repository_source,
+            config_override.repository_source,
+        )
+        cli_context.card_manager.config.repository_processing = (
+            config_merger.merge_configs(
+                cli_context.configuration.repository_processing,
+                config_override.repository_processing,
+            )
+        )
 
 
 def _print_unwanted_entries_dry_run(sd_card_path: str):
@@ -251,7 +282,7 @@ def _try(func: Callable[..., None], *args: object, error_prepend: str = "") -> N
             func(*args)
         else:
             func()
-    except (DfPlayerCardManagerError, FatError) as check_exc:
+    except (DfPlayerCardManagerError, FatError, TagError) as check_exc:
         if error_prepend:
             print_error(f"{error_prepend}")
         print_error(f"Error: {check_exc.message}")
