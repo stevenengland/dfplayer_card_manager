@@ -19,6 +19,7 @@ from dfplayer_card_manager.dfplayer.dfplayer_card_manager_interface import (
 )
 from dfplayer_card_manager.fat.fat_sorter import FatSorter
 from dfplayer_card_manager.fat.fat_sorter_interface import FatSorterInterface
+from dfplayer_card_manager.logging.logger import Logger
 from dfplayer_card_manager.mp3.audio_file_manager import AudioFileManager
 from dfplayer_card_manager.repository.detection_source import DetectionSource
 from dfplayer_card_manager.repository.diff_modes import DiffMode
@@ -26,6 +27,7 @@ from dfplayer_card_manager.repository.diff_modes import DiffMode
 
 def setup_cli_context() -> CliContext:
     cli_context = CliContext()
+    cli_context.logger = Logger()
     cli_context.configuration = (
         _setup_default_config()
     )  # only partially overriden in sync command
@@ -36,6 +38,7 @@ def setup_cli_context() -> CliContext:
     )
     cli_context.card_manager = _setup_card_manager(
         config=cli_context.configuration,
+        logger=cli_context.logger,
     )
     return cli_context
 
@@ -88,11 +91,15 @@ def _setup_content_checker(config: RepositoryConfig) -> DfPlayerCardContentCheck
     )
 
 
-def _setup_card_manager(config: Configuration) -> DfPlayerCardManagerInterface:
+def _setup_card_manager(
+    config: Configuration,
+    logger: Logger,
+) -> DfPlayerCardManagerInterface:
 
     return DfPlayerCardManager(
         source_repo_root_dir="",
         target_repo_root_dir="",
         audio_manager=AudioFileManager(),
         config=config,
+        logger=logger,
     )

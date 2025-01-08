@@ -60,6 +60,8 @@ class DfPlayerCardContentChecker:  # noqa: WPS214
             if re.match(self._valid_root_dir_pattern, entry):
                 numbers.append(int(entry))
         numbers.sort()
+        if not numbers:
+            return []
         # Get the highest number in the list, then get the range from 1 to that number
         for expected_number in range(1, numbers[-1]):
             if expected_number not in numbers:

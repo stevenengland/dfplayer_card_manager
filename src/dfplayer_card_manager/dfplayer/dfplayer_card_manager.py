@@ -9,6 +9,7 @@ from dfplayer_card_manager.config.configuration import (
 from dfplayer_card_manager.dfplayer.dfplayer_card_manager_interface import (
     DfPlayerCardManagerInterface,
 )
+from dfplayer_card_manager.logging.logger_interface import LoggerInterface
 from dfplayer_card_manager.mp3.audio_file_manager_interface import (
     AudioFileManagerInterface,
 )
@@ -31,11 +32,12 @@ from dfplayer_card_manager.repository.repository_element import (
 
 class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
 
-    def __init__(
+    def __init__(  # noqa: WPS211
         self,
         source_repo_root_dir: str,
         target_repo_root_dir: str,
         audio_manager: AudioFileManagerInterface,
+        logger: LoggerInterface,
         config: Optional[Configuration] = None,
     ):
         self._config_overrides: dict[str, RepositoryConfig] = {}
@@ -44,6 +46,7 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
         self._target_repo: Repository = Repository()
         self._source_repo_root_dir = source_repo_root_dir
         self._target_repo_root_dir = target_repo_root_dir
+        self._logger = logger
 
         self._config: Configuration = config
 
@@ -93,6 +96,7 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
 
     # ToDo: tests
     def create_repositories(self) -> None:
+        self._logger.debug("Creating repositories")
         if not os.path.isdir(self._source_repo_root_dir):
             raise ValueError("Source repository root directory is not a directory")
         if not os.path.isdir(self._target_repo_root_dir):

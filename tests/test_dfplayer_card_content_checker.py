@@ -205,6 +205,21 @@ class TestUnwantedDirsAndFiles:
         # THEN
         assert gaps == [4, 6, 7, 8]
 
+    def test_get_root_dir_numbering_when_only_invalid_dirs_exist(
+        self,
+        sut: DfPlayerCardContentChecker,
+        when,
+    ):
+        # GIVEN
+        sd_root_path = "/sdcard"
+        when(os).listdir(sd_root_path).thenReturn(
+            [".git", "System Volume Information"],
+        )
+        # WHEN
+        gaps = sut.get_root_dir_numbering_gaps(sd_root_path)
+        # THEN
+        assert gaps == []
+
     def test_get_subdir_numbering_gaps(self, sut: DfPlayerCardContentChecker, when):
         # GIVEN
         sd_root_path = "/sdcard"
