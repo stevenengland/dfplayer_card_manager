@@ -8,6 +8,7 @@
 
 - ctt - copy to target
 - dft - delete from target
+- tde - target does exist
 - tne - target does not exist
 - swt - source with tags
 - smt - source missing tags

@@ -198,10 +198,17 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
 
         is_hash_reading_needed = self.is_hash_reading_needed()
 
+        element_full_path = os.path.join(
+            element.repo_root_dir,
+            element.dir,
+            element.file_name,
+        )
+
         if is_tag_reading_needed and is_hash_reading_needed:
             audio_content, id3_tags = (
                 self._audio_manager.read_audio_content_and_id3_tags(
-                    os.path.join(element.repo_root_dir, element.dir, element.file_name),
+                    element_full_path,
+                    self._target_repo_root_dir != element.repo_root_dir,
                 )
             )
             repository_element_updater.update_element_by_tags(
@@ -215,7 +222,8 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
             )
         elif is_tag_reading_needed and not is_hash_reading_needed:
             id3_tags = self._audio_manager.read_id3_tags(
-                os.path.join(element.repo_root_dir, element.dir, element.file_name),
+                element_full_path,
+                self._target_repo_root_dir != element.repo_root_dir,
             )
             repository_element_updater.update_element_by_tags(
                 element,
@@ -224,7 +232,7 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
             )
         elif not is_tag_reading_needed and is_hash_reading_needed:
             audio_content = self._audio_manager.read_audio_content(
-                os.path.join(element.repo_root_dir, element.dir, element.file_name),
+                element_full_path,
             )
             repository_element_updater.update_element_by_audio_content(
                 element,

@@ -9,11 +9,16 @@ class AudioFileManagerInterface(ABC):
     def read_audio_content_and_id3_tags(
         self,
         file_path: str,
+        check_tags: bool = True,
     ) -> Tuple[bytes, TagCollection]:
         pass
 
     @abstractmethod
-    def read_id3_tags(self, file_path: str) -> TagCollection:
+    def read_id3_tags(
+        self,
+        file_path: str,
+        check_tags: bool = True,
+    ) -> TagCollection:
         pass
 
     @abstractmethod

@@ -71,6 +71,13 @@ class TestReadAudio:
         # GIVEN
         # WHEN
         # THEN
+        tags = sut.read_id3_tags(
+            os.path.join(test_assets_fs.test_assets_path, "0003.mp3"),
+            check_tags=False,
+        )
+
+        assert tags.title is None
+
         with pytest.raises(expected_exception=TagError, match="Invalid"):
             sut.read_id3_tags(
                 os.path.join(test_assets_fs.test_assets_path, "0003.mp3"),
@@ -129,6 +136,28 @@ class TestReadAudio:
         # THEN
         assert len(sut_result_1) == 3605
         assert isinstance(sut_result_2, TagCollection)
+
+    @e2e
+    def test_read_audio_content_and_id3_tags_from_file_wo_tags(
+        self,
+        sut: AudioFileManagerInterface,
+        test_assets_fs: FakeFileSystemHelper,
+    ):
+        # GIVEN
+        # WHEN
+        # THEN
+        sut_result_1, sut_result_2 = sut.read_audio_content_and_id3_tags(
+            os.path.join(test_assets_fs.test_assets_path, "0003.mp3"),
+            check_tags=False,
+        )
+
+        assert len(sut_result_1) == 3605
+        assert isinstance(sut_result_2, TagCollection)
+
+        with pytest.raises(expected_exception=TagError, match="Invalid"):
+            sut_result_1, sut_result_2 = sut.read_audio_content_and_id3_tags(
+                os.path.join(test_assets_fs.test_assets_path, "0003.mp3"),
+            )
 
 
 class TestCopyingAudio:

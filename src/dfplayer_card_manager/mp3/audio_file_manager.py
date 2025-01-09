@@ -20,18 +20,25 @@ class AudioFileManager(AudioFileManagerInterface):
     def read_audio_content_and_id3_tags(
         self,
         file_path: str,
+        check_tags: bool = True,
     ) -> Tuple[bytes, TagCollection]:
         # ToDo: Refactor this method to use only one read audio method
         audio = self._read_audio(file_path)
-        self._check_tags(audio)
+        if check_tags:
+            self._check_tags(audio)
 
         tag_collection = self._extract_tags(audio)
         audio_content = self._extract_audio_content(file_path, audio)
         return audio_content, tag_collection
 
-    def read_id3_tags(self, file_path: str) -> TagCollection:
+    def read_id3_tags(
+        self,
+        file_path: str,
+        check_tags: bool = True,
+    ) -> TagCollection:
         audio = self._read_audio(file_path)
-        self._check_tags(audio)
+        if check_tags:
+            self._check_tags(audio)
 
         return self._extract_tags(audio)
 
@@ -76,6 +83,8 @@ class AudioFileManager(AudioFileManagerInterface):
 
     def _extract_tags(self, audio: eyed3.AudioFile) -> TagCollection:
         tag_collection = TagCollection()
+        if not audio.tag:
+            return tag_collection
         tag_collection.title = audio.tag.title
         tag_collection.artist = audio.tag.artist
         tag_collection.album = audio.tag.album
