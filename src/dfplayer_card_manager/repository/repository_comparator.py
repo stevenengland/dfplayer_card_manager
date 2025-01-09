@@ -102,7 +102,7 @@ def compare_repository_elements(
                     CompareResult(
                         dir_num=target_key[0],
                         track_num=target_key[1],
-                        target_element=target_dict[target_key],
+                        source_element=source_dict[target_key],
                         action=CompareResultAction.copy_to_target,
                     ),
                 )

@@ -51,6 +51,12 @@ def test_repository_comparison():
     )
     source_repo.append(copy.deepcopy(element_all_the_same_with_none_tag_value))
     target_repo.append(copy.deepcopy(element_all_the_same_with_none_tag_value))
+    element_with_changed_tag = create_repository_element(
+        RepositoryElement(dir_number=1, track_number=5, artist="artist"),
+    )
+    source_repo.append(copy.deepcopy(element_with_changed_tag))
+    element_with_changed_tag.artist = "different_artist"
+    target_repo.append(copy.deepcopy(element_with_changed_tag))
     # WHEN
     comparison_results = compare_repository_elements(
         source_repo,
@@ -58,7 +64,7 @@ def test_repository_comparison():
         DiffMode.hash_and_tags,
     )
     # THEN
-    assert len(comparison_results) == 5
+    assert len(comparison_results) == 6
     # assert that a specific comparison result is in the list
     expected_results = [
         (50, 50, CompareResultAction.copy_to_target),
@@ -66,6 +72,7 @@ def test_repository_comparison():
         (1, 2, CompareResultAction.no_change),
         (1, 3, CompareResultAction.copy_to_target),
         (1, 4, CompareResultAction.no_change),
+        (1, 5, CompareResultAction.copy_to_target),
     ]
     for comparison_index, (dir_num, title_num, action) in enumerate(expected_results):
         assert comparison_results[comparison_index].dir_num == dir_num
@@ -78,6 +85,7 @@ def test_repository_comparison():
     assert comparison_results[1].target_element == el_in_target_but_not_in_source
     assert comparison_results[2].source_element == element_all_the_same
     assert comparison_results[2].target_element == element_all_the_same
+    assert comparison_results[5].source_element.artist == "artist"
 
 
 def test_stuff_compare_results_returns_correct_list():
