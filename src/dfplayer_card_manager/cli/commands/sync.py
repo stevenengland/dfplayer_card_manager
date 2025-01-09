@@ -26,7 +26,7 @@ def sync(
         exit(0)
     for compared_item in repo_comparison_result:
         cli_context.logger.debug(
-            f"Processing {compared_item.dir_num}/{compared_item.track_num}",
+            f"Processing {compared_item.dir_num}/{compared_item.track_num}/{str(compared_item.action)}",  # noqa: WPS221
         )
         print_action(compared_item)
         if not dry_run:

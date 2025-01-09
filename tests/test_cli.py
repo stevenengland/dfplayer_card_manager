@@ -350,11 +350,64 @@ class TestSyncing:
         test_assets_fs: FakeFileSystemHelper,
     ):
         # GIVEN
+        expected_results = [
+            CompareResult(
+                dir_num=1,
+                track_num=1,
+                action=CompareResultAction.copy_to_target,
+            ),
+            CompareResult(
+                dir_num=1,
+                track_num=2,
+                action=CompareResultAction.copy_to_target,
+            ),
+            CompareResult(
+                dir_num=2,
+                track_num=1,
+                action=CompareResultAction.copy_to_target,
+            ),
+            CompareResult(
+                dir_num=2,
+                track_num=2,
+                action=CompareResultAction.no_change,
+            ),
+            CompareResult(
+                dir_num=2,
+                track_num=3,
+                action=CompareResultAction.no_change,
+            ),
+            CompareResult(
+                dir_num=2,
+                track_num=4,
+                action=CompareResultAction.copy_to_target,
+            ),
+            CompareResult(
+                dir_num=2,
+                track_num=5,
+                action=CompareResultAction.copy_to_target,
+            ),
+            CompareResult(
+                dir_num=2,
+                track_num=6,
+                action=CompareResultAction.copy_to_target,
+            ),
+            CompareResult(
+                dir_num=2,
+                track_num=7,
+                action=CompareResultAction.unstuff,
+            ),
+            CompareResult(
+                dir_num=2,
+                track_num=8,
+                action=CompareResultAction.delete_from_target,
+            ),
+        ]
 
         # WHEN
         sync_output = cli_runner.invoke(
             app,
             [
+                "-vvv",
                 "sync",
                 os.path.join(test_assets_fs.test_assets_path, "repositories", "target"),
                 os.path.join(test_assets_fs.test_assets_path, "repositories", "source"),
@@ -363,5 +416,9 @@ class TestSyncing:
         )
 
         # THEN
-        print(sync_output.stdout)
         assert sync_output.exit_code == 0
+        for comparison_result in expected_results:
+            assert (
+                f"{comparison_result.dir_num}/{comparison_result.track_num}/{comparison_result.action}"
+                in sync_output.stdout
+            )
