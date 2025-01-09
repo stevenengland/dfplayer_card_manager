@@ -218,7 +218,7 @@ class TestUnwantedDirsAndFiles:
         # WHEN
         gaps = sut.get_root_dir_numbering_gaps(sd_root_path)
         # THEN
-        assert gaps == []
+        assert not gaps
 
     def test_get_subdir_numbering_gaps(self, sut: DfPlayerCardContentChecker, when):
         # GIVEN

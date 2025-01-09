@@ -309,7 +309,7 @@ class TestSyncing:
     ):
         # GIVEN
         when(cli_context.card_manager).create_repositories().thenReturn(None)
-        when(cli_context.card_manager).get_repositories_comparison().thenReturn(
+        when(cli_context.card_manager).get_repositories_comparison(...).thenReturn(
             [
                 CompareResult(
                     dir_num=1,

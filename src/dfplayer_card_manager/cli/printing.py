@@ -48,6 +48,10 @@ def print_action(compared_item: CompareResult):
         print_ok(
             f"ooo |{left_path}| --- |{_get_element_relative_path(compared_item.source_element)}|",
         )
+    elif compared_item.action == CompareResultAction.unstuff:
+        print_error(
+            f"??? |{left_path}| <-- |MISSING FILE|",
+        )
 
 
 def _get_element_relative_path(element: RepositoryElement) -> str:

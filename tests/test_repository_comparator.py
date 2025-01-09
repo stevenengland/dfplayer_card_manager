@@ -1,6 +1,7 @@
 import copy
 
 import pytest
+from factories.compare_result_factory import create_compare_result
 from factories.repository_element_factory import create_repository_element
 
 from dfplayer_card_manager.repository.compare_result_actions import (
@@ -9,6 +10,7 @@ from dfplayer_card_manager.repository.compare_result_actions import (
 from dfplayer_card_manager.repository.diff_modes import DiffMode
 from dfplayer_card_manager.repository.repository_comparator import (
     compare_repository_elements,
+    stuff_compare_results,
 )
 from dfplayer_card_manager.repository.repository_element import (
     RepositoryElement,
@@ -76,3 +78,46 @@ def test_repository_comparison():
     assert comparison_results[1].target_element == el_in_target_but_not_in_source
     assert comparison_results[2].source_element == element_all_the_same
     assert comparison_results[2].target_element == element_all_the_same
+
+
+def test_stuff_compare_results_returns_correct_list():
+    # GIVEN
+    unstuffed_compare_results = [
+        create_compare_result(
+            dir_num=1,
+            track_num=1,
+        ),  # ok
+        create_compare_result(
+            dir_num=1,
+            track_num=2,
+        ),
+        create_compare_result(
+            dir_num=2,
+            track_num=1,
+        ),  # need to be stuffed
+        create_compare_result(
+            dir_num=2,
+            track_num=3,
+        ),
+        create_compare_result(
+            dir_num=3,
+            track_num=2,
+        ),  # need to be stuffed
+    ]
+    # WHEN
+    stuffed_compare_results = stuff_compare_results(unstuffed_compare_results)
+
+    # THEN
+    assert len(stuffed_compare_results) == 7
+    assert stuffed_compare_results[0].dir_num == 1
+    assert stuffed_compare_results[0].track_num == 1
+    assert stuffed_compare_results[1].dir_num == 1
+    assert stuffed_compare_results[1].track_num == 2
+
+    assert stuffed_compare_results[3].dir_num == 2
+    assert stuffed_compare_results[3].track_num == 2
+    assert stuffed_compare_results[3].action == CompareResultAction.unstuff
+
+    assert stuffed_compare_results[5].dir_num == 3
+    assert stuffed_compare_results[5].track_num == 1
+    assert stuffed_compare_results[5].action == CompareResultAction.unstuff

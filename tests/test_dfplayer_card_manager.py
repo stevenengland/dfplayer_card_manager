@@ -296,6 +296,34 @@ class TestRepositoryComparison:
         assert comparison_results[0].action == CompareResultAction.copy_to_target
         assert len(comparison_results) == 3
 
+    def test_repository_comparison_with_stuffing_succeeds(
+        self,
+        sut: DfPlayerCardManager,
+        when,
+    ):
+        # GIVEN
+        when(repository_comparator).compare_repository_elements(...).thenReturn(
+            [],
+        )
+        when(repository_comparator).stuff_compare_results(...).thenReturn(
+            [
+                CompareResult(
+                    dir_num=50,
+                    track_num=50,
+                    action=CompareResultAction.copy_to_target,
+                ),
+                CompareResult(),
+                CompareResult(),
+            ],
+        )
+        # WHEN
+        comparison_results = sut.get_repositories_comparison(True)
+        # THEN
+        assert comparison_results[0].dir_num == 50
+        assert comparison_results[0].track_num == 50
+        assert comparison_results[0].action == CompareResultAction.copy_to_target
+        assert len(comparison_results) == 3
+
 
 class TestDeletionsToTargetRepo:
 

@@ -48,9 +48,5 @@ class DfPlayerCardManagerInterface(ABC):  # noqa: WPS214
         pass
 
     @abstractmethod
-    def write_copy_to_target_repository(
-        self,
-        dir_number: int,
-        track_number: int,
-    ) -> None:
+    def write_change_to_target_repository(self, compare_result: CompareResult) -> None:
         pass

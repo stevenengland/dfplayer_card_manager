@@ -46,8 +46,13 @@ def setup_cli_context() -> CliContext:
 def _setup_default_config() -> Configuration:
     tmp_config = Configuration()
     tmp_config.repository_target = RepositoryConfig(
-        valid_subdir_pattern=r"^\d{2}$",
+        valid_subdir_pattern=r"^(\d{2})$",
         valid_subdir_files_pattern=r"^(\d{3})\.mp3$",
+        album_source=DetectionSource.tag,
+        artist_source=DetectionSource.tag,
+        dir_number_source=DetectionSource.dirname,
+        dir_number_match=1,
+        title_source=DetectionSource.tag,
         track_number_source=DetectionSource.filename,
         track_number_match=1,
     )

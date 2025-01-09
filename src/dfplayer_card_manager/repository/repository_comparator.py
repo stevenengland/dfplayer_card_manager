@@ -8,6 +8,51 @@ from dfplayer_card_manager.repository.repository_element import (
 )
 
 
+# ToDo: Refactor this function to make it less complex and more efficient.
+def stuff_compare_results(  # noqa: WPS231
+    unstuffed_compare_results: list[CompareResult],
+) -> list[CompareResult]:
+    # get all distinct dir_num values from the list of CompareResult objects
+    dir_nums = sorted(
+        {compare_result.dir_num for compare_result in unstuffed_compare_results},
+    )
+    # get the highest track_num value for each dir_num
+    highest_track_num_per_dir = {
+        dir_num: max(
+            compare_result.track_num
+            for compare_result in unstuffed_compare_results
+            if compare_result.dir_num == dir_num
+        )
+        for dir_num in dir_nums
+    }
+
+    # for every dir_num, check if there is a CompareResult object from track_num 1 to the highest track_num value.
+    # If yes, add it to the stuffed_compare_results list.
+    # If not, add a CompareResult object with action set to "delete_from_target" to the stuffed_compare_results list.
+    stuffed_compare_results = []
+    for dir_num in dir_nums:
+        for track_num in range(1, highest_track_num_per_dir[dir_num] + 1):
+            found = False
+            for compare_result in unstuffed_compare_results:
+                if (
+                    compare_result.dir_num == dir_num
+                    and compare_result.track_num == track_num
+                ):
+                    stuffed_compare_results.append(compare_result)
+                    found = True
+                    break
+            if not found:
+                stuffed_compare_results.append(
+                    CompareResult(
+                        dir_num=dir_num,
+                        track_num=track_num,
+                        action=CompareResultAction.unstuff,
+                    ),
+                )
+
+    return stuffed_compare_results
+
+
 def compare_repository_elements(
     source: list[RepositoryElement],
     target: list[RepositoryElement],

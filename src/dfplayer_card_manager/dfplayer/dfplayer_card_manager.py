@@ -22,6 +22,9 @@ from dfplayer_card_manager.repository import (
     repository_finder,
 )
 from dfplayer_card_manager.repository.compare_result import CompareResult
+from dfplayer_card_manager.repository.compare_result_actions import (
+    CompareResultAction,
+)
 from dfplayer_card_manager.repository.detection_source import DetectionSource
 from dfplayer_card_manager.repository.diff_modes import DiffMode
 from dfplayer_card_manager.repository.repository import Repository
@@ -96,7 +99,6 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
 
     # ToDo: tests
     def create_repositories(self) -> None:
-        self._logger.debug("Creating repositories")
         if not os.path.isdir(self._source_repo_root_dir):
             raise ValueError("Source repository root directory is not a directory")
         if not os.path.isdir(self._target_repo_root_dir):
@@ -247,12 +249,34 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
             or applied_config.track_number_source == DetectionSource.tag
         )
 
-    def get_repositories_comparison(self) -> list[CompareResult]:
-        return repository_comparator.compare_repository_elements(
+    def get_repositories_comparison(
+        self,
+        stuff_missing_elements=False,
+    ) -> list[CompareResult]:
+        unstuffed_compare_results = repository_comparator.compare_repository_elements(
             self._source_repo.elements,
             self._target_repo.elements,
             self._config.repository_processing.diff_method or DiffMode.hash_and_tags,
         )
+
+        if not stuff_missing_elements:
+            return unstuffed_compare_results
+
+        return repository_comparator.stuff_compare_results(
+            unstuffed_compare_results,
+        )
+
+    def write_change_to_target_repository(self, compare_result: CompareResult) -> None:
+        if compare_result.action == CompareResultAction.delete_from_target:
+            self.write_deletion_to_target_repository(
+                compare_result.dir_num,
+                compare_result.track_num,
+            )
+        elif compare_result.action == CompareResultAction.copy_to_target:
+            self.write_copy_to_target_repository(
+                compare_result.dir_num,
+                compare_result.track_num,
+            )
 
     def write_deletion_to_target_repository(
         self,
