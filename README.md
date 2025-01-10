@@ -10,14 +10,14 @@ You may ask: Why not just copying my audio files to the SD card and instead use 
 # Features
 
 - Perform file system checks (FAT type, allocation unit size, FAT sorting state)
-- Delete undesireable files and folders
-- Apply FAT sorting
-- Sync audio files from a repository to the SD card
+- Delete undesireable files and folders from the SD card
+- Apply FAT sorting to the SD card
+- Sync audio files from a music repository (on any disk or filesystem) to the SD card
 
 ## What is (currently) not covered?
 
 - SD card formatting
-- wav -> only mp3
+- Audio types: WAV (-> only MP3 is supported)
 
 # Usage guide
 
@@ -32,7 +32,20 @@ pip install dfplayer-card-manager
 To run the DfPlayer Card Manager, use the following command structure:
 
 ```sh
-dfplayer-card-manager <COMMAND> [ARGS] [OPTIONS]
+Usage: dfplayer-card-manager [OPTIONS] COMMAND [ARGS]...
+
+╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --verbose             -v      INTEGER  [default: 0]                                                                                                                                 │
+│ --install-completion                   Install completion for the current shell.                                                                                                    │
+│ --show-completion                      Show completion for the current shell, to copy it or customize the installation.                                                             │
+│ --help                                 Show this message and exit.                                                                                                                  │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ check                                                                                                                                                                               │
+│ sort                                                                                                                                                                                │
+│ clean                                                                                                                                                                               │
+│ sync                                                                                                                                                                                │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## Available Commands
@@ -113,7 +126,7 @@ dfplayer-card-manager clean /media/SDCARD --dry-run
 
 ### `sync`
 
-The `sync` command is intended to synchronize the content from a repository folder to SD card. It can be run in a dry run mode to preview changes.
+The `sync` command is intended to synchronize the content from a repository folder to SD card. It can be run in a dry run mode to preview changes. See [CONFIG.md](./docs/CONFIG.md) for more information on which folder and file structure for the music repository is expected by default and how you can change these settings.
 
 **Usage:**
 
