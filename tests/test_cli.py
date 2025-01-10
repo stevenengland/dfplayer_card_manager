@@ -52,6 +52,11 @@ def get_cli_runner(monkeypatch) -> CliRunner:
     return CliRunner()
 
 
+@pytest.fixture(scope="function", name="cli_runner_e2e")
+def get_cli_runner_e2e() -> CliRunner:
+    return CliRunner()
+
+
 class TestChecks:  # noqa: WPS214
     def test_fat_check_returns_false(
         self,
@@ -422,9 +427,10 @@ class TestSyncing:
                 in sync_output.stdout
             )
 
+    @e2e
     def test_syncing_e2e(
         self,
-        cli_runner,
+        cli_runner_e2e,
         test_assets_fs_w: FakeFileSystemHelper,
     ):
         # GIVEN
@@ -456,7 +462,7 @@ class TestSyncing:
         )
 
         # WHEN
-        sync_output = cli_runner.invoke(
+        sync_output = cli_runner_e2e.invoke(
             app,
             [
                 "-vvv",
@@ -498,3 +504,46 @@ class TestSyncing:
         )
         assert "007.mp3" not in files02
         assert "008.mp3" not in files02
+
+    @e2e
+    def test_syncing_idempotency_e2e(
+        self,
+        cli_runner_e2e,
+        test_assets_fs_w: FakeFileSystemHelper,
+    ):
+        # GIVEN
+        source_dir = os.path.join(
+            test_assets_fs_w.test_assets_path,
+            "repositories",
+            "source",
+        )
+        target_dir = os.path.join(
+            test_assets_fs_w.test_assets_path,
+            "repositories",
+            "target",
+        )
+
+        # WHEN
+        cli_runner_e2e.invoke(
+            app,
+            [
+                "-vvv",
+                "sync",
+                target_dir,
+                source_dir,
+            ],
+        )
+
+        sync_output2 = cli_runner_e2e.invoke(
+            app,
+            [
+                "-vvv",
+                "sync",
+                target_dir,
+                source_dir,
+            ],
+        )
+        # THEN
+        assert sync_output2.exit_code == 0
+        assert str(CompareResultAction.copy_to_target) not in sync_output2.stdout
+        assert str(CompareResultAction.delete_from_target) not in sync_output2.stdout

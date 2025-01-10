@@ -99,6 +99,7 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
 
     # ToDo: tests
     def create_repositories(self) -> None:
+        self._reset()
         if not os.path.isdir(self._source_repo_root_dir):
             raise ValueError("Source repository root directory is not a directory")
         if not os.path.isdir(self._target_repo_root_dir):
@@ -382,3 +383,8 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
         else:
             raise ValueError("The element does not belong to any of the repositories")
         return applied_config
+
+    def _reset(self) -> None:
+        self._source_repo = Repository()
+        self._target_repo = Repository()
+        self._config_overrides = {}
