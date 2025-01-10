@@ -81,6 +81,8 @@ class TestChecks:  # noqa: WPS214
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
         # THEN
+        if fat32_check_output.exit_code != 0:
+            print(fat32_check_output.stdout)
         assert fat32_check_output.exit_code == 0
         assert "is a path within a FAT32" in fat32_check_output.stdout
 
@@ -94,6 +96,8 @@ class TestChecks:  # noqa: WPS214
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
         # THEN
+        if fat32_check_output.exit_code != 0:
+            print(fat32_check_output.stdout)
         assert fat32_check_output.exit_code == 0  # Since the check is not fatal
         assert (
             "does not have the correct allocation unit size"
@@ -110,6 +114,8 @@ class TestChecks:  # noqa: WPS214
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
         # THEN
+        if fat32_check_output.exit_code != 0:
+            print(fat32_check_output.stdout)
         assert fat32_check_output.exit_code == 0
         assert "has the correct allocation unit size" in fat32_check_output.stdout
 
@@ -123,6 +129,8 @@ class TestChecks:  # noqa: WPS214
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
         # THEN
+        if fat32_check_output.exit_code != 0:
+            print(fat32_check_output.stdout)
         assert fat32_check_output.exit_code == 0
         assert "is not sorted" in fat32_check_output.stdout
 
@@ -136,6 +144,8 @@ class TestChecks:  # noqa: WPS214
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
         # THEN
+        if fat32_check_output.exit_code != 0:
+            print(fat32_check_output.stdout)
         assert fat32_check_output.exit_code == 0
         assert "is sorted" in fat32_check_output.stdout
 
@@ -151,6 +161,8 @@ class TestChecks:  # noqa: WPS214
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
         # THEN
+        if fat32_check_output.exit_code != 0:
+            print(fat32_check_output.stdout)
         assert fat32_check_output.exit_code == 0
         assert "Missing dirs:" in fat32_check_output.stdout
         assert "01" in fat32_check_output.stdout
@@ -168,6 +180,8 @@ class TestChecks:  # noqa: WPS214
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
         # THEN
+        if fat32_check_output.exit_code != 0:
+            print(fat32_check_output.stdout)
         assert fat32_check_output.exit_code == 0
         assert "has no missing dirs/gaps" in fat32_check_output.stdout
 
@@ -183,6 +197,8 @@ class TestChecks:  # noqa: WPS214
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
         # THEN
+        if fat32_check_output.exit_code != 0:
+            print(fat32_check_output.stdout)
         assert fat32_check_output.exit_code == 0
         assert "Missing files:" in fat32_check_output.stdout
         assert f"01{os.sep}001" in fat32_check_output.stdout
@@ -197,6 +213,8 @@ class TestChecks:  # noqa: WPS214
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
         # THEN
+        if fat32_check_output.exit_code != 0:
+            print(fat32_check_output.stdout)
         assert fat32_check_output.exit_code == 0
         assert "has no missing files/gaps" in fat32_check_output.stdout
 
@@ -212,6 +230,8 @@ class TestChecks:  # noqa: WPS214
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
         # THEN
+        if fat32_check_output.exit_code != 0:
+            print(fat32_check_output.stdout)
         assert fat32_check_output.exit_code == 0
         assert "has unwanted entries in the root dir" in fat32_check_output.stdout
         assert "01" in fat32_check_output.stdout
@@ -229,6 +249,8 @@ class TestChecks:  # noqa: WPS214
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
         # THEN
+        if fat32_check_output.exit_code != 0:
+            print(fat32_check_output.stdout)
         assert fat32_check_output.exit_code == 0
         assert "has no unwanted entries in the root dir" in fat32_check_output.stdout
 
@@ -244,6 +266,8 @@ class TestChecks:  # noqa: WPS214
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
         # THEN
+        if fat32_check_output.exit_code != 0:
+            print(fat32_check_output.stdout)
         assert fat32_check_output.exit_code == 0
         assert "has unwanted entries in its subdirs" in fat32_check_output.stdout
         assert f"01{os.sep}001" in fat32_check_output.stdout
@@ -275,6 +299,8 @@ class TestSort:
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["sort", "tests/test_assets"])
         # THEN
+        if fat32_check_output.exit_code != 0:
+            print(fat32_check_output.stdout)
         assert fat32_check_output.exit_code == 0
         assert "has been sorted" in fat32_check_output.stdout
 
@@ -298,6 +324,8 @@ class TestCleanDryRun:
             ["clean", "tests/test_assets", "--dry-run"],
         )
         # THEN
+        if fat32_check_output.exit_code != 0:
+            print(fat32_check_output.stdout)
         assert fat32_check_output.exit_code == 0
         assert "Would remove" in fat32_check_output.stdout
         assert "01" in fat32_check_output.stdout
@@ -343,6 +371,8 @@ class TestSyncing:
         )
 
         # THEN
+        if sync_output.exit_code != 0:
+            print(sync_output.stdout)
         assert sync_output.exit_code == 0
         assert f"+++ |01{os.sep}001| <--" in sync_output.stdout
         assert f"--- |02{os.sep}002| <-- X" in sync_output.stdout
@@ -420,6 +450,8 @@ class TestSyncing:
         )
 
         # THEN
+        if sync_output.exit_code != 0:
+            print(sync_output.stdout)
         assert sync_output.exit_code == 0
         for comparison_result in expected_results:
             assert (
@@ -473,7 +505,8 @@ class TestSyncing:
         )
 
         # THEN
-        print(sync_output.stdout)
+        if sync_output.exit_code != 0:
+            print(sync_output.stdout)
         assert sync_output.exit_code == 0
         files01 = os.listdir(os.path.join(target_dir, "01"))
         files02 = os.listdir(os.path.join(target_dir, "02"))
@@ -534,7 +567,7 @@ class TestSyncing:
             ],
         )
 
-        sync_output2 = cli_runner_e2e.invoke(
+        sync_output = cli_runner_e2e.invoke(
             app,
             [
                 "-vvv",
@@ -544,6 +577,8 @@ class TestSyncing:
             ],
         )
         # THEN
-        assert sync_output2.exit_code == 0
-        assert str(CompareResultAction.copy_to_target) not in sync_output2.stdout
-        assert str(CompareResultAction.delete_from_target) not in sync_output2.stdout
+        if sync_output.exit_code != 0:
+            print(sync_output.stdout)
+        assert sync_output.exit_code == 0
+        assert str(CompareResultAction.copy_to_target) not in sync_output.stdout
+        assert str(CompareResultAction.delete_from_target) not in sync_output.stdout

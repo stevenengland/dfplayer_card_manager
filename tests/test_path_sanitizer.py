@@ -15,7 +15,6 @@ class TestPathSanitation:
     )
     def test_sanitize_windows_volume_path(self, path):
         # GIVEN
-        path = "E:\\"
         # WHEN
         sanitized_path = path_sanitizer.sanitize_windows_volume_path(path)
         # THEN

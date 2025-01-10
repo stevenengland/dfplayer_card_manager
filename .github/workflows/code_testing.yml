@@ -31,7 +31,7 @@ jobs:
   # Performs quick checks before the expensive test runs
   check_and_coverage-test:
     if: contains(github.event.head_commit.message, '[skip ci]') == false
-
+    name: "Check and Coverage Test"
     runs-on: ubuntu-latest
 
     steps:
