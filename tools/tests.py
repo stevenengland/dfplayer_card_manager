@@ -14,9 +14,10 @@ def call_pytest(argv: list[str]) -> None:
     if argv:
         cmd.extend(argv)
     try:
-        subprocess.run(cmd)  # noqa: S607, S603
+        subprocess.run(cmd, check=True)  # noqa: S607, S603
     except FileNotFoundError:
         print("Module pytest not found. Please make sure it is installed.")
+        exit(1)
 
     print("Calling PyTest completed successfully.")
 
