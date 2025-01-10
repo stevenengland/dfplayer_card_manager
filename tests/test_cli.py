@@ -3,6 +3,7 @@ import os
 import pytest
 from factories.repository_element_factory import create_repository_element
 from file_system_helper import FakeFileSystemHelper
+from strip_ansi import strip_ansi
 from typer.testing import CliRunner
 
 from dfplayer_card_manager.cli.cli import app, cli_context
@@ -67,9 +68,10 @@ class TestChecks:  # noqa: WPS214
         when(fat_checker).check_is_fat32(...).thenReturn(False)
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
+        stout = strip_ansi(fat32_check_output.stdout)
         # THEN
         assert fat32_check_output.exit_code != 0
-        assert "is not a path within a FAT32" in fat32_check_output.stdout
+        assert "is not a path within a FAT32" in stout
 
     def test_fat_check_returns_true(
         self,
@@ -80,11 +82,12 @@ class TestChecks:  # noqa: WPS214
         when(fat_checker).check_is_fat32(...).thenReturn(True)
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
+        stout = strip_ansi(fat32_check_output.stdout)
         # THEN
         if fat32_check_output.exit_code != 0:
-            print(fat32_check_output.stdout)
+            print(stout)
         assert fat32_check_output.exit_code == 0
-        assert "is a path within a FAT32" in fat32_check_output.stdout
+        assert "is a path within a FAT32" in stout
 
     def test_fat_check_returns_false_allocation_unit_size(
         self,
@@ -95,14 +98,12 @@ class TestChecks:  # noqa: WPS214
         when(fat_checker).check_has_correct_allocation_unit_size(...).thenReturn(False)
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
+        stout = strip_ansi(fat32_check_output.stdout)
         # THEN
         if fat32_check_output.exit_code != 0:
-            print(fat32_check_output.stdout)
+            print(stout)
         assert fat32_check_output.exit_code == 0  # Since the check is not fatal
-        assert (
-            "does not have the correct allocation unit size"
-            in fat32_check_output.stdout
-        )
+        assert "does not have the correct allocation unit size" in stout
 
     def test_fat_check_returns_true_allocation_unit_size(
         self,
@@ -113,11 +114,12 @@ class TestChecks:  # noqa: WPS214
         when(fat_checker).check_has_correct_allocation_unit_size(...).thenReturn(True)
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
+        stout = strip_ansi(fat32_check_output.stdout)
         # THEN
         if fat32_check_output.exit_code != 0:
-            print(fat32_check_output.stdout)
+            print(stout)
         assert fat32_check_output.exit_code == 0
-        assert "has the correct allocation unit size" in fat32_check_output.stdout
+        assert "has the correct allocation unit size" in stout
 
     def test_fat_check_returns_false_sorted(
         self,
@@ -128,11 +130,12 @@ class TestChecks:  # noqa: WPS214
         when(cli_context.fat_sorter).is_fat_volume_sorted(...).thenReturn(False)
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
+        stout = strip_ansi(fat32_check_output.stdout)
         # THEN
         if fat32_check_output.exit_code != 0:
-            print(fat32_check_output.stdout)
+            print(stout)
         assert fat32_check_output.exit_code == 0
-        assert "is not sorted" in fat32_check_output.stdout
+        assert "is not sorted" in stout
 
     def test_fat_check_returns_true_sorted(
         self,
@@ -143,11 +146,12 @@ class TestChecks:  # noqa: WPS214
         when(cli_context.fat_sorter).is_fat_volume_sorted(...).thenReturn(True)
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
+        stout = strip_ansi(fat32_check_output.stdout)
         # THEN
         if fat32_check_output.exit_code != 0:
-            print(fat32_check_output.stdout)
+            print(stout)
         assert fat32_check_output.exit_code == 0
-        assert "is sorted" in fat32_check_output.stdout
+        assert "is sorted" in stout
 
     def test_sd_root_dir_numbering_returns_gaps(
         self,
@@ -160,13 +164,14 @@ class TestChecks:  # noqa: WPS214
         )
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
+        stout = strip_ansi(fat32_check_output.stdout)
         # THEN
         if fat32_check_output.exit_code != 0:
-            print(fat32_check_output.stdout)
+            print(stout)
         assert fat32_check_output.exit_code == 0
-        assert "Missing dirs:" in fat32_check_output.stdout
-        assert "01" in fat32_check_output.stdout
-        assert "03" in fat32_check_output.stdout
+        assert "Missing dirs:" in stout
+        assert "01" in stout
+        assert "03" in stout
 
     def test_sd_root_dir_numbering_returns_no_gaps(
         self,
@@ -179,11 +184,12 @@ class TestChecks:  # noqa: WPS214
         )
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
+        stout = strip_ansi(fat32_check_output.stdout)
         # THEN
         if fat32_check_output.exit_code != 0:
-            print(fat32_check_output.stdout)
+            print(stout)
         assert fat32_check_output.exit_code == 0
-        assert "has no missing dirs/gaps" in fat32_check_output.stdout
+        assert "has no missing dirs/gaps" in stout
 
     def test_sd_subdir_numbering_returns_gaps(
         self,
@@ -196,12 +202,13 @@ class TestChecks:  # noqa: WPS214
         )
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
+        stout = strip_ansi(fat32_check_output.stdout)
         # THEN
         if fat32_check_output.exit_code != 0:
-            print(fat32_check_output.stdout)
+            print(stout)
         assert fat32_check_output.exit_code == 0
-        assert "Missing files:" in fat32_check_output.stdout
-        assert f"01{os.sep}001" in fat32_check_output.stdout
+        assert "Missing files:" in stout
+        assert f"01{os.sep}001" in stout
 
     def test_sd_subdir_numbering_returns_no_gaps(
         self,
@@ -212,11 +219,12 @@ class TestChecks:  # noqa: WPS214
         when(cli_context.content_checker).get_subdir_numbering_gaps(...).thenReturn([])
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
+        stout = strip_ansi(fat32_check_output.stdout)
         # THEN
         if fat32_check_output.exit_code != 0:
-            print(fat32_check_output.stdout)
+            print(stout)
         assert fat32_check_output.exit_code == 0
-        assert "has no missing files/gaps" in fat32_check_output.stdout
+        assert "has no missing files/gaps" in stout
 
     def test_unwanted_root_dir_entries(
         self,
@@ -229,13 +237,14 @@ class TestChecks:  # noqa: WPS214
         )
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
+        stout = strip_ansi(fat32_check_output.stdout)
         # THEN
         if fat32_check_output.exit_code != 0:
-            print(fat32_check_output.stdout)
+            print(stout)
         assert fat32_check_output.exit_code == 0
-        assert "has unwanted entries in the root dir" in fat32_check_output.stdout
-        assert "01" in fat32_check_output.stdout
-        assert "03" in fat32_check_output.stdout
+        assert "has unwanted entries in the root dir" in stout
+        assert "01" in stout
+        assert "03" in stout
 
     def test_no_unwanted_root_dir_entries(
         self,
@@ -248,11 +257,12 @@ class TestChecks:  # noqa: WPS214
         )
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
+        stout = strip_ansi(fat32_check_output.stdout)
         # THEN
         if fat32_check_output.exit_code != 0:
-            print(fat32_check_output.stdout)
+            print(stout)
         assert fat32_check_output.exit_code == 0
-        assert "has no unwanted entries in the root dir" in fat32_check_output.stdout
+        assert "has no unwanted entries in the root dir" in stout
 
     def test_unwanted_subdir_entries(
         self,
@@ -265,13 +275,14 @@ class TestChecks:  # noqa: WPS214
         )
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
+        stout = strip_ansi(fat32_check_output.stdout)
         # THEN
         if fat32_check_output.exit_code != 0:
-            print(fat32_check_output.stdout)
+            print(stout)
         assert fat32_check_output.exit_code == 0
-        assert "has unwanted entries in its subdirs" in fat32_check_output.stdout
-        assert f"01{os.sep}001" in fat32_check_output.stdout
-        assert f"03{os.sep}003" in fat32_check_output.stdout
+        assert "has unwanted entries in its subdirs" in stout
+        assert f"01{os.sep}001" in stout
+        assert f"03{os.sep}003" in stout
 
 
 class TestSort:
@@ -284,9 +295,10 @@ class TestSort:
         when(cli_context.fat_sorter).is_fat_volume_sorted(...).thenReturn(True)
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["sort", "tests/test_assets"])
+        stout = strip_ansi(fat32_check_output.stdout)
         # THEN
         assert fat32_check_output.exit_code == 0
-        assert "is sorted" in fat32_check_output.stdout
+        assert "is sorted" in stout
 
     def test_sort_is_applied_if_is_not_sorted_yet(
         self,
@@ -298,11 +310,12 @@ class TestSort:
         when(cli_context.fat_sorter).sort_fat_volume(...).thenReturn(None)
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["sort", "tests/test_assets"])
+        stout = strip_ansi(fat32_check_output.stdout)
         # THEN
         if fat32_check_output.exit_code != 0:
-            print(fat32_check_output.stdout)
+            print(stout)
         assert fat32_check_output.exit_code == 0
-        assert "has been sorted" in fat32_check_output.stdout
+        assert "has been sorted" in stout
 
 
 class TestCleanDryRun:
@@ -323,15 +336,16 @@ class TestCleanDryRun:
             app,
             ["clean", "tests/test_assets", "--dry-run"],
         )
+        stout = strip_ansi(fat32_check_output.stdout)
         # THEN
         if fat32_check_output.exit_code != 0:
-            print(fat32_check_output.stdout)
+            print(stout)
         assert fat32_check_output.exit_code == 0
-        assert "Would remove" in fat32_check_output.stdout
-        assert "01" in fat32_check_output.stdout
-        assert "03" in fat32_check_output.stdout
-        assert f"01{os.sep}001" in fat32_check_output.stdout
-        assert f"03{os.sep}003" in fat32_check_output.stdout
+        assert "Would remove" in stout
+        assert "01" in stout
+        assert "03" in stout
+        assert f"01{os.sep}001" in stout
+        assert f"03{os.sep}003" in stout
 
 
 class TestSyncing:
@@ -369,13 +383,13 @@ class TestSyncing:
                 "--dry-run",
             ],
         )
-
+        stout = strip_ansi(sync_output.stdout)
         # THEN
         if sync_output.exit_code != 0:
-            print(sync_output.stdout)
+            print(stout)
         assert sync_output.exit_code == 0
-        assert f"+++ |01{os.sep}001| <--" in sync_output.stdout
-        assert f"--- |02{os.sep}002| <-- X" in sync_output.stdout
+        assert f"+++ |01{os.sep}001| <--" in stout
+        assert f"--- |02{os.sep}002| <-- X" in stout
 
     @e2e
     def test_syncing_dry_run_e2e(
@@ -448,15 +462,15 @@ class TestSyncing:
                 "--dry-run",
             ],
         )
-
+        stout = strip_ansi(sync_output.stdout)
         # THEN
         if sync_output.exit_code != 0:
-            print(sync_output.stdout)
+            print(stout)
         assert sync_output.exit_code == 0
         for comparison_result in expected_results:
             assert (
                 f"{comparison_result.dir_num}/{comparison_result.track_num}/{comparison_result.action}"
-                in sync_output.stdout
+                in stout
             )
 
     @e2e
@@ -503,10 +517,10 @@ class TestSyncing:
                 source_dir,
             ],
         )
-
+        stout = strip_ansi(sync_output.stdout)
         # THEN
         if sync_output.exit_code != 0:
-            print(sync_output.stdout)
+            print(stout)
         assert sync_output.exit_code == 0
         files01 = os.listdir(os.path.join(target_dir, "01"))
         files02 = os.listdir(os.path.join(target_dir, "02"))
@@ -576,9 +590,10 @@ class TestSyncing:
                 source_dir,
             ],
         )
+        stout = strip_ansi(sync_output.stdout)
         # THEN
         if sync_output.exit_code != 0:
-            print(sync_output.stdout)
+            print(stout)
         assert sync_output.exit_code == 0
-        assert str(CompareResultAction.copy_to_target) not in sync_output.stdout
-        assert str(CompareResultAction.delete_from_target) not in sync_output.stdout
+        assert str(CompareResultAction.copy_to_target) not in stout
+        assert str(CompareResultAction.delete_from_target) not in stout

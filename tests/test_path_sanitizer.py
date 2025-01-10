@@ -10,7 +10,7 @@ class TestPathSanitation:
         "path",
         [
             "E:",
-            "E:\\",
+            f"E:{os.sep}",
         ],
     )
     def test_sanitize_windows_volume_path(self, path):

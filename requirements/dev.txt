@@ -11,5 +11,6 @@ pytest-env
 pytest-mock
 pytest-mockito
 pytest-timeout
+strip_ansi
 wemake-python-styleguide
 wheel
