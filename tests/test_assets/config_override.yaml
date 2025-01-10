@@ -11,4 +11,4 @@ repository_source:
   track_number_match: 2
 repository_processing:
   diff_method: "hash_and_tags"
-  overrides_file_name: ".dfplayer_card_manager.yaml"
+  overrides_file_name: "dfplayer_card_manager.yaml"

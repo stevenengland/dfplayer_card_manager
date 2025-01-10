@@ -346,7 +346,6 @@ class TestSyncing:
     def test_syncing_dry_run_e2e(
         self,
         cli_runner,
-        when,
         test_assets_fs: FakeFileSystemHelper,
     ):
         # GIVEN
@@ -422,3 +421,80 @@ class TestSyncing:
                 f"{comparison_result.dir_num}/{comparison_result.track_num}/{comparison_result.action}"
                 in sync_output.stdout
             )
+
+    def test_syncing_e2e(
+        self,
+        cli_runner,
+        test_assets_fs_w: FakeFileSystemHelper,
+    ):
+        # GIVEN
+        source_dir = os.path.join(
+            test_assets_fs_w.test_assets_path,
+            "repositories",
+            "source",
+        )
+        target_dir = os.path.join(
+            test_assets_fs_w.test_assets_path,
+            "repositories",
+            "target",
+        )
+
+        mtime_before_02_002 = os.path.getmtime(
+            os.path.join(target_dir, "02", "002.mp3"),
+        )
+        mtime_before_02_003 = os.path.getmtime(
+            os.path.join(target_dir, "02", "003.mp3"),
+        )
+        mtime_before_02_004 = os.path.getmtime(
+            os.path.join(target_dir, "02", "004.mp3"),
+        )
+        mtime_before_02_005 = os.path.getmtime(
+            os.path.join(target_dir, "02", "005.mp3"),
+        )
+        mtime_before_02_006 = os.path.getmtime(
+            os.path.join(target_dir, "02", "006.mp3"),
+        )
+
+        # WHEN
+        sync_output = cli_runner.invoke(
+            app,
+            [
+                "-vvv",
+                "sync",
+                target_dir,
+                source_dir,
+            ],
+        )
+
+        # THEN
+        print(sync_output.stdout)
+        assert sync_output.exit_code == 0
+        files01 = os.listdir(os.path.join(target_dir, "01"))
+        files02 = os.listdir(os.path.join(target_dir, "02"))
+        assert len(files01) == 3
+        assert len(files02) == 6
+        assert "001.mp3" in files01
+        assert "002.mp3" in files01
+        assert "001.mp3" in files02
+        assert "002.mp3" in files02
+        assert mtime_before_02_002 == os.path.getmtime(
+            os.path.join(target_dir, "02", "002.mp3"),
+        )
+        assert "003.mp3" in files02
+        assert mtime_before_02_003 == os.path.getmtime(
+            os.path.join(target_dir, "02", "003.mp3"),
+        )
+        assert "004.mp3" in files02
+        assert mtime_before_02_004 != os.path.getmtime(
+            os.path.join(target_dir, "02", "004.mp3"),
+        )
+        assert "005.mp3" in files02
+        assert mtime_before_02_005 != os.path.getmtime(
+            os.path.join(target_dir, "02", "005.mp3"),
+        )
+        assert "006.mp3" in files02
+        assert mtime_before_02_006 != os.path.getmtime(
+            os.path.join(target_dir, "02", "006.mp3"),
+        )
+        assert "007.mp3" not in files02
+        assert "008.mp3" not in files02

@@ -274,6 +274,7 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
             unstuffed_compare_results,
         )
 
+    # ToDo: Rewrite to use CompareElement
     def write_change_to_target_repository(self, compare_result: CompareResult) -> None:
         if compare_result.action == CompareResultAction.delete_from_target:
             self.write_deletion_to_target_repository(
@@ -286,6 +287,7 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
                 compare_result.track_num,
             )
 
+    # ToDo: Rewrite to use CompareElement
     def write_deletion_to_target_repository(
         self,
         dir_number: int,
@@ -307,8 +309,7 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
         file_to_delete = os.path.join(
             self._target_repo_root_dir,
             str(dir_number).zfill(2),
-            str(track_number).zfill(3),
-            str(element_to_delete.file_type),
+            f"{str(track_number).zfill(3)}.{str(element_to_delete.file_type)}",
         )
 
         if os.path.isfile(file_to_delete):

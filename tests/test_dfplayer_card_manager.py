@@ -356,8 +356,7 @@ class TestDeletionsToTargetRepo:
         target_file_path = os.path.join(
             "target_root",
             str(dir_number).zfill(2),
-            str(track_number).zfill(3),
-            str(ValidFileType.mp3),
+            f"{str(track_number).zfill(3)}.{str(ValidFileType.mp3)}",
         )
         when(os.path).isfile(target_file_path).thenReturn(True)
         when(os).remove(target_file_path).thenReturn(None)

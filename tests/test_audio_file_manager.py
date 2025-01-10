@@ -190,6 +190,33 @@ class TestCopyingAudio:
 
         # THEN
 
+    def test_copy_audio_when_target_file_has_no_tags(
+        self,
+        sut: AudioFileManagerInterface,
+        when,
+    ):
+        # GIVEN
+        source_file_path = os.path.join("source_root", "01", "01.mp3")
+        target_file_path = os.path.join("target_root", "01", "01.mp3")
+        tags_to_append = TagCollection()
+        tags_to_append.artist = "artist_test"
+        tags_to_append.title = "title_test"
+        tags_to_append.album = "album_test"
+        tags_to_append.track_number = 99
+
+        audio_mock = MagicMock()
+        audio_mock.save = Mock(return_value=None)
+        when(shutil).copyfile(source_file_path, target_file_path).thenReturn(None)
+        when(eyed3).load(target_file_path).thenReturn(audio_mock)
+        # WHEN
+        sut.copy_audio(
+            source_file_path,
+            target_file_path,
+            tags_to_append,
+        )
+
+        # THEN
+
     @pytest.mark.skip(reason="https://github.com/pytest-dev/pyfakefs/issues/1105")
     @e2e
     def test_copy_audio_with_fs(

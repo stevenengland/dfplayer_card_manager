@@ -61,6 +61,8 @@ class AudioFileManager(AudioFileManagerInterface):
 
         # read audio from target file
         audio = self._read_audio(target_path)
+        if not audio.tag:
+            audio.initTag()
         audio.tag.artist = tags_to_append.artist or audio.tag.artist
         audio.tag.title = tags_to_append.title or audio.tag.title
         audio.tag.album = tags_to_append.album or audio.tag.album
