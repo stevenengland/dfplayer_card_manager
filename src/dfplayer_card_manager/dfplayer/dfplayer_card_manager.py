@@ -1,11 +1,7 @@
 import os
 from typing import Optional
 
-from dfplayer_card_manager.config import (
-    config_checker,
-    config_merger,
-    yaml_config,
-)
+from dfplayer_card_manager.config import config_checker, config_merger
 from dfplayer_card_manager.config.configuration import (
     Configuration,
     RepositoryConfig,
@@ -13,6 +9,7 @@ from dfplayer_card_manager.config.configuration import (
 from dfplayer_card_manager.dfplayer.dfplayer_card_manager_interface import (
     DfPlayerCardManagerInterface,
 )
+from dfplayer_card_manager.logging.logger_interface import LoggerInterface
 from dfplayer_card_manager.mp3.audio_file_manager_interface import (
     AudioFileManagerInterface,
 )
@@ -24,7 +21,10 @@ from dfplayer_card_manager.repository import (
     repository_element_updater,
     repository_finder,
 )
-from dfplayer_card_manager.repository.compare_results import CompareResult
+from dfplayer_card_manager.repository.compare_result import CompareResult
+from dfplayer_card_manager.repository.compare_result_actions import (
+    CompareResultAction,
+)
 from dfplayer_card_manager.repository.detection_source import DetectionSource
 from dfplayer_card_manager.repository.diff_modes import DiffMode
 from dfplayer_card_manager.repository.repository import Repository
@@ -35,11 +35,12 @@ from dfplayer_card_manager.repository.repository_element import (
 
 class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
 
-    def __init__(
+    def __init__(  # noqa: WPS211
         self,
         source_repo_root_dir: str,
         target_repo_root_dir: str,
         audio_manager: AudioFileManagerInterface,
+        logger: LoggerInterface,
         config: Optional[Configuration] = None,
     ):
         self._config_overrides: dict[str, RepositoryConfig] = {}
@@ -48,8 +49,9 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
         self._target_repo: Repository = Repository()
         self._source_repo_root_dir = source_repo_root_dir
         self._target_repo_root_dir = target_repo_root_dir
+        self._logger = logger
 
-        self._config: Configuration = config or self.read_config()
+        self._config: Configuration = config
 
     @property
     def audio_manager(self):
@@ -67,9 +69,17 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
     def source_repo_root_dir(self):
         return self._source_repo_root_dir
 
+    @source_repo_root_dir.setter
+    def source_repo_root_dir(self, source_repo_root_dir):
+        self._source_repo_root_dir = source_repo_root_dir
+
     @property
     def target_repo_root_dir(self):
         return self._target_repo_root_dir
+
+    @target_repo_root_dir.setter
+    def target_repo_root_dir(self, target_repo_root_dir):
+        self._target_repo_root_dir = target_repo_root_dir
 
     @property
     def source_repo(self):
@@ -89,6 +99,7 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
 
     # ToDo: tests
     def create_repositories(self) -> None:
+        self._reset()
         if not os.path.isdir(self._source_repo_root_dir):
             raise ValueError("Source repository root directory is not a directory")
         if not os.path.isdir(self._target_repo_root_dir):
@@ -186,12 +197,19 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
         # File reading portion of the update
         is_tag_reading_needed = self.is_tag_reading_needed(applied_config)
 
-        is_hash_reading_needed = self.is_hash_reading_needed(applied_config)
+        is_hash_reading_needed = self.is_hash_reading_needed()
+
+        element_full_path = os.path.join(
+            element.repo_root_dir,
+            element.dir,
+            element.file_name,
+        )
 
         if is_tag_reading_needed and is_hash_reading_needed:
             audio_content, id3_tags = (
                 self._audio_manager.read_audio_content_and_id3_tags(
-                    os.path.join(element.repo_root_dir, element.dir, element.file_name),
+                    element_full_path,
+                    self._target_repo_root_dir != element.repo_root_dir,
                 )
             )
             repository_element_updater.update_element_by_tags(
@@ -205,7 +223,8 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
             )
         elif is_tag_reading_needed and not is_hash_reading_needed:
             id3_tags = self._audio_manager.read_id3_tags(
-                os.path.join(element.repo_root_dir, element.dir, element.file_name),
+                element_full_path,
+                self._target_repo_root_dir != element.repo_root_dir,
             )
             repository_element_updater.update_element_by_tags(
                 element,
@@ -214,7 +233,7 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
             )
         elif not is_tag_reading_needed and is_hash_reading_needed:
             audio_content = self._audio_manager.read_audio_content(
-                os.path.join(element.repo_root_dir, element.dir, element.file_name),
+                element_full_path,
             )
             repository_element_updater.update_element_by_audio_content(
                 element,
@@ -224,7 +243,7 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
         # Final check
         repository_element_checker.check_element(element)
 
-    def is_hash_reading_needed(self, applied_config: RepositoryConfig) -> bool:
+    def is_hash_reading_needed(self) -> bool:
         return self._config.repository_processing.diff_method in {
             DiffMode.hash_and_tags,
             DiffMode.hash,
@@ -232,30 +251,44 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
 
     def is_tag_reading_needed(self, applied_config: RepositoryConfig) -> bool:
         return (
-            self._config.repository_processing.diff_method  # noqa: WPS222
-            == DiffMode.hash_and_tags
-            or self._config.repository_processing.diff_method == DiffMode.tags
-            or applied_config.title_source == DetectionSource.tag
+            applied_config.title_source == DetectionSource.tag  # noqa: WPS222
             or applied_config.artist_source == DetectionSource.tag
             or applied_config.album_source == DetectionSource.tag
             or applied_config.dir_number_source == DetectionSource.tag
             or applied_config.track_number_source == DetectionSource.tag
         )
 
-    def read_config(self) -> Configuration:
-        config_file = Configuration().repository_processing.overrides_file_name
-        if not os.path.isfile(config_file):
-            raise FileNotFoundError("Configuration file not found")
-
-        return yaml_config.create_yaml_object(config_file, Configuration)
-
-    def get_repositories_comparison(self) -> list[tuple[int, int, CompareResult]]:
-        return repository_comparator.compare_repository_elements(
+    def get_repositories_comparison(
+        self,
+        stuff_missing_elements=False,
+    ) -> list[CompareResult]:
+        unstuffed_compare_results = repository_comparator.compare_repository_elements(
             self._source_repo.elements,
             self._target_repo.elements,
             self._config.repository_processing.diff_method or DiffMode.hash_and_tags,
         )
 
+        if not stuff_missing_elements:
+            return unstuffed_compare_results
+
+        return repository_comparator.stuff_compare_results(
+            unstuffed_compare_results,
+        )
+
+    # ToDo: Rewrite to use CompareElement
+    def write_change_to_target_repository(self, compare_result: CompareResult) -> None:
+        if compare_result.action == CompareResultAction.delete_from_target:
+            self.write_deletion_to_target_repository(
+                compare_result.dir_num,
+                compare_result.track_num,
+            )
+        elif compare_result.action == CompareResultAction.copy_to_target:
+            self.write_copy_to_target_repository(
+                compare_result.dir_num,
+                compare_result.track_num,
+            )
+
+    # ToDo: Rewrite to use CompareElement
     def write_deletion_to_target_repository(
         self,
         dir_number: int,
@@ -277,8 +310,7 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
         file_to_delete = os.path.join(
             self._target_repo_root_dir,
             str(dir_number).zfill(2),
-            str(track_number).zfill(3),
-            str(element_to_delete.file_type),
+            f"{str(track_number).zfill(3)}.{str(element_to_delete.file_type)}",
         )
 
         if os.path.isfile(file_to_delete):
@@ -351,3 +383,8 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
         else:
             raise ValueError("The element does not belong to any of the repositories")
         return applied_config
+
+    def _reset(self) -> None:
+        self._source_repo = Repository()
+        self._target_repo = Repository()
+        self._config_overrides = {}

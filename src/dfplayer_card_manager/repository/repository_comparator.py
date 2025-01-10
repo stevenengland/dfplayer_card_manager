@@ -1,15 +1,63 @@
-from dfplayer_card_manager.repository.compare_results import CompareResult
+from dfplayer_card_manager.repository.compare_result import CompareResult
+from dfplayer_card_manager.repository.compare_result_actions import (
+    CompareResultAction,
+)
 from dfplayer_card_manager.repository.diff_modes import DiffMode
 from dfplayer_card_manager.repository.repository_element import (
     RepositoryElement,
 )
 
 
+# ToDo: Refactor this function to make it less complex and more efficient.
+def stuff_compare_results(  # noqa: WPS231
+    unstuffed_compare_results: list[CompareResult],
+) -> list[CompareResult]:
+    # get all distinct dir_num values from the list of CompareResult objects
+    dir_nums = sorted(
+        {compare_result.dir_num for compare_result in unstuffed_compare_results},
+    )
+    # get the highest track_num value for each dir_num
+    highest_track_num_per_dir = {
+        dir_num: max(
+            compare_result.track_num
+            for compare_result in unstuffed_compare_results
+            if compare_result.dir_num == dir_num
+        )
+        for dir_num in dir_nums
+    }
+
+    # for every dir_num, check if there is a CompareResult object from track_num 1 to the highest track_num value.
+    # If yes, add it to the stuffed_compare_results list.
+    # If not, add a CompareResult object with action set to "delete_from_target" to the stuffed_compare_results list.
+    stuffed_compare_results = []
+    for dir_num in dir_nums:
+        for track_num in range(1, highest_track_num_per_dir[dir_num] + 1):
+            found = False
+            for compare_result in unstuffed_compare_results:
+                if (
+                    compare_result.dir_num == dir_num
+                    and compare_result.track_num == track_num
+                ):
+                    stuffed_compare_results.append(compare_result)
+                    found = True
+                    break
+            if not found:
+                stuffed_compare_results.append(
+                    CompareResult(
+                        dir_num=dir_num,
+                        track_num=track_num,
+                        action=CompareResultAction.unstuff,
+                    ),
+                )
+
+    return stuffed_compare_results
+
+
 def compare_repository_elements(
     source: list[RepositoryElement],
     target: list[RepositoryElement],
     diff_mode: DiffMode,
-) -> list[tuple[int, int, CompareResult]]:
+) -> list[CompareResult]:
     comparison_results = []
 
     source_dict = {
@@ -23,16 +71,26 @@ def compare_repository_elements(
         if element.dir_number is not None and element.track_number is not None
     }
 
-    for source_key in source_dict:
+    for source_key, _source_target in source_dict.items():
         if source_key not in target_dict:
             comparison_results.append(
-                (source_key[0], source_key[1], CompareResult.copy_to_target),
+                CompareResult(
+                    dir_num=source_key[0],
+                    track_num=source_key[1],
+                    source_element=source_dict[source_key],
+                    action=CompareResultAction.copy_to_target,
+                ),
             )
 
     for target_key, _target_value in target_dict.items():
         if target_key not in source_dict:
             comparison_results.append(
-                (target_key[0], target_key[1], CompareResult.delete_from_target),
+                CompareResult(
+                    dir_num=target_key[0],
+                    track_num=target_key[1],
+                    target_element=target_dict[target_key],
+                    action=CompareResultAction.delete_from_target,
+                ),
             )
         else:
             if _should_copy_to_target(
@@ -41,11 +99,22 @@ def compare_repository_elements(
                 target_dict[target_key],
             ):
                 comparison_results.append(
-                    (target_key[0], target_key[1], CompareResult.copy_to_target),
+                    CompareResult(
+                        dir_num=target_key[0],
+                        track_num=target_key[1],
+                        source_element=source_dict[target_key],
+                        action=CompareResultAction.copy_to_target,
+                    ),
                 )
             else:
                 comparison_results.append(
-                    (target_key[0], target_key[1], CompareResult.no_change),
+                    CompareResult(
+                        dir_num=target_key[0],
+                        track_num=target_key[1],
+                        source_element=source_dict[target_key],
+                        target_element=target_dict[target_key],
+                        action=CompareResultAction.no_change,
+                    ),
                 )
 
     return comparison_results

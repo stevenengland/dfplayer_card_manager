@@ -12,7 +12,6 @@ from factories.repository_element_factory import create_repository_element
 from file_system_helper import FakeFileSystemHelper
 from mockito import mock
 
-from dfplayer_card_manager.config import yaml_config
 from dfplayer_card_manager.config.configuration import (
     Configuration,
     ProcessingConfig,
@@ -21,6 +20,7 @@ from dfplayer_card_manager.config.configuration import (
 from dfplayer_card_manager.dfplayer.dfplayer_card_manager import (
     DfPlayerCardManager,
 )
+from dfplayer_card_manager.logging.logger_interface import LoggerInterface
 from dfplayer_card_manager.mp3.audio_file_manager import (
     AudioFileManagerInterface,
 )
@@ -30,7 +30,10 @@ from dfplayer_card_manager.repository import (
     repository_comparator,
     repository_finder,
 )
-from dfplayer_card_manager.repository.compare_results import CompareResult
+from dfplayer_card_manager.repository.compare_result import CompareResult
+from dfplayer_card_manager.repository.compare_result_actions import (
+    CompareResultAction,
+)
 from dfplayer_card_manager.repository.detection_source import DetectionSource
 from dfplayer_card_manager.repository.diff_modes import DiffMode
 from dfplayer_card_manager.repository.repository import Repository
@@ -45,6 +48,7 @@ e2e = pytest.mark.skipif("not config.getoption('e2e')")
 
 @pytest.fixture(scope="function", name="sut")
 def dfplayer_card_manager() -> DfPlayerCardManager:
+    logger_mock = mock(LoggerInterface, strict=False)
     audio_file_manager_mock = mock(AudioFileManagerInterface, strict=False)
     configuration = Configuration()
     configuration.repository_source = create_source_repo_config()
@@ -53,6 +57,7 @@ def dfplayer_card_manager() -> DfPlayerCardManager:
         "source_root",
         "target_root",
         audio_file_manager_mock,
+        logger_mock,
         configuration,
     )
     return sut  # noqa: WPS331
@@ -68,33 +73,10 @@ def dfplayer_card_manager_e2e() -> DfPlayerCardManager:
         "source_root",
         "target_root",
         AudioFileManagerInterface(),
+        LoggerInterface(),
         configuration,
     )
     return sut  # noqa: WPS331
-
-
-class TestConfigReading:
-    def test_config_reading_succeeds(self, sut: DfPlayerCardManager, when):
-        # GIVEN
-        init_config = Configuration()
-        init_config.repository_processing.diff_method = DiffMode.tags
-        when(os.path).isfile(
-            Configuration().repository_processing.overrides_file_name,
-        ).thenReturn(True)
-        when(yaml_config).create_yaml_object(...).thenReturn(init_config)
-        # WHEN
-        config = sut.read_config()
-        # THEN
-        assert config.repository_processing.diff_method == DiffMode.tags
-
-    def test_config_reading_raises(self, sut: DfPlayerCardManager, when):
-        # GIVEN
-        when(os.path).isfile(
-            Configuration().repository_processing.overrides_file_name,
-        ).thenReturn(False)
-        # WHEN
-        with pytest.raises(FileNotFoundError):
-            sut.read_config()
 
 
 class TestRepositoryTreeCreation:
@@ -297,15 +279,49 @@ class TestRepositoryComparison:
         # GIVEN
         when(repository_comparator).compare_repository_elements(...).thenReturn(
             [
-                (50, 50, CompareResult.copy_to_target),
-                (51, 51, CompareResult.delete_from_target),
-                (1, 2, CompareResult.no_change),
+                CompareResult(
+                    dir_num=50,
+                    track_num=50,
+                    action=CompareResultAction.copy_to_target,
+                ),
+                CompareResult(),
+                CompareResult(),
             ],
         )
         # WHEN
         comparison_results = sut.get_repositories_comparison()
         # THEN
-        assert (50, 50, CompareResult.copy_to_target) in comparison_results
+        assert comparison_results[0].dir_num == 50
+        assert comparison_results[0].track_num == 50
+        assert comparison_results[0].action == CompareResultAction.copy_to_target
+        assert len(comparison_results) == 3
+
+    def test_repository_comparison_with_stuffing_succeeds(
+        self,
+        sut: DfPlayerCardManager,
+        when,
+    ):
+        # GIVEN
+        when(repository_comparator).compare_repository_elements(...).thenReturn(
+            [],
+        )
+        when(repository_comparator).stuff_compare_results(...).thenReturn(
+            [
+                CompareResult(
+                    dir_num=50,
+                    track_num=50,
+                    action=CompareResultAction.copy_to_target,
+                ),
+                CompareResult(),
+                CompareResult(),
+            ],
+        )
+        # WHEN
+        comparison_results = sut.get_repositories_comparison(True)
+        # THEN
+        assert comparison_results[0].dir_num == 50
+        assert comparison_results[0].track_num == 50
+        assert comparison_results[0].action == CompareResultAction.copy_to_target
         assert len(comparison_results) == 3
 
 
@@ -340,8 +356,7 @@ class TestDeletionsToTargetRepo:
         target_file_path = os.path.join(
             "target_root",
             str(dir_number).zfill(2),
-            str(track_number).zfill(3),
-            str(ValidFileType.mp3),
+            f"{str(track_number).zfill(3)}.{str(ValidFileType.mp3)}",
         )
         when(os.path).isfile(target_file_path).thenReturn(True)
         when(os).remove(target_file_path).thenReturn(None)

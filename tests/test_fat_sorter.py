@@ -93,6 +93,3 @@ class TestFatNeedsSorting:
         # THEN
         assert not is_sorted_before
         assert is_sorted_after
-
-    def test_is_fat_root_sorted2(self, sut: FatSorter, when):  # noqa: WPS231
-        sut.is_fat_volume_sorted("E:\\")

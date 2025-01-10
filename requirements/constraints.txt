@@ -15,6 +15,7 @@ pytest-mock==3.14.0
 pytest-mockito==0.0.4
 pytest-timeout==2.3.1
 pyyaml==6.0.2
+strip_ansi==0.1.1
 types-PyYAML==6.0.12.20240917
 typer==0.15.1
 wemake-python-styleguide==0.19.2

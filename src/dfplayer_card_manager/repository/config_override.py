@@ -19,5 +19,5 @@ def get_config_overrides(
                     RepositoryConfig,
                 )
 
-            config_overrides[subdir] = config
+                config_overrides[subdir] = config
     return config_overrides

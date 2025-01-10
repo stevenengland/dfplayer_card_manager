@@ -71,6 +71,13 @@ class TestReadAudio:
         # GIVEN
         # WHEN
         # THEN
+        tags = sut.read_id3_tags(
+            os.path.join(test_assets_fs.test_assets_path, "0003.mp3"),
+            check_tags=False,
+        )
+
+        assert tags.title is None
+
         with pytest.raises(expected_exception=TagError, match="Invalid"):
             sut.read_id3_tags(
                 os.path.join(test_assets_fs.test_assets_path, "0003.mp3"),
@@ -130,6 +137,28 @@ class TestReadAudio:
         assert len(sut_result_1) == 3605
         assert isinstance(sut_result_2, TagCollection)
 
+    @e2e
+    def test_read_audio_content_and_id3_tags_from_file_wo_tags(
+        self,
+        sut: AudioFileManagerInterface,
+        test_assets_fs: FakeFileSystemHelper,
+    ):
+        # GIVEN
+        # WHEN
+        # THEN
+        sut_result_1, sut_result_2 = sut.read_audio_content_and_id3_tags(
+            os.path.join(test_assets_fs.test_assets_path, "0003.mp3"),
+            check_tags=False,
+        )
+
+        assert len(sut_result_1) == 3605
+        assert isinstance(sut_result_2, TagCollection)
+
+        with pytest.raises(expected_exception=TagError, match="Invalid"):
+            sut_result_1, sut_result_2 = sut.read_audio_content_and_id3_tags(
+                os.path.join(test_assets_fs.test_assets_path, "0003.mp3"),
+            )
+
 
 class TestCopyingAudio:
     def test_copy_audio(
@@ -149,6 +178,33 @@ class TestCopyingAudio:
         audio_mock = MagicMock()
         audio_mock.tag = MagicMock()
         audio_mock.tag.version = (2, 4)
+        audio_mock.save = Mock(return_value=None)
+        when(shutil).copyfile(source_file_path, target_file_path).thenReturn(None)
+        when(eyed3).load(target_file_path).thenReturn(audio_mock)
+        # WHEN
+        sut.copy_audio(
+            source_file_path,
+            target_file_path,
+            tags_to_append,
+        )
+
+        # THEN
+
+    def test_copy_audio_when_target_file_has_no_tags(
+        self,
+        sut: AudioFileManagerInterface,
+        when,
+    ):
+        # GIVEN
+        source_file_path = os.path.join("source_root", "01", "01.mp3")
+        target_file_path = os.path.join("target_root", "01", "01.mp3")
+        tags_to_append = TagCollection()
+        tags_to_append.artist = "artist_test"
+        tags_to_append.title = "title_test"
+        tags_to_append.album = "album_test"
+        tags_to_append.track_number = 99
+
+        audio_mock = MagicMock()
         audio_mock.save = Mock(return_value=None)
         when(shutil).copyfile(source_file_path, target_file_path).thenReturn(None)
         when(eyed3).load(target_file_path).thenReturn(audio_mock)

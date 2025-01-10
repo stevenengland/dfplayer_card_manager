@@ -20,6 +20,12 @@ def test_assets_fs(fs):
     yield fsh
 
 
+@pytest.fixture(scope="function")
+def test_assets_fs_w(fs):
+    fsh = FakeFileSystemHelper(TEST_ASSETS_DIR, fs, read_only=False)
+    yield fsh
+
+
 def pytest_addoption(parser):
     parser.addoption(
         "--e2e",
