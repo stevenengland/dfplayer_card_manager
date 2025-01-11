@@ -1,0 +1,125 @@
+---
+name: Release Publishing
+
+"on":
+  push:
+    branches:
+      - main
+      # paths:
+      #   - "current-version.txt"
+
+jobs:
+  build-and-upload-artifacts:
+    name: Build and upload artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        # with:
+        # python-version: '3.13' # The version of Python is per default detected from .python-version file
+
+      - name: Install dependencies
+        shell: bash
+        run: "python ./tools/create_venv.py"
+
+      - name: Perform code checks
+        shell: bash
+        run: "python ./tools/checks.py"
+
+      - name: Perform Unit and Coverage tests
+        shell: bash
+        run: "python ./tools/tests.py --e2e"
+
+      - name: Build and check package
+        shell: bash
+        run: "python ./tools/build.py"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist/
+
+  pypi-test-publish:
+    name: Upload release to PyPI
+    needs: [build-and-upload-artifacts]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          # packages-dir: dist/ # default
+          repository-url: https://test.pypi.org/
+
+  detect-and-tag-new-version:
+    name: Detect and tag new version.
+    runs-on: ubuntu-latest
+    outputs:
+      new_tag: ${{ steps.check-for-new-version.outputs.tag }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # Last two commits for salsify/action-detect-and-tag-new-version
+
+      - name: Check if there is a parent commit
+        id: check-parent-commit
+        run: |
+          echo "sha=$(git rev-parse --verify --quiet HEAD^)" >> $GITHUB_OUTPUT
+
+      - name: Detect and tag new version
+        id: check-for-new-version
+        if: steps.check-parent-commit.outputs.sha
+        uses: salsify/action-detect-and-tag-new-version@v2
+        with:
+          tag-template: "{VERSION}"
+          version-command: |
+            cat current-version.txt
+
+  pypi_publish:
+    name: Upload release to PyPI
+    needs: [detect-and-tag-new-version, build-and-upload-artifacts]
+    if: needs.detect-and-tag-new-version.outputs.new_tag != ''
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        # with:
+        # packages-dir: dist/ # default
+
+  release-notes:
+    name: Create release notes
+    needs: [detect-and-tag-new-version, pypi_publish]
+    if: needs.detect-and-tag-new-version.outputs.new_tag != ''
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish the release notes
+        uses: release-drafter/release-drafter@v6
+        with:
+          publish: ${{ needs.detect-and-tag-new-version.outputs.new_tag != '' }}
+          tag: ${{ needs.detect-and-tag-new-version.outputs.new_tag }}
+          config-name: release_drafting_config.yml
+          disable-autolabeler: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.WORKFLOW_GENERAL_RW }}

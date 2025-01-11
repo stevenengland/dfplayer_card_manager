@@ -1,5 +1,6 @@
 -r ./base.txt
 black
+check-wheel-contents
 faker
 isort
 mypy
@@ -12,5 +13,6 @@ pytest-mock
 pytest-mockito
 pytest-timeout
 strip_ansi
+twine
 wemake-python-styleguide
 wheel
