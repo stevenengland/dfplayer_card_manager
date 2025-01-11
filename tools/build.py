@@ -1,3 +1,4 @@
+import glob
 import os
 import subprocess  # noqa: S404
 import sys
@@ -33,14 +34,17 @@ def call_build_check_twine() -> None:
 
 def call_build_check_wheel() -> None:
     print("** BUILD CHECK WHEEL **")
+    wheel_files = glob.glob("dist/*.whl")
     cmd_path = os.path.join(get_os_specific_command_directory(), "check-wheel-contents")
-    cmd = [
-        cmd_path,
-        f"dist{os.sep}*.whl",
-    ]
-    subprocess.run(cmd, check=True)  # noqa: S607, S603
+    for wheel in wheel_files:
+        cmd = [
+            cmd_path,
+            wheel,
+        ]
+        print(f"Checking {wheel}:")
+        subprocess.run(cmd, check=True)  # noqa: S607, S603
 
-    print("Calling twine check completed successfully.")
+    print("Calling check-wheel-contents completed successfully.")
 
 
 call_build(sys.argv[1:])
