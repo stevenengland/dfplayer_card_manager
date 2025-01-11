@@ -1,6 +1,6 @@
 black==24.4.2
 eyed3==0.9.7
-faker==33.1.0
+faker==33.3.1
 FATtools==1.0.39
 isort==5.13.2
 multipledispatch==1.0.0
