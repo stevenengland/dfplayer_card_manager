@@ -21,7 +21,7 @@ concurrency:
 jobs:
   # Performs quick checks before the expensive test runs
   check_and_coverage-test:
-    if: contains(github.event.head_commit.message, '[skip ci]') == false
+    if: contains(github.event.pull_request.title, '[skip ci]') == false
     name: "Check and Coverage Test"
     runs-on: ubuntu-latest
 
@@ -51,7 +51,7 @@ jobs:
         run: "python ./tools/build.py"
 
   platform_testing:
-    if: contains(github.event.head_commit.message, '[skip ci]') == false
+    if: contains(github.event.pull_request.title, '[skip ci]') == false
     needs: check_and_coverage-test
     strategy:
       matrix:
