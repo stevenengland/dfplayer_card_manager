@@ -6,7 +6,7 @@ name: Release Publishing
     branches:
       - main
       # paths:
-      #   - "current-version.txt"
+      #   - "version.txt"
 
 jobs:
   detect-and-tag-new-version:
@@ -32,7 +32,7 @@ jobs:
         with:
           tag-template: "{VERSION}"
           version-command: |
-            cat current-version.txt
+            cat version.txt
 
   build-and-upload-artifacts:
     name: Build and upload artifacts
