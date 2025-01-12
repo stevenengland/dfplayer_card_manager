@@ -9,8 +9,34 @@ name: Release Publishing
       #   - "current-version.txt"
 
 jobs:
+  detect-and-tag-new-version:
+    name: Detect and tag new version.
+    runs-on: ubuntu-latest
+    outputs:
+      new_tag: ${{ steps.check-for-new-version.outputs.tag }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # Last two commits for salsify/action-detect-and-tag-new-version
+
+      - name: Check if there is a parent commit
+        id: check-parent-commit
+        run: |
+          echo "sha=$(git rev-parse --verify --quiet HEAD^)" >> $GITHUB_OUTPUT
+
+      - name: Detect and tag new version
+        id: check-for-new-version
+        if: steps.check-parent-commit.outputs.sha
+        uses: salsify/action-detect-and-tag-new-version@v2
+        with:
+          tag-template: "{VERSION}"
+          version-command: |
+            cat current-version.txt
+
   build-and-upload-artifacts:
     name: Build and upload artifacts
+    needs: [detect-and-tag-new-version]
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repository
@@ -20,6 +46,42 @@ jobs:
         uses: actions/setup-python@v5
         # with:
         # python-version: '3.13' # The version of Python is per default detected from .python-version file
+
+      - name: Create test release version in the current version file
+        if: ${{ contains(github.event.head_commit.message, '[test-release]') && needs.detect-and-tag-new-version.outputs.new_tag == '' }}
+        run: |
+          response=$(curl -s https://test.pypi.org/pypi/dfplayer-card-manager/json || echo "{}")
+          latest_previous_version=$(echo $response | jq --raw-output "select(.releases != null) | .releases | keys_unsorted | last")
+          new_version=''
+          if [ -z "$latest_previous_version" ]; then
+            echo "Package not found on Test PyPI."
+            latest_previous_version="0.0.0"
+          fi
+
+          echo "Latest version on PyPI: ->$latest_previous_version"
+
+          # Check if version matches the dev format (e.g., 0.0.1.dev1)
+          if [[ $latest_previous_version =~ ^([0-9]+\.[0-9]+\.[0-9]+)\.dev([0-9]+)$ ]]; then
+            # Extract the base version and dev number
+            local base_version=${BASH_REMATCH[1]}
+            local dev_num=${BASH_REMATCH[2]}
+
+            # Increment dev number
+            local new_dev_num=$((dev_num + 1))
+            new_version="${base_version}.dev${new_dev_num}"
+
+          # Check if version matches the standard format (e.g., 0.0.1)
+          elif [[ $latest_previous_version =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            # Add .dev1 to the version
+            new_version="${latest_previous_version}.dev1"
+          else
+            echo "Error: Invalid version format" >&2
+            exit 1
+          fi
+
+          echo "New version: $new_version"
+
+          echo "$new_version" > version.txt
 
       - name: Install dependencies
         shell: bash
@@ -61,31 +123,6 @@ jobs:
         with:
           # packages-dir: dist/ # default
           repository-url: https://test.pypi.org/
-
-  detect-and-tag-new-version:
-    name: Detect and tag new version.
-    runs-on: ubuntu-latest
-    outputs:
-      new_tag: ${{ steps.check-for-new-version.outputs.tag }}
-    steps:
-      - name: Check out the repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2 # Last two commits for salsify/action-detect-and-tag-new-version
-
-      - name: Check if there is a parent commit
-        id: check-parent-commit
-        run: |
-          echo "sha=$(git rev-parse --verify --quiet HEAD^)" >> $GITHUB_OUTPUT
-
-      - name: Detect and tag new version
-        id: check-for-new-version
-        if: steps.check-parent-commit.outputs.sha
-        uses: salsify/action-detect-and-tag-new-version@v2
-        with:
-          tag-template: "{VERSION}"
-          version-command: |
-            cat current-version.txt
 
   pypi_publish:
     name: Upload release to PyPI
