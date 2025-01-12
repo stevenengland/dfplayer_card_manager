@@ -55,7 +55,7 @@ jobs:
           new_version=''
           if [ -z "$latest_previous_version" ]; then
             echo "Package not found on Test PyPI."
-            latest_previous_version="0.0.0"
+            exit 1
           fi
 
           echo "Latest version on PyPI: ->$latest_previous_version"
