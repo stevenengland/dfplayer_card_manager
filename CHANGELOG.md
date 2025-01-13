@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.1.2 - 2025-01-13
+
+### paperless-ngx ansible role 0.1.2
+
+#### Bug Fixes
+
+- fix: remove unused pytest import from audio_file_manager.py @stevenengland ([#33](https://github.com/stevenengland/dfplayer_card_manager/pull/33))
+- fix: correct spelling of 'advertisment' to 'advert' in multiple files @stevenengland ([#32](https://github.com/stevenengland/dfplayer_card_manager/pull/32))
+
+#### Maintenance
+
+- ci: update repository URL for PyPI publishing in workflow @stevenengland ([#31](https://github.com/stevenengland/dfplayer_card_manager/pull/31))
+
+**Full Changelog**: https://github.com/stevenengland/dfplayer_card_manager/compare/0.1.1...0.1.2
+
 ## 0.1.1 - 2025-01-12
 
 ### paperless-ngx ansible role 0.1.1
@@ -20,10 +35,8 @@
 - ci: add build and package check step to code testing workflow @stevenengland ([#22](https://github.com/stevenengland/dfplayer_card_manager/pull/22))
 - ci: add workflow for automatic changelog updating on release @stevenengland ([#21](https://github.com/stevenengland/dfplayer_card_manager/pull/21))
 - ci: update GitHub token reference in dependabot auto-merge workflow @stevenengland ([#20](https://github.com/stevenengland/dfplayer_card_manager/pull/20))
-
 </details>
 #### Dependencies
-
 - fix(deps): bump types-pyyaml from 6.0.12.20240917 to 6.0.12.20241230 in /requirements @dependabot ([#10](https://github.com/stevenengland/dfplayer_card_manager/pull/10))
 - fix(deps): bump pytest from 8.2.1 to 8.3.4 in /requirements @dependabot ([#2](https://github.com/stevenengland/dfplayer_card_manager/pull/2))
 
