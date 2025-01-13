@@ -15,7 +15,7 @@ def main() -> None:
         exit(1)
     dirs_to_create = [
         "mp3",
-        "advertisment",
+        "advert",
         "01",
         "02",
         "03",

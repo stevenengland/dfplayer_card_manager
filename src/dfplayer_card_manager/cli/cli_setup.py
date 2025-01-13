@@ -92,7 +92,7 @@ def _setup_content_checker(config: RepositoryConfig) -> DfPlayerCardContentCheck
         valid_root_dir_pattern=config.valid_subdir_pattern,
         valid_subdir_files_pattern=config.valid_subdir_files_pattern,
         valid_subdir_files_track_number_match=config.track_number_match,
-        root_dir_exceptions={"mp3", "advertisment"},
+        root_dir_exceptions={"mp3", "advert"},
     )
 
 
