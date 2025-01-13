@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.1.3 - 2025-01-13
+
+### paperless-ngx ansible role 0.1.3
+
+#### Bug Fixes
+
+- fix: add __init__.py file to os module @stevenengland ([#39](https://github.com/stevenengland/dfplayer_card_manager/pull/39))
+- fix(deps): bump crazy-max/ghaction-github-labeler from 5.0.0 to 5.1.0 @dependabot ([#34](https://github.com/stevenengland/dfplayer_card_manager/pull/34))
+- fix(deps): bump actions/download-artifact from 3 to 4 @dependabot ([#35](https://github.com/stevenengland/dfplayer_card_manager/pull/35))
+- fix(deps): bump actions/upload-artifact from 3 to 4 @dependabot ([#36](https://github.com/stevenengland/dfplayer_card_manager/pull/36))
+
+#### Dependencies
+
+- fix(deps): bump crazy-max/ghaction-github-labeler from 5.0.0 to 5.1.0 @dependabot ([#34](https://github.com/stevenengland/dfplayer_card_manager/pull/34))
+- fix(deps): bump actions/download-artifact from 3 to 4 @dependabot ([#35](https://github.com/stevenengland/dfplayer_card_manager/pull/35))
+- fix(deps): bump actions/upload-artifact from 3 to 4 @dependabot ([#36](https://github.com/stevenengland/dfplayer_card_manager/pull/36))
+
+**Full Changelog**: https://github.com/stevenengland/dfplayer_card_manager/compare/0.1.2...0.1.3
+
 ## 0.1.2 - 2025-01-13
 
 ### paperless-ngx ansible role 0.1.2
@@ -39,5 +58,4 @@
 #### Dependencies
 - fix(deps): bump types-pyyaml from 6.0.12.20240917 to 6.0.12.20241230 in /requirements @dependabot ([#10](https://github.com/stevenengland/dfplayer_card_manager/pull/10))
 - fix(deps): bump pytest from 8.2.1 to 8.3.4 in /requirements @dependabot ([#2](https://github.com/stevenengland/dfplayer_card_manager/pull/2))
-
 **Full Changelog**: https://github.com/stevenengland/dfplayer_card_manager/compare/...0.1.1
