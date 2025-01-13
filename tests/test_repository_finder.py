@@ -23,7 +23,7 @@ class TestValidSubdirDetection:
             [
                 "01",
                 "mp3",
-                "advertisment",
+                "advert",
                 "02",
                 "003",
                 "3",
@@ -55,7 +55,7 @@ class TestValidFileDetectionInSubdirs:
             [
                 "01.file",
                 "002.mp3",
-                "advertisment",
+                "advert",
                 "006.mp3",
                 "003",
                 "001.mp3",

@@ -17,7 +17,7 @@ def sd_card_cleaner() -> DfPlayerCardContentChecker:
         valid_root_dir_pattern=r"^\d{2}$",
         valid_subdir_files_pattern=r"^(\d{3})\.mp3$",
         valid_subdir_files_track_number_match=1,
-        root_dir_exceptions={"mp3", "advertisment"},
+        root_dir_exceptions={"mp3", "advert"},
     )
     return sut  # noqa: WPS331
 
@@ -33,7 +33,7 @@ class TestUnwantedDirsAndFiles:
         when(os).listdir(sd_root_path).thenReturn(
             [
                 "mp3",
-                "advertisment",
+                "advert",
                 "01.file",  # error
                 "02",
                 "003",  # error

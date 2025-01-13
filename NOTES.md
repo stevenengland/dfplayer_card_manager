@@ -1,6 +1,6 @@
 - source ungereimtheiten finden
   - mps3
-  - advertisment
+  - advert
   - Ordner ungleich 00._ bis 99._ reporten und deleten, auch die geheimen
 - 00._ bis 99._ source Verzeichnis lesen
 
