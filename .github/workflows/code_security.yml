@@ -39,6 +39,6 @@ jobs:
 
       # Scan the dependencies for security vulnerabilities
       - name: Run pip-audit
-        uses: pypa/gh-action-pip-audit@v1.0.0
+        uses: pypa/gh-action-pip-audit@v1
         with:
           inputs: ./requirements/constraints.txt ./requirements/base.txt
