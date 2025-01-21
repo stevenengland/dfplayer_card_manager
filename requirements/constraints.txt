@@ -6,7 +6,7 @@ FATtools==1.0.39
 isort==5.13.2
 multipledispatch==1.0.0
 mypy==1.10.0
-pre-commit==3.8.0
+pre-commit==4.1.0
 pydantic==2.10.4
 pyfakefs==5.7.4
 pytest==8.3.4
