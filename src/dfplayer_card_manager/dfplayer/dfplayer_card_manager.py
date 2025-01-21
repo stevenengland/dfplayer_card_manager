@@ -116,11 +116,22 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
     def init_repositories(self) -> None:
         source_repository_tree = self.get_source_repository_tree()
         target_repository_tree = self.get_target_repository_tree()
+        dir_counter = 0
+        file_counter = 0
+        last_subdirectory = ""
         for source_subdirectory, source_file in source_repository_tree:
+            if source_subdirectory != last_subdirectory:
+                dir_counter += 1
+                file_counter = 0
+            last_subdirectory = source_subdirectory
+            file_counter += 1
+
             element = RepositoryElement()
             element.repo_root_dir = self._source_repo_root_dir or ""
             element.dir = source_subdirectory
-            element.file_name = source_file
+            element.file_name = source_file  # alphabetical order
+            element.dir_number = dir_counter  # alphabetical order
+            element.track_number = file_counter
             self._source_repo.elements.append(element)
         for target_subdirectory, target_file in target_repository_tree:
             element = RepositoryElement()
@@ -139,10 +150,14 @@ class DfPlayerCardManager(DfPlayerCardManagerInterface):  # noqa: WPS214
         overrides = config_override.get_config_overrides(
             self._source_repo_root_dir,
             # get all distinct subdirs from the source repository
-            [element.dir or "" for element in self._source_repo.elements],
+            repository_finder.get_valid_root_dirs(
+                self._source_repo_root_dir,
+                self._config.repository_source.valid_subdir_pattern,
+            ),
             self._config.repository_processing.overrides_file_name,
         )
         for subdir, config in overrides.items():
+            self._logger.debug(f"Found config override for subdir: {subdir}")
             overrides[subdir] = config_merger.merge_configs(
                 self._config.repository_source,
                 config,

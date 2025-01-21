@@ -4,7 +4,10 @@ import pytest
 from mockito import ANY
 
 from dfplayer_card_manager.config import yaml_config
-from dfplayer_card_manager.config.configuration import RepositoryConfig
+from dfplayer_card_manager.config.configuration import (
+    OverrideConfig,
+    RepositoryConfig,
+)
 from dfplayer_card_manager.repository import config_override
 
 pytestmark = pytest.mark.usefixtures("unstub")
@@ -23,13 +26,19 @@ class TestConfigOverride:
             os.path.join("test", "01", "dfplayer_card_manager"),
             ANY,
         ).thenReturn(
-            RepositoryConfig(valid_subdir_pattern="test_subdirs"),
+            OverrideConfig(
+                repository_source=RepositoryConfig(valid_subdir_pattern="test_subdirs"),
+            ),
         )
         when(yaml_config).create_yaml_object(
             os.path.join("test", "02", "dfplayer_card_manager"),
             ANY,
         ).thenReturn(
-            RepositoryConfig(valid_subdir_files_pattern="test_files"),
+            OverrideConfig(
+                repository_source=RepositoryConfig(
+                    valid_subdir_files_pattern="test_files",
+                ),
+            ),
         )
         # WHEN
         overrides = config_override.get_config_overrides(

@@ -10,7 +10,7 @@ from factories.configuration_factory import (
 )
 from factories.repository_element_factory import create_repository_element
 from file_system_helper import FakeFileSystemHelper
-from mockito import mock
+from mockito import ANY, mock
 
 from dfplayer_card_manager.config.configuration import (
     Configuration,
@@ -139,28 +139,43 @@ class TestRepoInit:
             [
                 ("01", "01.mp3"),
                 ("03", "01.mp3"),
+                ("03", "03.mp3"),
             ],
         )
         # WHEN
         sut.init_repositories()
         # THEN
+        # General item assertions
         assert sut.target_repo.elements[0].repo_root_dir == sut.target_repo_root_dir
         assert sut.target_repo.elements[0].dir == "01"
         assert sut.target_repo.elements[0].file_name == "01.mp3"
         assert sut.target_repo.elements[1].dir == "02"
         assert sut.target_repo.elements[1].file_name == "01.mp3"
+
         assert sut.source_repo.elements[0].repo_root_dir == sut.source_repo_root_dir
         assert sut.source_repo.elements[0].dir == "01"
         assert sut.source_repo.elements[0].file_name == "01.mp3"
         assert sut.source_repo.elements[1].dir == "03"
         assert sut.source_repo.elements[1].file_name == "01.mp3"
 
+        # Specific item assertions for alphabetical sorting in source repo
+        assert sut.source_repo.elements[0].dir_number == 1
+        assert sut.source_repo.elements[0].track_number == 1
+        assert sut.source_repo.elements[1].dir_number == 2
+        assert sut.source_repo.elements[1].track_number == 1
+        assert sut.source_repo.elements[2].dir_number == 2
+        assert sut.source_repo.elements[2].track_number == 2
+
 
 class TestConfigOverrides:
     def test_reading_config_overrides_succeeds(self, sut: DfPlayerCardManager, when):
         # GIVEN
-
-        when(config_override).get_config_overrides(...).thenReturn(
+        when(repository_finder).get_valid_root_dirs(...).thenReturn(["01", "03"])
+        when(config_override).get_config_overrides(
+            ANY(str),
+            ["01", "03"],
+            ANY,
+        ).thenReturn(
             {
                 "01": RepositoryConfig(valid_subdir_files_pattern="test"),
                 "03": RepositoryConfig(valid_subdir_files_pattern="test2"),

@@ -39,7 +39,9 @@ audio_repo_root
 
 In the directory where you store the original audio files that can be synced to the SD card, you can place a configuration file named `dfplayer_card_manager.yaml` where you can override the default behavior of the `sync` command. You can also place further same named files in subdirectories of your repository to override the settings for just one directory during the sync process.
 
-The `dfplayer_card_manager.yaml` file can contain options for two blocks: Options regarding the source audio repository itself (`repository_source`) and special options regarding the sync behaviour (`repository_processing`)
+The `dfplayer_card_manager.yaml` file in the audio repo root directory can contain options for two blocks: Options regarding the source audio repository itself (`repository_source`) and special options regarding the sync behaviour (`repository_processing`).
+
+Within the subdirectories of the audio root directory only overrides of the block `repository_source` are accepted (for now).
 
 Here is an example:
 
@@ -50,10 +52,10 @@ audio_repo_root
 |   ├── 002.anotherone.mp3
 |   ├── ...
 |   ├── 255
-|   └── dfplayer_card_manager.yaml (override per directory)
+|   └── dfplayer_card_manager.yaml (override per directory, can override repository_source)
 ├── ...
 ├── 99.more.stuff/
-└── dfplayer_card_manager.yaml (main config)
+└── dfplayer_card_manager.yaml (main config, can override repository_source and repository_processing variables)
 ```
 
 ---
@@ -89,24 +91,26 @@ If there are two files given:
 
 - sd_root/01/001.mp3
 - audio_repo_root/01.superstars.bestoff/001.supertitleone.mp3
-  then the `sync` command can be instructed how to tell if the file on the SD card needs to be overwritten.
+
+then the `sync` command can be instructed how to tell if the file on the SD card needs to be overwritten.
 
 > Hint: The `sync` command will determine attributes like title and artist from the file in the audio repository (identified by `DetectionSorces`) and will add them as ID3 tags to the file stored on the SD card.
 
-| Value         | Description                                                                                                                                                               |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| none          | Does not compare file contents, only checks file existence (in the above scenario nothing will be done)                                                                   |
-| hash          | Compares audio contents (tags excluded, only the audio portion is considered) by calculating and comparing the file content hashes                                        |
-| tags          | Compares metadata (ID3 tags) of the file on the SD card for differences compared to the attributes of the file in the audio repository identified via `DetectionSources`. |
-| hash_and_tags | Uses both hash and tag comparison.                                                                                                                                        |
+| Value           | Description                                                                                                                                                               |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `none`          | Does not compare file contents, only checks file existence (in the above scenario nothing will be done)                                                                   |
+| `hash`          | Compares audio contents (tags excluded, only the audio portion is considered) by calculating and comparing the file content hashes                                        |
+| `tags`          | Compares metadata (ID3 tags) of the file on the SD card for differences compared to the attributes of the file in the audio repository identified via `DetectionSources`. |
+| `hash_and_tags` | Uses both hash and tag comparison.                                                                                                                                        |
 
 ## `DetectionSource`
 
-| Value      | Description                                                           |
-| ---------- | --------------------------------------------------------------------- |
-| `dirname`  | Extracts metadata from the parent directory name of the audio file.   |
-| `filename` | Extracts metadata from the filename of the audio file.                |
-| `tag`      | Extracts metadata from any applicable tags (ID3 tags in an MP3 file). |
+| Value      | Description                                                              | album_source | artist_source | dir_number_source | title_source | track_number_source |
+| ---------- | ------------------------------------------------------------------------ | ------------ | ------------- | ----------------- | ------------ | ------------------- |
+| `dirname`  | Extracts metadata from the parent directory name of the audio file.      | ✅           | ✅            | ✅                | ✅           | 🚫                  |
+| `filename` | Extracts metadata from the filename of the audio file.                   | ✅           | ✅            | 🚫                | ✅           | ✅                  |
+| `tag`      | Extracts metadata from any applicable tags (ID3 tags in an MP3 file).    | ✅           | ✅            | ✅                | ✅           | ✅                  |
+| `alphabet` | Use the alphabetical order of dirs/files for root dir number/file number | 🚫           | 🚫            | ✅                | 🚫           | ✅                  |
 
 If the detection source is set to `dirname` or `filename` the corresponding match attribute needs to be filled and the subdir or subdir filename pattern needs to include a match group.
 
