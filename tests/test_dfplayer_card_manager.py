@@ -20,8 +20,10 @@ from dfplayer_card_manager.config.configuration import (
 from dfplayer_card_manager.dfplayer.dfplayer_card_manager import (
     DfPlayerCardManager,
 )
+from dfplayer_card_manager.logging.logger import Logger
 from dfplayer_card_manager.logging.logger_interface import LoggerInterface
 from dfplayer_card_manager.mp3.audio_file_manager import (
+    AudioFileManager,
     AudioFileManagerInterface,
 )
 from dfplayer_card_manager.mp3.tag_collection import TagCollection
@@ -72,8 +74,8 @@ def dfplayer_card_manager_e2e() -> DfPlayerCardManager:
     sut = DfPlayerCardManager(
         "source_root",
         "target_root",
-        AudioFileManagerInterface(),
-        LoggerInterface(),
+        AudioFileManager(),
+        Logger(),
         configuration,
     )
     return sut  # noqa: WPS331
@@ -382,7 +384,7 @@ class TestDeletionsToTargetRepo:
 
 class TestCopyToTargetRepo:
 
-    @pytest.mark.skip(reason="https://github.com/pytest-dev/pyfakefs/issues/1105")
+    # @pytest.mark.skip(reason="https://github.com/pytest-dev/pyfakefs/issues/1105")
     @e2e
     def test_copy_to_target_repo_succeeds(
         self,
