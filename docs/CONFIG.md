@@ -39,7 +39,9 @@ audio_repo_root
 
 In the directory where you store the original audio files that can be synced to the SD card, you can place a configuration file named `dfplayer_card_manager.yaml` where you can override the default behavior of the `sync` command. You can also place further same named files in subdirectories of your repository to override the settings for just one directory during the sync process.
 
-The `dfplayer_card_manager.yaml` file can contain options for two blocks: Options regarding the source audio repository itself (`repository_source`) and special options regarding the sync behaviour (`repository_processing`)
+The `dfplayer_card_manager.yaml` file in the audio repo root directory can contain options for two blocks: Options regarding the source audio repository itself (`repository_source`) and special options regarding the sync behaviour (`repository_processing`).
+
+Within the subdirectories of the audio root directory only overrides of the block `repository_source` are accepted (for now).
 
 Here is an example:
 
@@ -50,10 +52,10 @@ audio_repo_root
 |   ├── 002.anotherone.mp3
 |   ├── ...
 |   ├── 255
-|   └── dfplayer_card_manager.yaml (override per directory)
+|   └── dfplayer_card_manager.yaml (override per directory, can override repository_source)
 ├── ...
 ├── 99.more.stuff/
-└── dfplayer_card_manager.yaml (main config)
+└── dfplayer_card_manager.yaml (main config, can override repository_source and repository_processing variables)
 ```
 
 ---

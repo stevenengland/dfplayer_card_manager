@@ -1,7 +1,10 @@
 import os
 
 from dfplayer_card_manager.config import yaml_config
-from dfplayer_card_manager.config.configuration import RepositoryConfig
+from dfplayer_card_manager.config.configuration import (
+    OverrideConfig,
+    RepositoryConfig,
+)
 
 
 def get_config_overrides(
@@ -14,10 +17,10 @@ def get_config_overrides(
         override_file_name = os.path.join(root_dir, subdir, overrides_file_name)
         if os.path.isdir(os.path.join(root_dir, subdir)):
             if os.path.isfile(override_file_name):
-                config: RepositoryConfig = yaml_config.create_yaml_object(
+                config: OverrideConfig = yaml_config.create_yaml_object(
                     override_file_name,
-                    RepositoryConfig,
+                    OverrideConfig(),
                 )
 
-                config_overrides[subdir] = config
+                config_overrides[subdir] = config.repository_source
     return config_overrides
