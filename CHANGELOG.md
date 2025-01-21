@@ -1,12 +1,34 @@
 # Changelog
 
+## 0.2.0 - 2025-01-21
+
+### paperless-ngx ansible role 0.2.0
+
+#### Features
+
+- feat: add alphabetical ordering for sync command @stevenengland ([#45](https://github.com/stevenengland/dfplayer_card_manager/pull/45))
+
+#### Bug Fixes
+
+- fix(deps): bump pyfakefs from 5.7.3 to 5.7.4 in /requirements @[dependabot[bot]](https://github.com/apps/dependabot) ([#42](https://github.com/stevenengland/dfplayer_card_manager/pull/42))
+
+#### Maintenance
+
+- ci: add GitHub Actions workflow for code security scans @stevenengland ([#43](https://github.com/stevenengland/dfplayer_card_manager/pull/43))
+
+#### Dependencies
+
+- fix(deps): bump pyfakefs from 5.7.3 to 5.7.4 in /requirements @[dependabot[bot]](https://github.com/apps/dependabot) ([#42](https://github.com/stevenengland/dfplayer_card_manager/pull/42))
+
+**Full Changelog**: https://github.com/stevenengland/dfplayer_card_manager/compare/0.1.3...0.2.0
+
 ## 0.1.3 - 2025-01-13
 
 ### paperless-ngx ansible role 0.1.3
 
 #### Bug Fixes
 
-- fix: add __init__.py file to os module @stevenengland ([#39](https://github.com/stevenengland/dfplayer_card_manager/pull/39))
+- fix: add **init**.py file to os module @stevenengland ([#39](https://github.com/stevenengland/dfplayer_card_manager/pull/39))
 - fix(deps): bump crazy-max/ghaction-github-labeler from 5.0.0 to 5.1.0 @dependabot ([#34](https://github.com/stevenengland/dfplayer_card_manager/pull/34))
 - fix(deps): bump actions/download-artifact from 3 to 4 @dependabot ([#35](https://github.com/stevenengland/dfplayer_card_manager/pull/35))
 - fix(deps): bump actions/upload-artifact from 3 to 4 @dependabot ([#36](https://github.com/stevenengland/dfplayer_card_manager/pull/36))
