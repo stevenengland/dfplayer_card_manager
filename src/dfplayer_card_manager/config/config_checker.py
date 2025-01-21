@@ -26,9 +26,6 @@ def check_override_config(config: OverrideConfig) -> None:
     if config.repository_processing is None:
         raise ValueError("Config for processing repository must be set")
 
-    check_repository_config(config.repository_source)
-    check_processing_config(config.repository_processing)
-
 
 def check_processing_config(config: ProcessingConfig) -> None:
     if config.diff_method is None:
@@ -81,6 +78,15 @@ def _detect_constellations_that_are_not_supported(  # noqa: C901, WPS238, WPS231
 
     if config.dir_number_source == DetectionSource.tag:
         raise ValueError("Directory number cannot be read from tags")
+
+    if config.album_source == DetectionSource.alphabet:
+        raise ValueError("Album cannot be read from sort order")
+
+    if config.artist_source == DetectionSource.alphabet:
+        raise ValueError("Artist cannot be read from sort order")
+
+    if config.title_source == DetectionSource.alphabet:
+        raise ValueError("Title cannot be read from sort order")
 
 
 def _detect_completness_errors(  # noqa: C901, WPS238, WPS231
