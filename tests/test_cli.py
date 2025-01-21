@@ -597,3 +597,60 @@ class TestSyncing:
         assert sync_output.exit_code == 0
         assert str(CompareResultAction.copy_to_target) not in stout
         assert str(CompareResultAction.delete_from_target) not in stout
+
+    @e2e
+    def test_syncing_alphabetical_e2e(
+        self,
+        cli_runner_e2e,
+        test_assets_fs_w: FakeFileSystemHelper,
+    ):
+        # GIVEN
+        source_dir = os.path.join(
+            test_assets_fs_w.test_assets_path,
+            "repositories",
+            "source_alpha",
+        )
+        target_dir = os.path.join(
+            test_assets_fs_w.test_assets_path,
+            "repositories",
+            "target_empty",
+        )
+
+        # WHEN
+        sync_output = cli_runner_e2e.invoke(
+            app,
+            [
+                "-vvv",
+                "sync",
+                target_dir,
+                source_dir,
+            ],
+        )
+        stout = strip_ansi(sync_output.stdout)
+        # THEN
+        if sync_output.exit_code != 0:
+            print(stout)
+        assert sync_output.exit_code == 0
+        files01 = os.listdir(os.path.join(target_dir, "01"))
+        files02 = os.listdir(os.path.join(target_dir, "02"))
+        assert files01 == ["001.mp3", "002.mp3"]
+        assert files02 == ["001.mp3", "002.mp3"]
+
+    @pytest.mark.skip(
+        reason="For individual testing of repos -> change dirs to your own",
+    )
+    def test_syncing(
+        self,
+        cli_runner_e2e,
+    ):
+        # GIVEN
+        # WHEN
+        sync_output = cli_runner_e2e.invoke(
+            app,
+            ["-vvv", "sync", "E:", r"D:\\steven\\clouds\\synology_drive\\tonuino\\"],
+        )
+        stout = strip_ansi(sync_output.stdout)
+        # THEN
+        if sync_output.exit_code != 0:
+            print(stout)
+        assert sync_output.exit_code == 0

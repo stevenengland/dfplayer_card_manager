@@ -5,3 +5,4 @@ class DetectionSource(Enum):
     dirname = "dirname"
     filename = "filename"
     tag = "tag"
+    alphabet = "alphabet"

@@ -1,0 +1,5 @@
+repository_source:
+  valid_subdir_pattern: "^[a-z]+$"
+  valid_subdir_files_pattern: '^[a-z]\.mp3$'
+  dir_number_source: "alphabet"
+  track_number_source: "alphabet"

@@ -91,24 +91,26 @@ If there are two files given:
 
 - sd_root/01/001.mp3
 - audio_repo_root/01.superstars.bestoff/001.supertitleone.mp3
-  then the `sync` command can be instructed how to tell if the file on the SD card needs to be overwritten.
+
+then the `sync` command can be instructed how to tell if the file on the SD card needs to be overwritten.
 
 > Hint: The `sync` command will determine attributes like title and artist from the file in the audio repository (identified by `DetectionSorces`) and will add them as ID3 tags to the file stored on the SD card.
 
-| Value         | Description                                                                                                                                                               |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| none          | Does not compare file contents, only checks file existence (in the above scenario nothing will be done)                                                                   |
-| hash          | Compares audio contents (tags excluded, only the audio portion is considered) by calculating and comparing the file content hashes                                        |
-| tags          | Compares metadata (ID3 tags) of the file on the SD card for differences compared to the attributes of the file in the audio repository identified via `DetectionSources`. |
-| hash_and_tags | Uses both hash and tag comparison.                                                                                                                                        |
+| Value           | Description                                                                                                                                                               |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `none`          | Does not compare file contents, only checks file existence (in the above scenario nothing will be done)                                                                   |
+| `hash`          | Compares audio contents (tags excluded, only the audio portion is considered) by calculating and comparing the file content hashes                                        |
+| `tags`          | Compares metadata (ID3 tags) of the file on the SD card for differences compared to the attributes of the file in the audio repository identified via `DetectionSources`. |
+| `hash_and_tags` | Uses both hash and tag comparison.                                                                                                                                        |
 
 ## `DetectionSource`
 
-| Value      | Description                                                           |
-| ---------- | --------------------------------------------------------------------- |
-| `dirname`  | Extracts metadata from the parent directory name of the audio file.   |
-| `filename` | Extracts metadata from the filename of the audio file.                |
-| `tag`      | Extracts metadata from any applicable tags (ID3 tags in an MP3 file). |
+| Value      | Description                                                              | album_source | artist_source | dir_number_source | title_source | track_number_source |
+| ---------- | ------------------------------------------------------------------------ | ------------ | ------------- | ----------------- | ------------ | ------------------- |
+| `dirname`  | Extracts metadata from the parent directory name of the audio file.      | ✅           | ✅            | ✅                | ✅           | 🚫                  |
+| `filename` | Extracts metadata from the filename of the audio file.                   | ✅           | ✅            | 🚫                | ✅           | ✅                  |
+| `tag`      | Extracts metadata from any applicable tags (ID3 tags in an MP3 file).    | ✅           | ✅            | ✅                | ✅           | ✅                  |
+| `alphabet` | Use the alphabetical order of dirs/files for root dir number/file number | 🚫           | 🚫            | ✅                | 🚫           | ✅                  |
 
 If the detection source is set to `dirname` or `filename` the corresponding match attribute needs to be filled and the subdir or subdir filename pattern needs to include a match group.
 

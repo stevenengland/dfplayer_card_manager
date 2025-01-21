@@ -1,0 +1,3 @@
+repository_source:
+  valid_subdir_files_pattern: '^[0-9]+\.mp3$'
+  track_number_source: "alphabet"
