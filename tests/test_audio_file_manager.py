@@ -217,7 +217,7 @@ class TestCopyingAudio:
 
         # THEN
 
-    @pytest.mark.skip(reason="https://github.com/pytest-dev/pyfakefs/issues/1105")
+    # @pytest.mark.skip(reason="https://github.com/pytest-dev/pyfakefs/issues/1105")
     @e2e
     def test_copy_audio_with_fs(
         self,
