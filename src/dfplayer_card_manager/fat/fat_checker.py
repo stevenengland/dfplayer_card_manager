@@ -54,7 +54,7 @@ def _check_fat32_unix(sd_card_path: str) -> bool:  # noqa: C901
         return False
 
     subprocess_result = subprocess.run(
-        ["lsblk", "-f", sd_card_path],
+        ["lsblk", "-f"],
         capture_output=True,
         text=True,
         shell=False,

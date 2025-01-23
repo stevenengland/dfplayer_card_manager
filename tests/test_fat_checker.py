@@ -35,7 +35,9 @@ class TestFat32CheckerUnix:
         when(platform).system().thenReturn("Linux")
         when(os.path).exists(...).thenReturn(True)
 
-        when(subprocess).run(...).thenReturn(mock_subprocess_run_linux)
+        when(subprocess).run(["lsblk", "-f"], ...).thenReturn(
+            mock_subprocess_run_linux,
+        )
 
         is_fat32_filesystem_partition = check_is_fat32("/dev/sdb2")
         is_fat32_filesystem_mountpoint = check_is_fat32("/media/user/sdcard")
