@@ -13,6 +13,18 @@ from dfplayer_card_manager.fat.fat_checker import (
 pytestmark = pytest.mark.usefixtures("unstub")
 e2e = pytest.mark.skipif("not config.getoption('e2e')")
 
+mock_subprocess_run_linux = MagicMock(
+    stdout="""  AME   FSTYPE  FSVER            LABEL    UUID             FSAVAIL FSUSE% MOUNTPOINTS
+                sda
+                ├─sda1
+                ├─sda2 vfat    FAT32                    1A60-9999        505,9M  1%     /boot/efi
+                └─sda3 ext4    1.0                      71c53cd8-0ab2    4,7G    70%    /
+                sdb
+                ├─sdb1 ext4    1.0                      71c53cd8-1111    4,7G    70%    /media/user/usb
+                └─sdb2 vfat    FAT32           TOSHIBA  4C1C-9999        28,9G   0%     /media/user/sdcard""",
+    returncode=0,
+)
+
 
 class TestFat32CheckerUnix:
     def test_check_fat32_unix_exists_and_is_fat32(
@@ -23,14 +35,13 @@ class TestFat32CheckerUnix:
         when(platform).system().thenReturn("Linux")
         when(os.path).exists(...).thenReturn(True)
 
-        mock_subprocess_run = MagicMock(
-            stdout="Filesystem     Type 1K-blocks  Used Available Use% Mounted on\n/dev/sda2      FAT32    523244   336    522908   1% /boot/efi",  # noqa: E501
-            returncode=0,
-        )
-        when(subprocess).run(...).thenReturn(mock_subprocess_run)
+        when(subprocess).run(...).thenReturn(mock_subprocess_run_linux)
 
-        is_fat32_filesystem = check_is_fat32("/mnt/sdcard")
-        assert is_fat32_filesystem
+        is_fat32_filesystem_partition = check_is_fat32("/dev/sdb2")
+        is_fat32_filesystem_mountpoint = check_is_fat32("/media/user/sdcard")
+
+        assert is_fat32_filesystem_mountpoint
+        assert is_fat32_filesystem_partition
 
     def test_check_fat32_unix_does_not_exist(
         self,
@@ -51,14 +62,14 @@ class TestFat32CheckerUnix:
         when(platform).system().thenReturn("Linux")
         when(os.path).exists(...).thenReturn(True)
 
-        mock_subprocess_run = MagicMock(
-            stdout="Filesystem     Type 1K-blocks  Used Available Use% Mounted on\n/dev/sda2      ext4    523244   336    522908   1% /boot/efi",  # noqa: E501
-            returncode=0,
-        )
-        when(subprocess).run(...).thenReturn(mock_subprocess_run)
+        when(subprocess).run(...).thenReturn(mock_subprocess_run_linux)
 
-        is_fat32_filesystem = check_is_fat32("/mnt/sdcard")
-        assert not is_fat32_filesystem
+        is_fat32_filesystem_mountpoint = check_is_fat32("/")
+        is_fat32_filesystem_partition = check_is_fat32("/dev/sda1")
+        is_fat32_filesystem_partition_partial = check_is_fat32("/media/user/")
+        assert not is_fat32_filesystem_mountpoint
+        assert not is_fat32_filesystem_partition
+        assert not is_fat32_filesystem_partition_partial
 
 
 class TestFat32CheckerWindows:
