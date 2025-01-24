@@ -128,6 +128,7 @@ def try_safe(func: Callable[..., None], *args: object, error_prepend: str = "") 
         if error_prepend:
             print_error(f"{error_prepend}")
         print_error(f"Error: {check_exc.message}")
+        cli_context.logger.debug(f"Traceback: {traceback.format_exc()}")
         _abort(check_exc)
     except Exception as exc:
         print_error(f"An unexpected exception occurred: {exc}")
