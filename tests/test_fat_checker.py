@@ -185,10 +185,41 @@ class TestAllocationUnitSizeDetectionUnix:
             stdout="  File: /media/administer/TOSHIBA/\n  Size: 32768     	Blocks: 64         IO Block: 32768  directory",  # noqa: E501
             returncode=0,
         )
-        when(subprocess).run(...).thenReturn(mock_subprocess_run)
+        when(subprocess).run(["stat", "/mnt/sdcard"], ...).thenReturn(
+            mock_subprocess_run,
+        )
 
         has_correct_allocation_unit_size = check_has_correct_allocation_unit_size(
             "/mnt/sdcard",
+        )
+        assert has_correct_allocation_unit_size
+
+    def test_check_allocation_unit_size_unix_exists_and_has_correct_allocation_unit_size_using_partition(
+        self,
+        when,
+    ):
+        # GIVEN
+        when(platform).system().thenReturn("Linux")
+        when(os.path).exists(...).thenReturn(True)
+
+        mock_subprocess_run_stat = MagicMock(
+            stdout="  File: /media/administer/TOSHIBA/\n  Size: 32768     	Blocks: 64         IO Block: 32768  directory",  # noqa: E501
+            returncode=0,
+        )
+        mock_subprocess_run_findmnt = MagicMock(
+            stdout="/mnt/sdcard",  # noqa: E501
+            returncode=0,
+        )
+        when(subprocess).run(["stat", "/mnt/sdcard"], ...).thenReturn(
+            mock_subprocess_run_stat,
+        )
+        when(subprocess).run(
+            ["findmnt", "/dev/sdb1", "-n", "-o", "TARGET"],
+            ...,
+        ).thenReturn(mock_subprocess_run_findmnt)
+
+        has_correct_allocation_unit_size = check_has_correct_allocation_unit_size(
+            "/dev/sdb1",
         )
         assert has_correct_allocation_unit_size
 

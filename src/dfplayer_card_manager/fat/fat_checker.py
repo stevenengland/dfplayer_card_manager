@@ -93,15 +93,28 @@ def _check_allocation_unit_size_windows(sd_card_path: str) -> bool:
         shell=False,
     )
 
-    return (
-        subprocess_result.returncode == 0
-        and "AllocationUnitSize : 32768" in subprocess_result.stdout
-    )
+    if subprocess_result.returncode != 0:
+        raise FatError(subprocess_result.stderr)
+
+    return "AllocationUnitSize : 32768" in subprocess_result.stdout
 
 
 def _check_allocation_unit_size_unix(sd_card_path: str) -> bool:
     if not os.path.exists(sd_card_path):
         return False
+
+    if sd_card_path.startswith("/dev/"):
+        subprocess_result = subprocess.run(
+            ["findmnt", sd_card_path, "-n", "-o", "TARGET"],
+            capture_output=True,
+            text=True,
+            shell=False,
+        )
+
+        if subprocess_result.returncode == 0:
+            sd_card_path = subprocess_result.stdout.strip()
+        else:
+            raise FatError(f"Could not find mount point for {sd_card_path}")
 
     subprocess_result = subprocess.run(
         ["stat", sd_card_path],
@@ -109,6 +122,9 @@ def _check_allocation_unit_size_unix(sd_card_path: str) -> bool:
         text=True,
         shell=False,
     )
+
+    if subprocess_result.returncode != 0:
+        raise FatError(subprocess_result.stderr)
 
     return (
         subprocess_result.returncode == 0
