@@ -12,25 +12,28 @@ from dfplayer_card_manager.fat.fat_linux_mount import (
 pytestmark = pytest.mark.usefixtures("unstub")
 e2e = pytest.mark.skipif("not config.getoption('e2e')")
 
-mock_subprocess_run_linux = MagicMock(
-    stdout="""  Filesystem      Size  Used Avail Use% Mounted on
-tmpfs           198M  2,7M  195M   2% /run
-/dev/sda3        20G   15G  3,9G  79% /
-tmpfs           988M   60M  928M   7% /dev/shm
-tmpfs           5,0M  4,0K  5,0M   1% /run/lock
-/dev/sda2       512M  6,1M  506M   2% /boot/efi
-tmpfs           198M   76K  198M   1% /run/user/1000
-/dev/loop0      9,9M   512  9,9M   1% /home/user/usbtest/usbtestmount
-/dev/sdb1        29G  128K   29G   1% /media/user/sdcard""",
-    returncode=0,
-)
+
+@pytest.fixture(scope="function", name="lsblk_mock")
+def get_lsblk_mock():
+    return MagicMock(
+        stdout="""  Filesystem      Size  Used Avail Use% Mounted on
+    tmpfs           198M  2,7M  195M   2% /run
+    /dev/sda3        20G   15G  3,9G  79% /
+    tmpfs           988M   60M  928M   7% /dev/shm
+    tmpfs           5,0M  4,0K  5,0M   1% /run/lock
+    /dev/sda2       512M  6,1M  506M   2% /boot/efi
+    tmpfs           198M   76K  198M   1% /run/user/1000
+    /dev/loop0      9,9M   512  9,9M   1% /home/user/usbtest/usbtestmount
+    /dev/sdb1        29G  128K   29G   1% /media/user/sdcard""",
+        returncode=0,
+    )
 
 
 class TestGetBlockDevice:
-    def test_get_device_by_mount_path_succeeds(self, when):
+    def test_get_device_by_mount_path_succeeds(self, when, lsblk_mock):
         # GIVEN
         when(subprocess).run(["df", "-h"], ...).thenReturn(
-            mock_subprocess_run_linux,
+            lsblk_mock,
         )
 
         # WHEN
@@ -41,11 +44,11 @@ class TestGetBlockDevice:
         assert device_path == "/media/user/sdcard"
         assert device_path_with_os_sep == "/media/user/sdcard"
 
-    def test_get_device_by_mount_path_fails(self, when):
+    def test_get_device_by_mount_path_fails(self, when, lsblk_mock):
         # GIVEN
-        mock_subprocess_run_linux.returncode = 1
+        lsblk_mock.returncode = 1
         when(subprocess).run(["df", "-h"], ...).thenReturn(
-            mock_subprocess_run_linux,
+            lsblk_mock,
         )
 
         with pytest.raises(FatError):
@@ -53,10 +56,11 @@ class TestGetBlockDevice:
 
 
 class TestGetMountPoint:
-    def test_get_mount_point_by_device_path_succeeds(self, when):
+
+    def test_get_mount_point_by_device_path_succeeds(self, when, lsblk_mock):
         # GIVEN
         when(subprocess).run(["df", "-h"], ...).thenReturn(
-            mock_subprocess_run_linux,
+            lsblk_mock,
         )
 
         # WHEN
@@ -67,11 +71,11 @@ class TestGetMountPoint:
         assert mount_path == "/dev/sdb1"
         assert mount_path_with_os_sep == "/dev/sdb1"
 
-    def test_get_mount_point_by_device_path_fails(self, when):
+    def test_get_mount_point_by_device_path_fails(self, when, lsblk_mock):
         # GIVEN
-        mock_subprocess_run_linux.returncode = 1
+        lsblk_mock.returncode = 1
         when(subprocess).run(["df", "-h"], ...).thenReturn(
-            mock_subprocess_run_linux,
+            lsblk_mock,
         )
 
         with pytest.raises(FatError):

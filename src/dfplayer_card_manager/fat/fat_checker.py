@@ -3,6 +3,7 @@ import platform
 import re
 import subprocess  # noqa: S404
 
+from dfplayer_card_manager.fat import fat_linux_mount
 from dfplayer_card_manager.fat.fat_error import FatError
 from dfplayer_card_manager.os import path_sanitizer  # noqa: S404
 
@@ -104,16 +105,8 @@ def _check_allocation_unit_size_unix(sd_card_path: str) -> bool:
         return False
 
     if sd_card_path.startswith("/dev/"):
-        subprocess_result = subprocess.run(
-            ["findmnt", sd_card_path, "-n", "-o", "TARGET"],
-            capture_output=True,
-            text=True,
-            shell=False,
-        )
-
-        if subprocess_result.returncode == 0:
-            sd_card_path = subprocess_result.stdout.strip()
-        else:
+        sd_card_path = fat_linux_mount.get_mount_path(sd_card_path)
+        if not sd_card_path:
             raise FatError(f"Could not find mount point for {sd_card_path}")
 
     subprocess_result = subprocess.run(

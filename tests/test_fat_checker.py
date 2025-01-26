@@ -5,6 +5,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from dfplayer_card_manager.fat import fat_linux_mount
 from dfplayer_card_manager.fat.fat_checker import (
     check_has_correct_allocation_unit_size,
     check_is_fat32,
@@ -207,17 +208,10 @@ class TestAllocationUnitSizeDetectionUnix:
             stdout="  File: /media/administer/TOSHIBA/\n  Size: 32768     	Blocks: 64         IO Block: 32768  directory",  # noqa: E501
             returncode=0,
         )
-        mock_subprocess_run_findmnt = MagicMock(
-            stdout="/mnt/sdcard",  # noqa: E501
-            returncode=0,
-        )
+        when(fat_linux_mount).get_mount_path("/dev/sdb1").thenReturn("/mnt/sdcard")
         when(subprocess).run(["stat", "/mnt/sdcard"], ...).thenReturn(
             mock_subprocess_run_stat,
         )
-        when(subprocess).run(
-            ["findmnt", "/dev/sdb1", "-n", "-o", "TARGET"],
-            ...,
-        ).thenReturn(mock_subprocess_run_findmnt)
 
         has_correct_allocation_unit_size = check_has_correct_allocation_unit_size(
             "/dev/sdb1",

@@ -104,7 +104,7 @@ class TestFatNeedsSorting:
     ):
         # GIVEN
         when(Volume).vopen(...).thenRaise(PermissionError(13, "Permission denied"))
-
+        when(platform).system().thenReturn("Windows")
         # WHEN
         with pytest.raises(expected_exception=FatError, match="block device"):
             sut.is_fat_volume_sorted("/path/to/sd_card")
