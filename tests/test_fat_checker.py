@@ -163,6 +163,7 @@ class TestAllocationUnitSizeDetectionWindows:
 
         mock_subprocess_run = MagicMock(
             stdout="\nAllocationUnitSize : 16384\n\n",
+            returncode=0,
         )
         when(subprocess).run(...).thenReturn(mock_subprocess_run)
 
