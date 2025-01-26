@@ -1,10 +1,12 @@
 # -*- coding: cp1252 -*-
 import os
+import platform
 from io import BytesIO
 
 from FATtools import Volume
 from FATtools.FAT import Dirtable
 
+from dfplayer_card_manager.fat import fat_linux_mount
 from dfplayer_card_manager.fat.fat_error import FatError
 from dfplayer_card_manager.fat.fat_sorter_interface import FatSorterInterface
 
@@ -38,6 +40,7 @@ class FatSorter(FatSorterInterface):
         root: Dirtable = None
         if isinstance(root_dir, str):
             root_dir = root_dir.rstrip(os.sep)
+            root_dir = self._resolve_needed_path(root_dir)
         try:
             root = Volume.vopen(root_dir, "r+b")
         except PermissionError as permission_exc:
@@ -73,3 +76,12 @@ class FatSorter(FatSorterInterface):
             if original != sorted_val:
                 return False
         return True
+
+    def _resolve_needed_path(self, root_dir: str) -> str:
+        if platform.system() == "Linux" and not root_dir.startswith("/dev"):
+            root_dir = fat_linux_mount.get_dev_root_dir(root_dir)
+            if not root_dir:
+                raise FatError(
+                    "You're trying to access a path that is (or has no correspondent) device (/dev/xxx).",
+                )
+        return root_dir
