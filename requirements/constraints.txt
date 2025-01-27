@@ -2,7 +2,7 @@ black==24.4.2
 check-wheel-contents==0.6.1
 eyed3==0.9.7
 faker==33.1.0
-FATtools==1.0.39
+FATtools==1.0.42
 isort==5.13.2
 multipledispatch==1.0.0
 mypy==1.10.0
