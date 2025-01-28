@@ -1,9 +1,9 @@
 import os
 import platform
 import re
+import struct
 import subprocess  # noqa: S404
 
-from dfplayer_card_manager.fat import fat_linux_mount
 from dfplayer_card_manager.fat.fat_error import FatError
 from dfplayer_card_manager.os import path_sanitizer  # noqa: S404
 
@@ -104,11 +104,14 @@ def _check_allocation_unit_size_unix(sd_card_path: str) -> bool:
     if not os.path.exists(sd_card_path):
         return False
 
+    # root method on device path
     if sd_card_path.startswith("/dev/"):
-        sd_card_path = fat_linux_mount.get_mount_path(sd_card_path)
-        if not sd_card_path:
-            raise FatError(f"Could not find mount point for {sd_card_path}")
+        return (
+            _get_allocation_unit_size_from_boot_sector(sd_card_path)
+            == 32768  # noqa: WPS432
+        )
 
+    # non root method on mount path
     subprocess_result = subprocess.run(
         ["stat", sd_card_path],
         capture_output=True,
@@ -123,3 +126,21 @@ def _check_allocation_unit_size_unix(sd_card_path: str) -> bool:
         subprocess_result.returncode == 0
         and "IO Block: 32768" in subprocess_result.stdout
     )
+
+
+def _get_allocation_unit_size_from_boot_sector(device_path: str) -> int:
+    # be sure to only use this function with eleveted priviliges
+    with open(device_path, "rb") as device:
+        # Read the first 512 bytes (boot sector)
+        boot_sector = device.read(512)  # noqa: WPS432
+
+        # Bytes 11-12: Bytes per sector (2 bytes, little-endian)
+        bytes_per_sector = struct.unpack_from("<H", boot_sector, 11)[0]  # noqa: WPS432
+
+        # Byte 13: Sectors per cluster (1 byte)
+        sectors_per_cluster = struct.unpack_from("<B", boot_sector, 13)[  # noqa: WPS432
+            0
+        ]
+
+        # Calculate allocation unit size (bytes per cluster)
+        return bytes_per_sector * sectors_per_cluster

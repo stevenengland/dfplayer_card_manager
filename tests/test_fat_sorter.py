@@ -6,7 +6,7 @@ from FATtools import Volume
 from FATtools.FAT import Dirtable
 from FATtools.mkfat import exfat_mkfs, fat_mkfs
 
-from dfplayer_card_manager.fat import fat_linux_mount
+from dfplayer_card_manager.fat import fat_device_mount
 from dfplayer_card_manager.fat.fat_error import FatError
 from dfplayer_card_manager.fat.fat_sorter import FatSorter
 
@@ -97,25 +97,13 @@ class TestFatNeedsSorting:
         assert not is_sorted_before
         assert is_sorted_after
 
-    def test_is_fat_volume_sorted_raises_if_permissions_are_insufficient(
-        self,
-        sut: FatSorter,
-        when,
-    ):
-        # GIVEN
-        when(Volume).vopen(...).thenRaise(PermissionError(13, "Permission denied"))
-        when(platform).system().thenReturn("Windows")
-        # WHEN
-        with pytest.raises(expected_exception=FatError, match="block device"):
-            sut.is_fat_volume_sorted("/path/to/sd_card")
-
     def test_is_fat_volume_sorted_raises_if_device_path_not_found(
         self,
         sut: FatSorter,
         when,
     ):
         # GIVEN
-        when(fat_linux_mount).get_dev_root_dir(...).thenReturn("")
+        when(fat_device_mount).get_dev_root_dir(...).thenReturn("")
         when(platform).system().thenReturn("Linux")
 
         # WHEN

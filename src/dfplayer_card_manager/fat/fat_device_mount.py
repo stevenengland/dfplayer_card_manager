@@ -1,28 +1,31 @@
 import os
+import platform
 import subprocess
 
 from dfplayer_card_manager.fat.fat_error import FatError
 
 
 def get_mount_path(device_path: str) -> str:
-    subprocess_result = subprocess.run(
-        [
-            "df",
-            "-h",
-        ],
-        capture_output=True,
-        text=True,
-        shell=False,
-    )
-
-    if subprocess_result.returncode != 0:
-        raise FatError(subprocess_result.stderr)
-
-    lines = subprocess_result.stdout.splitlines()
-    return _find_df_column(device_path, lines, 0, -1)
+    if platform.system() == "Windows":
+        return device_path
+    if platform.system() == "Linux":
+        return _get_mount_path_linux(device_path)
+    if platform.system() == "Darwin":
+        raise NotImplementedError("macOS is not supported")
+    raise NotImplementedError(f"{platform.system()} is not supported")
 
 
 def get_dev_root_dir(mount_path: str) -> str:
+    if platform.system() == "Windows":
+        return mount_path
+    if platform.system() == "Linux":
+        return _get_dev_root_dir_linux(mount_path)
+    if platform.system() == "Darwin":
+        raise NotImplementedError("macOS is not supported")
+    raise NotImplementedError(f"{platform.system()} is not supported")
+
+
+def _get_dev_root_dir_linux(mount_path: str) -> str:
     subprocess_result = subprocess.run(
         [
             "df",
@@ -38,6 +41,24 @@ def get_dev_root_dir(mount_path: str) -> str:
 
     lines = subprocess_result.stdout.splitlines()
     return _find_df_column(mount_path, lines, -1, 0)
+
+
+def _get_mount_path_linux(device_path: str) -> str:
+    subprocess_result = subprocess.run(
+        [
+            "df",
+            "-h",
+        ],
+        capture_output=True,
+        text=True,
+        shell=False,
+    )
+
+    if subprocess_result.returncode != 0:
+        raise FatError(subprocess_result.stderr)
+
+    lines = subprocess_result.stdout.splitlines()
+    return _find_df_column(device_path, lines, 0, -1)
 
 
 def _find_df_column(

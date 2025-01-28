@@ -3,11 +3,11 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from dfplayer_card_manager.fat.fat_error import FatError
-from dfplayer_card_manager.fat.fat_linux_mount import (
+from dfplayer_card_manager.fat.fat_device_mount import (
     get_dev_root_dir,
     get_mount_path,
 )
+from dfplayer_card_manager.fat.fat_error import FatError
 
 pytestmark = pytest.mark.usefixtures("unstub")
 e2e = pytest.mark.skipif("not config.getoption('e2e')")
