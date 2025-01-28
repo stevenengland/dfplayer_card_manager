@@ -15,13 +15,11 @@ from dfplayer_card_manager.fat import fat_checker, fat_device_mount
 def check(cli_context: CliContext, sd_card_path: str):  # noqa: C901, WPS213, WPS231
 
     # check the capabilities
-    if sd_card_path.startswith("/dev"):
-        device_path = sd_card_path
-        mountpoint_path = fat_device_mount.get_mount_path(sd_card_path)
-    else:
-        device_path = fat_device_mount.get_dev_root_dir(sd_card_path)
-        mountpoint_path = sd_card_path
+    device_path, mountpoint_path = fat_device_mount.detect_device_path_and_mount_path(
+        sd_card_path,
+    )
 
+    # Device path is always available
     device_path_readable = os.access(device_path, os.R_OK)
     device_path_writable = os.access(device_path, os.W_OK)
 

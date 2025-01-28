@@ -340,6 +340,35 @@ class TestChecks:  # noqa: WPS214
 
 
 class TestSort:
+
+    def test_sort_returns_if_no_mountpoint(
+        self,
+        cli_runner,
+        when,
+    ):
+        # GIVEN
+        when(fat_device_mount).get_dev_root_dir(...).thenReturn("")
+        # WHEN
+        fat32_check_output = cli_runner.invoke(app, ["sort", "tests/test_assets"])
+        stout = strip_ansi(fat32_check_output.stdout)
+        # THEN
+        assert fat32_check_output.exit_code == 1
+        assert "no corresponding device" in stout
+
+    def test_sort_returns_if_no_write_access(
+        self,
+        cli_runner,
+        when,
+    ):
+        # GIVEN
+        when(os).access(...).thenReturn(False)
+        # WHEN
+        fat32_check_output = cli_runner.invoke(app, ["sort", "tests/test_assets"])
+        stout = strip_ansi(fat32_check_output.stdout)
+        # THEN
+        assert fat32_check_output.exit_code == 1
+        assert "write permissions" in stout
+
     def test_sort_returns_if_is_already_sorted(
         self,
         cli_runner,
@@ -373,6 +402,20 @@ class TestSort:
 
 
 class TestCleanDryRun:
+    def test_clean_stops_if_no_mountpoint(
+        self,
+        cli_runner,
+        when,
+    ):
+        # GIVEN
+        when(fat_device_mount).get_mount_path(...).thenReturn("")
+        # WHEN
+        fat32_check_output = cli_runner.invoke(app, ["clean", "/dev/sdb1", "--dry-run"])
+        stout = strip_ansi(fat32_check_output.stdout)
+        # THEN
+        assert fat32_check_output.exit_code == 1
+        assert "no corresponding mount point" in stout
+
     def test_clean_dry_run(
         self,
         cli_runner,
@@ -403,6 +446,22 @@ class TestCleanDryRun:
 
 
 class TestSyncing:
+    def test_syncing_stops_if_no_mountpoint(
+        self,
+        cli_runner,
+        when,
+    ):
+        # GIVEN
+        when(fat_device_mount).get_mount_path(...).thenReturn("")
+        # WHEN
+        fat32_check_output = cli_runner.invoke(
+            app,
+            ["sync", "/dev/sdb1", "tests/test_assets"],
+        )
+        # THEN
+        assert fat32_check_output.exit_code == 1
+        assert "no corresponding mount point" in fat32_check_output.stdout
+
     def test_syncing_dry_run(
         self,
         cli_runner,
