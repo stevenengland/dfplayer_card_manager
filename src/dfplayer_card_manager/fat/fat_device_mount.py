@@ -1,4 +1,3 @@
-import os
 import platform
 import subprocess
 
@@ -36,7 +35,7 @@ def detect_device_path_and_mount_path(sd_card_path: str) -> tuple[str, str]:
 
 
 def _detect_device_path_and_mount_path_windows(sd_card_path: str) -> tuple[str, str]:
-    return sd_card_path, sd_card_path
+    return get_dev_root_dir(sd_card_path), get_mount_path(sd_card_path)
 
 
 def _detect_device_path_and_mount_path_linux(sd_card_path: str) -> tuple[str, str]:
@@ -92,7 +91,7 @@ def _find_df_column(
     col_in: int,
     col_out: int,
 ) -> str:
-    device_path = device_path.rstrip(os.sep)
+    device_path = device_path.rstrip("/")  # specific to linux, no os.sep meaningful
     for line in lines:
         parts = line.split()
         if parts and parts[col_in] == device_path:

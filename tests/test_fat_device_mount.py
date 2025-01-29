@@ -1,3 +1,4 @@
+import platform
 import subprocess  # noqa: S404
 from unittest.mock import MagicMock
 
@@ -30,8 +31,9 @@ def get_lsblk_mock():
 
 
 class TestGetBlockDevice:
-    def test_get_device_by_mount_path_succeeds(self, when, lsblk_mock):
+    def test_get_device_by_mount_path_succeeds_linux(self, when, lsblk_mock):
         # GIVEN
+        when(platform).system().thenReturn("Linux")
         when(subprocess).run(["df", "-h"], ...).thenReturn(
             lsblk_mock,
         )
@@ -44,21 +46,33 @@ class TestGetBlockDevice:
         assert device_path == "/media/user/sdcard"
         assert device_path_with_os_sep == "/media/user/sdcard"
 
-    def test_get_device_by_mount_path_fails(self, when, lsblk_mock):
+    def test_get_device_by_mount_path_fails_linux(self, when, lsblk_mock):
         # GIVEN
+        when(platform).system().thenReturn("Linux")
         lsblk_mock.returncode = 1
         when(subprocess).run(["df", "-h"], ...).thenReturn(
             lsblk_mock,
         )
-
+        # WHEN
+        # THEN
         with pytest.raises(FatError):
             get_mount_path("/dev/sdb1")
+
+    def test_get_device_by_mount_path_succeeds_windows(self, when, lsblk_mock):
+        # GIVEN
+        when(platform).system().thenReturn("Windows")
+
+        # WHEN
+        device_path = get_mount_path("tests/test_assets")
+        # THEN
+        assert device_path == "tests/test_assets"
 
 
 class TestGetMountPoint:
 
-    def test_get_mount_point_by_device_path_succeeds(self, when, lsblk_mock):
+    def test_get_mount_point_by_device_path_succeeds_linux(self, when, lsblk_mock):
         # GIVEN
+        when(platform).system().thenReturn("Linux")
         when(subprocess).run(["df", "-h"], ...).thenReturn(
             lsblk_mock,
         )
@@ -71,12 +85,25 @@ class TestGetMountPoint:
         assert mount_path == "/dev/sdb1"
         assert mount_path_with_os_sep == "/dev/sdb1"
 
-    def test_get_mount_point_by_device_path_fails(self, when, lsblk_mock):
+    def test_get_mount_point_by_device_path_fails_linux(self, when, lsblk_mock):
         # GIVEN
+        when(platform).system().thenReturn("Linux")
         lsblk_mock.returncode = 1
         when(subprocess).run(["df", "-h"], ...).thenReturn(
             lsblk_mock,
         )
+        # WHEN
+        # THEN
 
         with pytest.raises(FatError):
             get_dev_root_dir("/media/user/sdcard")
+
+    def test_get_mount_point_by_device_path_succeeds_windows(self, when, lsblk_mock):
+        # GIVEN
+        when(platform).system().thenReturn("Windows")
+
+        # WHEN
+        mount_path = get_dev_root_dir("tests/test_assets")
+
+        # THEN
+        assert mount_path == "tests/test_assets"
