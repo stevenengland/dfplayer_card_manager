@@ -1,4 +1,4 @@
-black==24.4.2
+black==25.1.0
 check-wheel-contents==0.6.1
 eyed3==0.9.7
 faker==33.1.0
