@@ -101,7 +101,7 @@ jobs:
 
       - name: Set up mounted USB stick
         shell: bash
-        run: "./tools/create_fat_volume.sh"
+        run: "sudo /tools/create_fat_volume.sh"
 
       - name: Perform dfplayer-card-manager tests
         shell: bash
