@@ -16,22 +16,10 @@ if mountpoint -q "$MOUNT_POINT"; then
 fi
 
 echo "Checking if required tools are installed"
-if ! command -v modprobe &> /dev/null; then
-    echo "modprobe is not available. Installing."
-    apt-get update
-    apt-get install -y kmod
-fi
 if ! command -v mkfs.vfat &> /dev/null; then
     echo "mkfs.vfat is not available. Installing."
     apt-get update
     apt-get install -y dosfstools
-fi
-
-echo "Checking if g_mass_storage module is available"
-if ! modprobe -n -v g_mass_storage &> /dev/null; then
-    echo "g_mass_storage module is not available. Installing."
-    apt-get update
-    apt-get install -y linux-modules-extra-$(uname -r)
 fi
 
 echo "Creating FAT32 image file"
@@ -42,7 +30,8 @@ fi
 mkfs.vfat -F 32 "$IMG_FILE"
 
 echo "Mounting image file"
-mkdir "$MOUNT_POINT"
+if [ ! -d "$MOUNT_POINT" ]; then
+    mkdir "$MOUNT_POINT"
+fi
 mount -o loop "$IMG_FILE" "$MOUNT_POINT"
-modprobe g_mass_storage file=$(pwd)/"$IMG_FILE" stall=0 removable=1
 
