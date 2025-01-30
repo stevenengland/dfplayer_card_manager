@@ -129,4 +129,6 @@ jobs:
 
       - name: Perform dfplayer-card-manager tests
         shell: cmd
-        run: ".\\tests\\test_windows.bat"
+        run: |
+          .venv\Scripts\activate.bat
+          .\\tests\\test_windows.bat
