@@ -106,3 +106,27 @@ jobs:
       - name: Perform dfplayer-card-manager tests
         shell: bash
         run: "./tests/test_linux.sh"
+
+  platform_testing_special_windows:
+    if: contains(github.event.pull_request.title, '[skip ci]') == false
+    needs: check_and_coverage-test
+    name: "Special Windows testing"
+    runs-on: windows-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+
+      - name: Install dependencies
+        shell: bash
+        run: "python ./tools/create_venv.py"
+
+      - name: Set up mounted USB stick
+        shell: cmd
+        run: ".\\tools\\create_fat_volume.bat"
+
+      - name: Perform dfplayer-card-manager tests
+        shell: cmd
+        run: ".\\tests\\test_windows.bat"
