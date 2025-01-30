@@ -7,7 +7,7 @@ from strip_ansi import strip_ansi
 from typer.testing import CliRunner
 
 from dfplayer_card_manager.cli.cli import app, cli_context
-from dfplayer_card_manager.fat import fat_checker
+from dfplayer_card_manager.fat import fat_checker, fat_device_mount
 from dfplayer_card_manager.repository.compare_result import CompareResult
 from dfplayer_card_manager.repository.compare_result_actions import (
     CompareResultAction,
@@ -19,6 +19,14 @@ e2e = pytest.mark.skipif("not config.getoption('e2e')")
 
 @pytest.fixture(scope="function", name="cli_runner")
 def get_cli_runner(monkeypatch) -> CliRunner:
+    # Monkeypatching and not mockito to avoid verifying calls
+    monkeypatch.setattr(os, "access", lambda _path, _mode: True)
+    monkeypatch.setattr(
+        fat_device_mount,
+        "get_mount_path",
+        lambda _path: "tests/test_assets",
+    )
+    monkeypatch.setattr(fat_device_mount, "get_dev_root_dir", lambda _path: "/dev/sdb1")
     monkeypatch.setattr(fat_checker, "check_is_fat32", lambda _filesystem_path: True)
     monkeypatch.setattr(
         fat_checker,
@@ -136,6 +144,38 @@ class TestChecks:  # noqa: WPS214
             print(stout)
         assert fat32_check_output.exit_code == 0
         assert "is not sorted" in stout
+
+    def test_fat_check_returns_missing_dev_when_tested_for_sorting_without_dev_path(
+        self,
+        cli_runner,
+        when,
+    ):
+        # GIVEN
+        when(fat_device_mount).get_dev_root_dir(...).thenReturn("")
+        # WHEN
+        fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
+        stout = strip_ansi(fat32_check_output.stdout)
+        # THEN
+        if fat32_check_output.exit_code != 0:
+            print(stout)
+        assert fat32_check_output.exit_code == 0
+        assert "no corresponding device" in stout
+
+    def test_fat_check_returns_missing_dev_when_tested_for_sorting_without_read_access(
+        self,
+        cli_runner,
+        when,
+    ):
+        # GIVEN
+        when(os).access(...).thenReturn(False)
+        # WHEN
+        fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
+        stout = strip_ansi(fat32_check_output.stdout)
+        # THEN
+        if fat32_check_output.exit_code != 0:
+            print(stout)
+        assert fat32_check_output.exit_code == 0
+        assert "no corresponding device" in stout
 
     def test_fat_check_returns_true_sorted(
         self,
@@ -284,8 +324,51 @@ class TestChecks:  # noqa: WPS214
         assert f"01{os.sep}001" in stout
         assert f"03{os.sep}003" in stout
 
+    def test_skipping_dir_checks_if_mountpoint_not_given(
+        self,
+        cli_runner,
+        when,
+    ):
+        # GIVEN
+        when(fat_device_mount).get_mount_path(...).thenReturn("")
+        # WHEN
+        fat32_check_output = cli_runner.invoke(app, ["check", "/dev/sdb1"])
+        stout = strip_ansi(fat32_check_output.stdout)
+        # THEN
+        assert fat32_check_output.exit_code == 0
+        assert "no corresponding mountpoint." in stout
+
 
 class TestSort:
+
+    def test_sort_returns_if_no_mountpoint(
+        self,
+        cli_runner,
+        when,
+    ):
+        # GIVEN
+        when(fat_device_mount).get_dev_root_dir(...).thenReturn("")
+        # WHEN
+        fat32_check_output = cli_runner.invoke(app, ["sort", "tests/test_assets"])
+        stout = strip_ansi(fat32_check_output.stdout)
+        # THEN
+        assert fat32_check_output.exit_code == 1
+        assert "no corresponding device" in stout
+
+    def test_sort_returns_if_no_write_access(
+        self,
+        cli_runner,
+        when,
+    ):
+        # GIVEN
+        when(os).access(...).thenReturn(False)
+        # WHEN
+        fat32_check_output = cli_runner.invoke(app, ["sort", "tests/test_assets"])
+        stout = strip_ansi(fat32_check_output.stdout)
+        # THEN
+        assert fat32_check_output.exit_code == 1
+        assert "write permissions" in stout
+
     def test_sort_returns_if_is_already_sorted(
         self,
         cli_runner,
@@ -319,6 +402,20 @@ class TestSort:
 
 
 class TestCleanDryRun:
+    def test_clean_stops_if_no_mountpoint(
+        self,
+        cli_runner,
+        when,
+    ):
+        # GIVEN
+        when(fat_device_mount).get_mount_path(...).thenReturn("")
+        # WHEN
+        fat32_check_output = cli_runner.invoke(app, ["clean", "/dev/sdb1", "--dry-run"])
+        stout = strip_ansi(fat32_check_output.stdout)
+        # THEN
+        assert fat32_check_output.exit_code == 1
+        assert "no corresponding mount point" in stout
+
     def test_clean_dry_run(
         self,
         cli_runner,
@@ -349,6 +446,22 @@ class TestCleanDryRun:
 
 
 class TestSyncing:
+    def test_syncing_stops_if_no_mountpoint(
+        self,
+        cli_runner,
+        when,
+    ):
+        # GIVEN
+        when(fat_device_mount).get_mount_path(...).thenReturn("")
+        # WHEN
+        fat32_check_output = cli_runner.invoke(
+            app,
+            ["sync", "/dev/sdb1", "tests/test_assets"],
+        )
+        # THEN
+        assert fat32_check_output.exit_code == 1
+        assert "no corresponding mount point" in fat32_check_output.stdout
+
     def test_syncing_dry_run(
         self,
         cli_runner,

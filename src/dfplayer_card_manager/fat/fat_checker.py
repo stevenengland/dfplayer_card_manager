@@ -1,5 +1,7 @@
 import os
 import platform
+import re
+import struct
 import subprocess  # noqa: S404
 
 from dfplayer_card_manager.fat.fat_error import FatError
@@ -25,7 +27,7 @@ def _check_fat32_windows(sd_card_path: str) -> bool:
     if not os.path.exists(sd_card_path):
         return False
 
-    subprocess_result = subprocess.run(  # noqa: S607
+    subprocess_result = subprocess.run(
         [
             "powershell",
             "-NoProfile",
@@ -34,7 +36,7 @@ def _check_fat32_windows(sd_card_path: str) -> bool:
         ],
         capture_output=True,
         text=True,
-        shell=False,  # noqa: S603
+        shell=False,
     )
 
     if subprocess_result.returncode != 0:
@@ -46,26 +48,33 @@ def _check_fat32_windows(sd_card_path: str) -> bool:
     )
 
 
-def _check_fat32_unix(sd_card_path: str) -> bool:
-    if not os.path.exists(sd_card_path):
+def _check_fat32_unix(sd_card_path: str) -> bool:  # noqa: C901
+    if not os.path.exists(  # Returns true for /dev/sda[1-9] and /mount/sdcard
+        sd_card_path,
+    ):
         return False
 
-    subprocess_result = subprocess.run(  # noqa: S607
-        ["df", "-T", sd_card_path],
+    subprocess_result = subprocess.run(
+        ["lsblk", "-f"],
         capture_output=True,
         text=True,
-        shell=False,  # noqa: S603
+        shell=False,
     )
-
-    lines = subprocess_result.stdout.split("\n")
-    second_line = lines[1]
-    columns = second_line.split()
-    fs_type = columns[1].lower()
 
     if subprocess_result.returncode != 0:
         raise FatError(subprocess_result.stderr)
 
-    return subprocess_result.returncode == 0 and fs_type == "fat32"  # ToDo: only FAT32?
+    if sd_card_path.startswith("/dev/"):
+        sd_card_path = sd_card_path[5:]
+
+    for line in subprocess_result.stdout.splitlines()[1:]:
+        if re.match(f".*{sd_card_path}$", line) or re.match(
+            f"^.*{sd_card_path} ",
+            line,
+        ):
+            if "FAT32" in line:
+                return True
+    return False
 
 
 def _check_allocation_unit_size_windows(sd_card_path: str) -> bool:
@@ -73,7 +82,7 @@ def _check_allocation_unit_size_windows(sd_card_path: str) -> bool:
     if not os.path.exists(sd_card_path):
         return False
 
-    subprocess_result = subprocess.run(  # noqa: S607
+    subprocess_result = subprocess.run(
         [
             "powershell",
             "-NoProfile",
@@ -82,27 +91,56 @@ def _check_allocation_unit_size_windows(sd_card_path: str) -> bool:
         ],
         capture_output=True,
         text=True,
-        shell=False,  # noqa: S603
+        shell=False,
     )
 
-    return (
-        subprocess_result.returncode == 0
-        and "AllocationUnitSize : 32768" in subprocess_result.stdout
-    )
+    if subprocess_result.returncode != 0:
+        raise FatError(subprocess_result.stderr)
+
+    return "AllocationUnitSize : 32768" in subprocess_result.stdout
 
 
 def _check_allocation_unit_size_unix(sd_card_path: str) -> bool:
     if not os.path.exists(sd_card_path):
         return False
 
-    subprocess_result = subprocess.run(  # noqa: S607
+    # root method on device path
+    if sd_card_path.startswith("/dev/"):
+        return (
+            _get_allocation_unit_size_from_boot_sector(sd_card_path)
+            == 32768  # noqa: WPS432
+        )
+
+    # non root method on mount path
+    subprocess_result = subprocess.run(
         ["stat", sd_card_path],
         capture_output=True,
         text=True,
-        shell=False,  # noqa: S603
+        shell=False,
     )
+
+    if subprocess_result.returncode != 0:
+        raise FatError(subprocess_result.stderr)
 
     return (
         subprocess_result.returncode == 0
         and "IO Block: 32768" in subprocess_result.stdout
     )
+
+
+def _get_allocation_unit_size_from_boot_sector(device_path: str) -> int:
+    # be sure to only use this function with eleveted priviliges
+    with open(device_path, "rb") as device:
+        # Read the first 512 bytes (boot sector)
+        boot_sector = device.read(512)  # noqa: WPS432
+
+        # Bytes 11-12: Bytes per sector (2 bytes, little-endian)
+        bytes_per_sector = struct.unpack_from("<H", boot_sector, 11)[0]  # noqa: WPS432
+
+        # Byte 13: Sectors per cluster (1 byte)
+        sectors_per_cluster = struct.unpack_from("<B", boot_sector, 13)[  # noqa: WPS432
+            0
+        ]
+
+        # Calculate allocation unit size (bytes per cluster)
+        return bytes_per_sector * sectors_per_cluster

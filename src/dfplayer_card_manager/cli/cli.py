@@ -94,9 +94,6 @@ def sync(
     sd_card_path = _sd_card_path_pre_processing(sd_card_path)
     repository_path = _sd_card_path_pre_processing(repository_path)
 
-    cli_context.card_manager.target_repo_root_dir = sd_card_path
-    cli_context.card_manager.source_repo_root_dir = repository_path
-
     print_task("Sync repositories")
     try_safe(
         commands.sync,
@@ -128,6 +125,7 @@ def try_safe(func: Callable[..., None], *args: object, error_prepend: str = "") 
         if error_prepend:
             print_error(f"{error_prepend}")
         print_error(f"Error: {check_exc.message}")
+        cli_context.logger.debug(f"Traceback: {traceback.format_exc()}")
         _abort(check_exc)
     except Exception as exc:
         print_error(f"An unexpected exception occurred: {exc}")
