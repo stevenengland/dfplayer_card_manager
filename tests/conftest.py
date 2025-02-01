@@ -2,15 +2,33 @@ from pathlib import PurePath
 
 import pytest
 from file_system_helper import FakeFileSystemHelper
-from mockito import unstub
 
 BASE_DIR = PurePath(__file__).parent.parent
 TEST_ASSETS_DIR = BASE_DIR.joinpath("tests", "test_assets")
 
 
+@pytest.fixture(name="unstub_wo_verify", scope="function")
+def get_unstub_wo_verify():
+    from mockito import unstub  # noqa: WPS433
+
+    yield unstub
+    unstub()
+
+
+@pytest.fixture(name="unstub", scope="function")
+def get_unstub(unstub_wo_verify):
+    from mockito import verifyStubbedInvocationsAreUsed  # noqa: WPS433
+
+    yield unstub_wo_verify
+
+    verifyStubbedInvocationsAreUsed()
+
+
 @pytest.fixture
-def unstub_all():
-    yield
+def when(unstub):
+    from mockito import when  # noqa: WPS442, WPS433
+
+    yield when
     unstub()
 
 
