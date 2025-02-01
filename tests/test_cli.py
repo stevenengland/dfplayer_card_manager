@@ -17,10 +17,11 @@ pytestmark = pytest.mark.usefixtures("unstub")
 e2e = pytest.mark.skipif("not config.getoption('e2e')")
 
 
-@pytest.fixture(scope="function", name="cli_runner")
-def get_cli_runner(monkeypatch) -> CliRunner:
+@pytest.fixture(scope="function", name="monkeypatches")
+def set_monkeypatches(monkeypatch):
     # Monkeypatching and not mockito to avoid verifying calls
     monkeypatch.setattr(os, "access", lambda _path, _mode: True)
+    monkeypatch.setattr(os.path, "exists", lambda _path: True)
     monkeypatch.setattr(
         fat_device_mount,
         "get_mount_path",
@@ -58,6 +59,10 @@ def get_cli_runner(monkeypatch) -> CliRunner:
         "get_unwanted_subdir_entries",
         lambda _entries: [],
     )
+
+
+@pytest.fixture(scope="function", name="cli_runner")
+def get_cli_runner(monkeypatches) -> CliRunner:
     return CliRunner()
 
 
@@ -67,6 +72,7 @@ def get_cli_runner_e2e() -> CliRunner:
 
 
 class TestChecks:  # noqa: WPS214
+
     def test_fat_check_returns_false(
         self,
         cli_runner,
@@ -507,8 +513,8 @@ class TestSyncing:
     @e2e
     def test_syncing_dry_run_e2e(
         self,
-        cli_runner,
-        test_assets_fs: FakeFileSystemHelper,
+        cli_runner_e2e,
+        test_assets_fs_w: FakeFileSystemHelper,
     ):
         # GIVEN
         expected_results = [
@@ -565,13 +571,21 @@ class TestSyncing:
         ]
 
         # WHEN
-        sync_output = cli_runner.invoke(
+        sync_output = cli_runner_e2e.invoke(
             app,
             [
                 "-vvv",
                 "sync",
-                os.path.join(test_assets_fs.test_assets_path, "repositories", "target"),
-                os.path.join(test_assets_fs.test_assets_path, "repositories", "source"),
+                os.path.join(
+                    test_assets_fs_w.test_assets_path,
+                    "repositories",
+                    "target",
+                ),
+                os.path.join(
+                    test_assets_fs_w.test_assets_path,
+                    "repositories",
+                    "source",
+                ),
                 "--dry-run",
             ],
         )
