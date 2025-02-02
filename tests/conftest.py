@@ -1,4 +1,6 @@
-from pathlib import PurePath
+import shutil
+from pathlib import Path, PurePath
+from typing import Generator
 
 import pytest
 from file_system_helper import FakeFileSystemHelper
@@ -42,6 +44,13 @@ def test_assets_fs(fs):
 def test_assets_fs_w(fs):
     fsh = FakeFileSystemHelper(TEST_ASSETS_DIR, fs, read_only=False)
     yield fsh
+
+
+# Either where fakefilesystem is not applicable (known limitations or performance)
+@pytest.fixture(scope="function")
+def test_assets_tmp(tmp_path) -> Generator[Path, None, None]:
+    shutil.copytree(TEST_ASSETS_DIR, tmp_path, dirs_exist_ok=True)
+    yield tmp_path
 
 
 def pytest_addoption(parser):

@@ -9,7 +9,6 @@ from factories.configuration_factory import (
     create_target_repo_config,
 )
 from factories.repository_element_factory import create_repository_element
-from file_system_helper import FakeFileSystemHelper
 from mockito import ANY, mock
 
 from dfplayer_card_manager.config.configuration import (
@@ -20,8 +19,10 @@ from dfplayer_card_manager.config.configuration import (
 from dfplayer_card_manager.dfplayer.dfplayer_card_manager import (
     DfPlayerCardManager,
 )
+from dfplayer_card_manager.logging.logger import Logger
 from dfplayer_card_manager.logging.logger_interface import LoggerInterface
 from dfplayer_card_manager.mp3.audio_file_manager import (
+    AudioFileManager,
     AudioFileManagerInterface,
 )
 from dfplayer_card_manager.mp3.tag_collection import TagCollection
@@ -72,8 +73,8 @@ def dfplayer_card_manager_e2e() -> DfPlayerCardManager:
     sut = DfPlayerCardManager(
         "source_root",
         "target_root",
-        AudioFileManagerInterface(),
-        LoggerInterface(),
+        AudioFileManager(),
+        Logger(),
         configuration,
     )
     return sut  # noqa: WPS331
@@ -381,21 +382,19 @@ class TestDeletionsToTargetRepo:
 
 
 class TestCopyToTargetRepo:
-
-    @pytest.mark.skip(reason="https://github.com/pytest-dev/pyfakefs/issues/1105")
     @e2e
     def test_copy_to_target_repo_succeeds(
         self,
         sut_e2e: DfPlayerCardManager,
-        test_assets_fs: FakeFileSystemHelper,
+        test_assets_tmp,
     ):
         # GIVEN
-        source_root_dir = os.path.join(test_assets_fs.test_assets_path, "source_root")
-        target_root_dir = os.path.join(test_assets_fs.test_assets_path, "target_root")
-        test_assets_fs.file_system.create_dir(source_root_dir)
-        test_assets_fs.file_system.create_dir(os.path.join(source_root_dir, "001.test"))
+        source_root_dir = os.path.join(test_assets_tmp, "source_root")
+        target_root_dir = os.path.join(test_assets_tmp, "target_root")
+        source_test_dir = test_assets_tmp / "source_root" / "001.test"
+        source_test_dir.mkdir(parents=True, exist_ok=True)
         shutil.copy(
-            os.path.join(test_assets_fs.test_assets_path, "0001.mp3"),
+            os.path.join(test_assets_tmp, "0001.mp3"),
             os.path.join(source_root_dir, "001.test", "0001.mp3"),
         )
         sut_e2e._source_repo_root_dir = source_root_dir  # noqa: WPS437

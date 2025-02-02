@@ -1,8 +1,8 @@
 import os
+from pathlib import Path
 
 import pytest
 from factories.repository_element_factory import create_repository_element
-from file_system_helper import FakeFileSystemHelper
 from strip_ansi import strip_ansi
 from typer.testing import CliRunner
 
@@ -514,7 +514,7 @@ class TestSyncing:
     def test_syncing_dry_run_e2e(
         self,
         cli_runner_e2e,
-        test_assets_fs_w: FakeFileSystemHelper,
+        test_assets_tmp: Path,
     ):
         # GIVEN
         expected_results = [
@@ -577,12 +577,12 @@ class TestSyncing:
                 "-vvv",
                 "sync",
                 os.path.join(
-                    test_assets_fs_w.test_assets_path,
+                    test_assets_tmp,
                     "repositories",
                     "target",
                 ),
                 os.path.join(
-                    test_assets_fs_w.test_assets_path,
+                    test_assets_tmp,
                     "repositories",
                     "source",
                 ),
@@ -604,16 +604,16 @@ class TestSyncing:
     def test_syncing_e2e(
         self,
         cli_runner_e2e,
-        test_assets_fs_w: FakeFileSystemHelper,
+        test_assets_tmp,
     ):
         # GIVEN
         source_dir = os.path.join(
-            test_assets_fs_w.test_assets_path,
+            test_assets_tmp,
             "repositories",
             "source",
         )
         target_dir = os.path.join(
-            test_assets_fs_w.test_assets_path,
+            test_assets_tmp,
             "repositories",
             "target",
         )
@@ -683,16 +683,16 @@ class TestSyncing:
     def test_syncing_idempotency_e2e(
         self,
         cli_runner_e2e,
-        test_assets_fs_w: FakeFileSystemHelper,
+        test_assets_tmp,
     ):
         # GIVEN
         source_dir = os.path.join(
-            test_assets_fs_w.test_assets_path,
+            test_assets_tmp,
             "repositories",
             "source",
         )
         target_dir = os.path.join(
-            test_assets_fs_w.test_assets_path,
+            test_assets_tmp,
             "repositories",
             "target",
         )
@@ -729,16 +729,16 @@ class TestSyncing:
     def test_syncing_alphabetical_e2e(
         self,
         cli_runner_e2e,
-        test_assets_fs_w: FakeFileSystemHelper,
+        test_assets_tmp,
     ):
         # GIVEN
         source_dir = os.path.join(
-            test_assets_fs_w.test_assets_path,
+            test_assets_tmp,
             "repositories",
             "source_alpha",
         )
         target_dir = os.path.join(
-            test_assets_fs_w.test_assets_path,
+            test_assets_tmp,
             "repositories",
             "target_empty",
         )

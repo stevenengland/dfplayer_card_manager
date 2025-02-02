@@ -4,7 +4,6 @@ from unittest.mock import MagicMock, Mock
 
 import eyed3
 import pytest
-from file_system_helper import FakeFileSystemHelper
 
 from dfplayer_card_manager.mp3.audio_file_manager import (
     AudioFileManager,
@@ -66,13 +65,13 @@ class TestReadAudio:
     def test_read_id3_tags_from_file_wo_tags(
         self,
         sut: AudioFileManagerInterface,
-        test_assets_fs: FakeFileSystemHelper,
+        test_assets_tmp,
     ):
         # GIVEN
         # WHEN
         # THEN
         tags = sut.read_id3_tags(
-            os.path.join(test_assets_fs.test_assets_path, "0003.mp3"),
+            os.path.join(test_assets_tmp, "0003.mp3"),
             check_tags=False,
         )
 
@@ -80,7 +79,7 @@ class TestReadAudio:
 
         with pytest.raises(expected_exception=TagError, match="Invalid"):
             sut.read_id3_tags(
-                os.path.join(test_assets_fs.test_assets_path, "0003.mp3"),
+                os.path.join(test_assets_tmp, "0003.mp3"),
             )
 
     # @pytest.mark.skip(reason="no way of currently testing this")
@@ -88,12 +87,12 @@ class TestReadAudio:
     def test_read_id3_tags_from_file_w_tags(
         self,
         sut: AudioFileManagerInterface,
-        test_assets_fs: FakeFileSystemHelper,
+        test_assets_tmp,
     ):
         # GIVEN
         # WHEN
         sut_result = sut.read_id3_tags(
-            os.path.join(test_assets_fs.test_assets_path, "0002.mp3"),
+            os.path.join(test_assets_tmp, "0002.mp3"),
         )
         # THEN
         assert sut_result.title == "title_test"
@@ -101,20 +100,19 @@ class TestReadAudio:
         assert sut_result.album == "album_test"
         assert sut_result.track_number == 99
 
-    # @pytest.mark.skip(reason="no way of currently testing this")
     @e2e
     def test_read_audio_content(
         self,
         sut: AudioFileManagerInterface,
-        test_assets_fs: FakeFileSystemHelper,
+        test_assets_tmp,
     ):
         # GIVEN
         # WHEN
         sut_result_1 = sut.read_audio_content(
-            os.path.join(test_assets_fs.test_assets_path, "0001.mp3"),
+            os.path.join(test_assets_tmp, "0001.mp3"),
         )
         sut_result_2 = sut.read_audio_content(
-            os.path.join(test_assets_fs.test_assets_path, "0002.mp3"),
+            os.path.join(test_assets_tmp, "0002.mp3"),
         )
         # THEN
 
@@ -125,12 +123,12 @@ class TestReadAudio:
     def test_read_audio_content_and_id3_tags(
         self,
         sut: AudioFileManagerInterface,
-        test_assets_fs: FakeFileSystemHelper,
+        test_assets_tmp,
     ):
         # GIVEN
         # WHEN
         sut_result_1, sut_result_2 = sut.read_audio_content_and_id3_tags(
-            os.path.join(test_assets_fs.test_assets_path, "0002.mp3"),
+            os.path.join(test_assets_tmp, "0002.mp3"),
         )
 
         # THEN
@@ -141,13 +139,13 @@ class TestReadAudio:
     def test_read_audio_content_and_id3_tags_from_file_wo_tags(
         self,
         sut: AudioFileManagerInterface,
-        test_assets_fs: FakeFileSystemHelper,
+        test_assets_tmp,
     ):
         # GIVEN
         # WHEN
         # THEN
         sut_result_1, sut_result_2 = sut.read_audio_content_and_id3_tags(
-            os.path.join(test_assets_fs.test_assets_path, "0003.mp3"),
+            os.path.join(test_assets_tmp, "0003.mp3"),
             check_tags=False,
         )
 
@@ -156,7 +154,7 @@ class TestReadAudio:
 
         with pytest.raises(expected_exception=TagError, match="Invalid"):
             sut_result_1, sut_result_2 = sut.read_audio_content_and_id3_tags(
-                os.path.join(test_assets_fs.test_assets_path, "0003.mp3"),
+                os.path.join(test_assets_tmp, "0003.mp3"),
             )
 
 
@@ -217,22 +215,21 @@ class TestCopyingAudio:
 
         # THEN
 
-    @pytest.mark.skip(reason="https://github.com/pytest-dev/pyfakefs/issues/1105")
     @e2e
     def test_copy_audio_with_fs(
         self,
         sut: AudioFileManagerInterface,
-        test_assets_fs: FakeFileSystemHelper,
+        test_assets_tmp,
     ):
         # GIVEN
-        source_file_path = os.path.join(test_assets_fs.test_assets_path, "0001.mp3")
+        source_file_path = os.path.join(test_assets_tmp, "0001.mp3")
         target_file_path = os.path.join(
-            test_assets_fs.test_assets_path,
+            test_assets_tmp,
             "target_repo",
             "9999.mp3",
         )
         os.makedirs(
-            os.path.join(test_assets_fs.test_assets_path, "target_repo"),
+            os.path.join(test_assets_tmp, "target_repo"),
         )
 
         print(f"source_file_path: {os.listdir(os.path.dirname(source_file_path))}")
