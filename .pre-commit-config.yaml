@@ -5,7 +5,7 @@ repos:
       - id: black
         name: black
         entry: |
-          python ./tools/checks.py black
+          python3 ./tools/checks.py black
         language: system
         types: [python]
         pass_filenames: false
@@ -13,7 +13,7 @@ repos:
       - id: flake8
         name: flake8
         entry: |
-          python ./tools/checks.py flake8
+          python3 ./tools/checks.py flake8
         language: system
         types: [python]
         pass_filenames: false
@@ -21,7 +21,7 @@ repos:
       - id: mypy
         name: mypy
         entry: |
-          python ./tools/checks.py mypy
+          python3 ./tools/checks.py mypy
         language: system
         types: [python]
         pass_filenames: false
