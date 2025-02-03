@@ -24,9 +24,10 @@ fi
 
 echo "Creating FAT32 image file"
 if [ ! -f "$IMG_FILE" ]; then
-    dd if=/dev/zero of="$IMG_FILE" bs=1M count=10
+    dd if=/dev/zero of="$IMG_FILE" bs=4M count=10
 fi
 
+echo "Creating FAT32 file system"
 mkfs.vfat -F 32 "$IMG_FILE"
 
 echo "Mounting image file"
