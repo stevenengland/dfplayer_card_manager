@@ -10,7 +10,7 @@ def get_mount_path(device_path: str) -> str:
     if platform.system() == "Linux":
         return _get_mount_path_linux(device_path)
     if platform.system() == "Darwin":
-        raise NotImplementedError("macOS is not supported")
+        return _get_mount_path_linux(device_path)
     raise NotImplementedError(f"{platform.system()} is not supported")
 
 
@@ -20,7 +20,7 @@ def get_dev_root_dir(mount_path: str) -> str:
     if platform.system() == "Linux":
         return _get_dev_root_dir_linux(mount_path)
     if platform.system() == "Darwin":
-        raise NotImplementedError("macOS is not supported")
+        return _get_dev_root_dir_linux(mount_path)
     raise NotImplementedError(f"{platform.system()} is not supported")
 
 
@@ -30,7 +30,7 @@ def detect_device_path_and_mount_path(sd_card_path: str) -> tuple[str, str]:
     if platform.system() == "Linux":
         return _detect_device_path_and_mount_path_linux(sd_card_path)
     if platform.system() == "Darwin":
-        raise NotImplementedError("macOS is not supported")
+        return _detect_device_path_and_mount_path_linux(sd_card_path)
     raise NotImplementedError(f"{platform.system()} is not supported")
 
 
