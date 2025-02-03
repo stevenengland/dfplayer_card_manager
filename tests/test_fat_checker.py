@@ -26,6 +26,31 @@ mock_subprocess_run_linux = MagicMock(
     returncode=0,
 )
 
+mock_subprocess_run_macos = MagicMock(
+    stdout="""<key>DeviceIdentifier</key>
+        <string>disk4</string>
+        <key>DeviceNode</key>
+        <string>/dev/disk4</string>
+        <key>DeviceTreePath</key>
+        <string>IODeviceTree:/</string>
+        <key>Ejectable</key>
+        <true/>
+        <key>EjectableMediaAutomaticUnderSoftwareControl</key>
+        <true/>
+        <key>EjectableOnly</key>
+        <true/>
+        <key>FilesystemName</key>
+        <string>MS-DOS FAT32</string>
+        <key>FilesystemType</key>
+        <string>msdos</string>
+        <key>FilesystemUserVisibleName</key>
+        <string>MS-DOS (FAT32)</string>
+        <key>FreeSpace</key>
+        <key>MountPoint</key>
+        <string>/Volumes/dfplayer_card_manager_usbstick</string>""",
+    returncode=0,
+)
+
 
 class TestFat32CheckerUnix:
     def test_check_fat32_unix_exists_and_is_fat32(
@@ -118,6 +143,63 @@ class TestFat32CheckerWindows:
         when(subprocess).run(...).thenReturn(mock_subprocess_run)
 
         is_fat32_filesystem = check_is_fat32("E:\\")
+        assert not is_fat32_filesystem
+
+
+class TestFat32CheckerMacos:
+    def test_check_fat32_macos_exists_and_is_fat32(
+        self,
+        when,
+    ):
+        # GIVEN
+        when(platform).system().thenReturn("Darwin")
+        when(os.path).exists(...).thenReturn(True)
+
+        when(subprocess).run(
+            ["diskutil", "info", "-plist", "/dev/disk4"],
+            ...,
+        ).thenReturn(
+            mock_subprocess_run_macos,
+        )
+
+        when(subprocess).run(
+            ["diskutil", "info", "-plist", "/Volumes/dfplayer_card_manager_usbstick"],
+            ...,
+        ).thenReturn(
+            mock_subprocess_run_macos,
+        )
+
+        is_fat32_filesystem_partition = check_is_fat32("/dev/disk4")
+        is_fat32_filesystem_mountpoint = check_is_fat32(
+            "/Volumes/dfplayer_card_manager_usbstick",
+        )
+
+        assert is_fat32_filesystem_mountpoint
+        assert is_fat32_filesystem_partition
+
+    def test_check_fat32_macos_does_not_exist(
+        self,
+        when,
+    ):
+        # GIVEN
+        when(platform).system().thenReturn("Darwin")
+        when(os.path).exists(...).thenReturn(False)
+
+        is_fat32_filesystem = check_is_fat32("/mnt/sdcard")
+        assert not is_fat32_filesystem
+
+    def test_check_fat32_macos_exists_and_is_not_fat32(
+        self,
+        when,
+    ):
+        # GIVEN
+        when(platform).system().thenReturn("Darwin")
+        when(os.path).exists(...).thenReturn(True)
+
+        mock_subprocess_run_macos.stdout = "<string>MS-DOS FAT16</string>"
+        when(subprocess).run(...).thenReturn(mock_subprocess_run_macos)
+
+        is_fat32_filesystem = check_is_fat32("/Volumes/some")
         assert not is_fat32_filesystem
 
 

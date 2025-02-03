@@ -12,7 +12,11 @@ def check_is_fat32(sd_card_path: str) -> bool:
     """Check if the SD card path exists and is fat32."""
     if platform.system() == "Windows":
         return _check_fat32_windows(sd_card_path)
-    return _check_fat32_unix(sd_card_path)
+    elif platform.system() == "Linux":
+        return _check_fat32_unix(sd_card_path)
+    elif platform.system() == "Darwin":
+        return _check_fat32_macos(sd_card_path)
+    raise NotImplementedError(f"{platform.system()} is not supported")
 
 
 def check_has_correct_allocation_unit_size(sd_card_path: str) -> bool:
@@ -75,6 +79,26 @@ def _check_fat32_unix(sd_card_path: str) -> bool:  # noqa: C901
             if "FAT32" in line:
                 return True
     return False
+
+
+def _check_fat32_macos(sd_card_path: str) -> bool:
+    if not os.path.exists(sd_card_path):
+        return False
+
+    subprocess_result = subprocess.run(
+        ["diskutil", "info", "-plist", sd_card_path],
+        capture_output=True,
+        text=True,
+        shell=False,
+    )
+
+    if subprocess_result.returncode != 0:
+        raise FatError(subprocess_result.stderr)
+
+    return (
+        re.search(r"\<string\>.*FAT32\<\/string\>", subprocess_result.stdout)
+        is not None
+    )
 
 
 def _check_allocation_unit_size_windows(sd_card_path: str) -> bool:
