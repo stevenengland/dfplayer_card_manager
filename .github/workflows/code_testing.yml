@@ -107,6 +107,30 @@ jobs:
         shell: bash
         run: "./tests/test_linux.sh"
 
+  platform_testing_special_macos:
+    if: contains(github.event.pull_request.title, '[skip ci]') == false
+    needs: check_and_coverage-test
+    name: "Special Mac OS testing"
+    runs-on: macos-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+
+      - name: Install dependencies
+        shell: bash
+        run: "python ./tools/create_venv.py"
+
+      - name: Set up mounted USB stick
+        shell: bash
+        run: "sudo ./tools/create_fat_volume_macos.sh"
+
+      - name: Perform dfplayer-card-manager tests
+        shell: bash
+        run: "./tests/test_macos.sh"
+
   platform_testing_special_windows:
     if: contains(github.event.pull_request.title, '[skip ci]') == false
     needs: check_and_coverage-test
