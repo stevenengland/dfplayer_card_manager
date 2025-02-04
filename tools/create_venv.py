@@ -1,3 +1,4 @@
+import argparse
 import os
 import shutil
 import subprocess  # noqa: S404
@@ -5,7 +6,8 @@ import sys
 from pathlib import Path
 
 
-def main() -> None:  # noqa: WPS213
+def main(prod: bool = False) -> None:  # noqa: WPS213
+    print(f"Production is set: {prod}")
     # Check if running inside a virtual environment
     if "VIRTUAL_ENV" in os.environ:
         print("Active venv session detected. Please call 'deactivate' first.")
@@ -34,10 +36,15 @@ def main() -> None:  # noqa: WPS213
 
     # Install dependencies
     print(">> Installing dependencies")
-
+    add_dev = "[dev]" if not prod else ""
     if os.name == "posix":
         subprocess.run(  # noqa: S607, S603
-            [str(venv_dir / "bin" / "pip"), "install", "-e", f"{str(base_dir)}[dev]"],
+            [  # noqa: WPS221
+                str(venv_dir / "bin" / "pip"),
+                "install",
+                "-e",
+                f"{str(base_dir)}{add_dev}",
+            ],
             check=True,
         )
     else:
@@ -46,7 +53,7 @@ def main() -> None:  # noqa: WPS213
                 str(venv_dir / "Scripts" / "pip"),
                 "install",
                 "-e",
-                f"{str(base_dir)}[dev]",
+                f"{str(base_dir)}{add_dev}",
             ],
             check=True,
         )
@@ -55,4 +62,13 @@ def main() -> None:  # noqa: WPS213
 
 
 if __name__ == "__main__":
-    main()
+
+    parser = argparse.ArgumentParser(description="Create a virtual environment.")
+    parser.add_argument(
+        "--prod",
+        action="store_true",
+        help="Install production dependencies",
+    )
+    args = parser.parse_args()
+
+    main(prod=args.prod)

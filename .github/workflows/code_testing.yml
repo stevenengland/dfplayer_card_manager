@@ -97,7 +97,7 @@ jobs:
 
       - name: Install dependencies
         shell: bash
-        run: "python ./tools/create_venv.py"
+        run: "python ./tools/create_venv.py --prod"
 
       - name: Set up mounted USB stick
         shell: bash
@@ -121,7 +121,7 @@ jobs:
 
       - name: Install dependencies
         shell: bash
-        run: "python ./tools/create_venv.py"
+        run: "python ./tools/create_venv.py --prod"
 
       - name: Set up mounted USB stick
         shell: bash
@@ -129,7 +129,9 @@ jobs:
 
       - name: Perform dfplayer-card-manager tests
         shell: bash
-        run: "./tests/test_macos.sh"
+        run: |
+          source .venv/bin/activate
+          ./tests/test_macos.sh
 
   platform_testing_special_windows:
     if: contains(github.event.pull_request.title, '[skip ci]') == false
@@ -145,7 +147,7 @@ jobs:
 
       - name: Install dependencies
         shell: bash
-        run: "python ./tools/create_venv.py"
+        run: "python ./tools/create_venv.py --prod"
 
       - name: Set up mounted USB stick
         shell: cmd
