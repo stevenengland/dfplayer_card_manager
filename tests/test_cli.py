@@ -8,6 +8,7 @@ from typer.testing import CliRunner
 
 from dfplayer_card_manager.cli.cli import app, cli_context
 from dfplayer_card_manager.fat import fat_checker, fat_device_mount
+from dfplayer_card_manager.os import file_access
 from dfplayer_card_manager.repository.compare_result import CompareResult
 from dfplayer_card_manager.repository.compare_result_actions import (
     CompareResultAction,
@@ -174,6 +175,22 @@ class TestChecks:  # noqa: WPS214
     ):
         # GIVEN
         when(os).access(...).thenReturn(False)
+        # WHEN
+        fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
+        stout = strip_ansi(fat32_check_output.stdout)
+        # THEN
+        if fat32_check_output.exit_code != 0:
+            print(stout)
+        assert fat32_check_output.exit_code == 0
+        assert "no corresponding device" in stout
+
+    def test_fat_check_returns_missing_dev_when_tested_for_sorting_with_busy_device(
+        self,
+        cli_runner,
+        when,
+    ):
+        # GIVEN
+        when(file_access).probe_is_busy(...).thenReturn(True)
         # WHEN
         fat32_check_output = cli_runner.invoke(app, ["check", "tests/test_assets"])
         stout = strip_ansi(fat32_check_output.stdout)
@@ -374,6 +391,20 @@ class TestSort:
         # THEN
         assert fat32_check_output.exit_code == 1
         assert "write permissions" in stout
+
+    def test_sort_returns_if_resource_busy(
+        self,
+        cli_runner,
+        when,
+    ):
+        # GIVEN
+        when(file_access).probe_is_busy(...).thenReturn(True)
+        # WHEN
+        fat32_check_output = cli_runner.invoke(app, ["sort", "tests/test_assets"])
+        stout = strip_ansi(fat32_check_output.stdout)
+        # THEN
+        assert fat32_check_output.exit_code == 1
+        assert "Resource is busy" in stout
 
     def test_sort_returns_if_is_already_sorted(
         self,

@@ -23,7 +23,11 @@ def check_has_correct_allocation_unit_size(sd_card_path: str) -> bool:
     """Check if the SD card path has the correct allocation unit size."""
     if platform.system() == "Windows":
         return _check_allocation_unit_size_windows(sd_card_path)
-    return _check_allocation_unit_size_unix(sd_card_path)
+    elif platform.system() == "Linux":
+        return _check_allocation_unit_size_unix(sd_card_path)
+    elif platform.system() == "Darwin":
+        return _check_allocation_unit_size_macos(sd_card_path)
+    raise NotImplementedError(f"{platform.system()} is not supported")
 
 
 def _check_fat32_windows(sd_card_path: str) -> bool:
@@ -149,6 +153,34 @@ def _check_allocation_unit_size_unix(sd_card_path: str) -> bool:
     return (
         subprocess_result.returncode == 0
         and "IO Block: 32768" in subprocess_result.stdout
+    )
+
+
+def _check_allocation_unit_size_macos(sd_card_path: str) -> bool:
+    if not os.path.exists(sd_card_path):
+        return False
+
+    # root method on device path
+    if sd_card_path.startswith("/dev/"):
+        return (
+            _get_allocation_unit_size_from_boot_sector(sd_card_path)
+            == 32768  # noqa: WPS432
+        )
+
+    # non root method on mount path
+    subprocess_result = subprocess.run(
+        ["stat", "-s", sd_card_path],
+        capture_output=True,
+        text=True,
+        shell=False,
+    )
+
+    if subprocess_result.returncode != 0:
+        raise FatError(subprocess_result.stderr)
+
+    return (
+        subprocess_result.returncode == 0
+        and "st_size=32768" in subprocess_result.stdout
     )
 
 

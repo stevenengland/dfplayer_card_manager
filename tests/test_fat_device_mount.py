@@ -144,6 +144,36 @@ class TestGetMountPoint:
         with pytest.raises(FatError):
             get_dev_root_dir("/media/user/sdcard")
 
+    def test_get_mount_point_by_device_path_succeeds_macos(self, when, df_mock_macos):
+        # GIVEN
+        when(platform).system().thenReturn("Darwin")
+        when(subprocess).run(["df", "-h"], ...).thenReturn(
+            df_mock_macos,
+        )
+
+        # WHEN
+        mount_path = get_dev_root_dir("/Volumes/dfplayer")
+        mount_path_with_os_sep = get_dev_root_dir("/Volumes/dfplayer/")
+        mount_path_with_os_macos_prefix = get_dev_root_dir("/Volumes/TOSHIBA")
+
+        # THEN
+        assert mount_path == "/dev/disk4"
+        assert mount_path_with_os_sep == "/dev/disk4"
+        assert mount_path_with_os_macos_prefix == "/dev/disk3s1"
+
+    def test_get_mount_point_by_device_path_fails_macos(self, when, df_mock_macos):
+        # GIVEN
+        when(platform).system().thenReturn("Darwin")
+        df_mock_macos.returncode = 1
+        when(subprocess).run(["df", "-h"], ...).thenReturn(
+            df_mock_macos,
+        )
+        # WHEN
+        # THEN
+
+        with pytest.raises(FatError):
+            get_dev_root_dir("/Volumes/TOSHIBA")
+
     def test_get_mount_point_by_device_path_succeeds_windows(self, when, lsblk_mock):
         # GIVEN
         when(platform).system().thenReturn("Windows")

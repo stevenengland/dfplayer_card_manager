@@ -18,42 +18,42 @@ set +e
 echo "Running with device path"
 echo "####### Check ####### "
 dfplayer-card-manager -vvv check "$DEVICE"
-#echo "####### Clean ####### "
-#dfplayer-card-manager -vvv clean "$DEVICE"
-#echo "####### Sort ####### "
-#dfplayer-card-manager -vvv sort "$DEVICE"
-#echo "####### Sync ####### "
-#dfplayer-card-manager -vvv sync "$DEVICE" ./tests/test_assets/repositories/source
+echo "####### Clean ####### "
+dfplayer-card-manager -vvv clean "$DEVICE"
+echo "####### Sort ####### "
+dfplayer-card-manager -vvv sort "$DEVICE"
+echo "####### Sync ####### "
+dfplayer-card-manager -vvv sync "$DEVICE" ./tests/test_assets/repositories/source
 
-#set -e
-#echo "Cleaning directory $MOUNT_POINT"
-#sudo rm -rf "$MOUNT_POINT"/*
+set -e
+echo "Cleaning directory $MOUNT_POINT"
+rm -rf "$MOUNT_POINT"/*
 
-#set +e
-#echo "Running with mount path"
-#echo "####### Check ####### "
-#dfplayer-card-manager -vvv check "$MOUNT_POINT"
-#echo "####### Clean ####### "
-#dfplayer-card-manager -vvv clean "$MOUNT_POINT"
-#echo "####### Sort ####### "
-#dfplayer-card-manager -vvv sort "$MOUNT_POINT"
-#echo "####### Sync ####### "
-#dfplayer-card-manager -vvv sync "$MOUNT_POINT" ./tests/test_assets/repositories/source
+set +e
+echo "Running with mount path"
+echo "####### Check ####### "
+dfplayer-card-manager -vvv check "$MOUNT_POINT"
+echo "####### Clean ####### "
+dfplayer-card-manager -vvv clean "$MOUNT_POINT"
+echo "####### Sort ####### "
+dfplayer-card-manager -vvv sort "$MOUNT_POINT"
+echo "####### Sync ####### "
+dfplayer-card-manager -vvv sync "$MOUNT_POINT" ./tests/test_assets/repositories/source
 
-#set -e
-#echo "Cleaning directory $MOUNT_POINT"
-#sudo rm -rf "$MOUNT_POINT"/*
+set -e
+echo "Cleaning directory $MOUNT_POINT"
+rm -rf "$MOUNT_POINT"/*
 
-#set +e
-#echo "####### Check ####### "
-#sudo ./.venv/bin/dfplayer-card-manager -vvv check "$DEVICE"
-#echo "####### Clean ####### "
-#sudo ./.venv/bin/dfplayer-card-manager -vvv clean "$DEVICE"
-#echo "####### Sort ####### "
-#sudo ./.venv/bin/dfplayer-card-manager -vvv sort "$DEVICE"
-#echo "####### Sync ####### "
-#sudo ./.venv/bin/dfplayer-card-manager -vvv sync "$DEVICE" ./tests/test_assets/repositories/source
+set +e
+echo "####### Check ####### "
+sudo ./.venv/bin/dfplayer-card-manager -vvv check "$DEVICE"
+echo "####### Clean ####### "
+sudo ./.venv/bin/dfplayer-card-manager -vvv clean "$DEVICE"
+echo "####### Sort ####### "
+sudo ./.venv/bin/dfplayer-card-manager -vvv sort "$DEVICE"
+echo "####### Sync ####### "
+sudo ./.venv/bin/dfplayer-card-manager -vvv sync "$DEVICE" ./tests/test_assets/repositories/source
 
-#set -e
-#echo "Cleaning directory $MOUNT_POINT"
-#sudo rm -rf "$MOUNT_POINT"/*
+set -e
+echo "Cleaning directory $MOUNT_POINT"
+sudo rm -rf "$MOUNT_POINT"/*

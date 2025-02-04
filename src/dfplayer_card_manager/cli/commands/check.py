@@ -10,6 +10,7 @@ from dfplayer_card_manager.dfplayer.dfplayer_card_manager_error import (
     DfPlayerCardManagerError,
 )
 from dfplayer_card_manager.fat import fat_checker, fat_device_mount
+from dfplayer_card_manager.os import file_access
 
 
 def check(cli_context: CliContext, sd_card_path: str):  # noqa: C901, WPS213, WPS231
@@ -22,11 +23,13 @@ def check(cli_context: CliContext, sd_card_path: str):  # noqa: C901, WPS213, WP
     # Device path is always available
     device_path_readable = os.access(device_path, os.R_OK)
     device_path_writable = os.access(device_path, os.W_OK)
+    device_path_busy = file_access.probe_is_busy(device_path)
 
     print_neutral(f"Device path: {device_path}")
     print_neutral(f"Mountpoint path: {mountpoint_path}")
     cli_context.logger.trace(f"Device path readable: {device_path_readable}")
     cli_context.logger.trace(f"Device path writable: {device_path_writable}")
+    cli_context.logger.trace(f"Device path busy: {device_path_busy}")
 
     # Check if the SD card path exists and is FAT32
     _check_is_fat32(sd_card_path)
@@ -43,11 +46,12 @@ def check(cli_context: CliContext, sd_card_path: str):  # noqa: C901, WPS213, WP
         )
 
     # Check if the SD card path is sorted
-    if device_path and device_path_readable:
+    if device_path and device_path_readable and not device_path_busy:
         _check_fat_volume_is_sorted(device_path, cli_context)
     else:
         print_warning(
-            f"{device_path} has no corresponding device path or is not readable (maybe you need elevated priviliges). "
+            f"{device_path} has no corresponding device path or is not readable. "
+            + "Maybe you need elevated priviliges or you need to unmount the device first. "
             + "Cannot check if FAT is sorted.",
         )
 
