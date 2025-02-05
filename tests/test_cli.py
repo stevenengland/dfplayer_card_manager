@@ -18,6 +18,7 @@ pytestmark = pytest.mark.usefixtures("unstub")
 e2e = pytest.mark.skipif("not config.getoption('e2e')")
 
 
+# ToDo: Maybe switch to mockitos "when without verifying calls"
 @pytest.fixture(scope="function", name="monkeypatches")
 def set_monkeypatches(monkeypatch):
     # Monkeypatching and not mockito to avoid verifying calls
