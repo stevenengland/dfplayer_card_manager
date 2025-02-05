@@ -1,7 +1,6 @@
 import os
 
 import pytest
-from file_system_helper import FakeFileSystemHelper
 from mockito import mock
 
 from dfplayer_card_manager.mp3.audio_diff_checker import AudioDiffChecker
@@ -74,12 +73,12 @@ class TestAudioDiffChecker:
     def test_check_diff_by_hash_succeeds(
         self,
         sute2e: AudioDiffChecker,
-        test_assets_fs: FakeFileSystemHelper,
+        test_assets_tmp,
     ):
         # GIVEN
-        audio_file_path = os.path.join(test_assets_fs.test_assets_path, "0001.mp3")
+        audio_file_path = os.path.join(test_assets_tmp, "0001.mp3")
         audio_file_path_compare = os.path.join(
-            test_assets_fs.test_assets_path,
+            test_assets_tmp,
             "0002.mp3",
         )
         # WHEN

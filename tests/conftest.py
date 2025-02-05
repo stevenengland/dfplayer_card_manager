@@ -1,16 +1,36 @@
-from pathlib import PurePath
+import shutil
+from pathlib import Path, PurePath
+from typing import Generator
 
 import pytest
 from file_system_helper import FakeFileSystemHelper
-from mockito import unstub
 
 BASE_DIR = PurePath(__file__).parent.parent
 TEST_ASSETS_DIR = BASE_DIR.joinpath("tests", "test_assets")
 
 
+@pytest.fixture(name="unstub_wo_verify", scope="function")
+def get_unstub_wo_verify():
+    from mockito import unstub  # noqa: WPS433
+
+    yield unstub
+    unstub()
+
+
+@pytest.fixture(name="unstub", scope="function")
+def get_unstub(unstub_wo_verify):
+    from mockito import verifyStubbedInvocationsAreUsed  # noqa: WPS433
+
+    yield unstub_wo_verify
+
+    verifyStubbedInvocationsAreUsed()
+
+
 @pytest.fixture
-def unstub_all():
-    yield
+def when(unstub):
+    from mockito import when  # noqa: WPS442, WPS433
+
+    yield when
     unstub()
 
 
@@ -24,6 +44,13 @@ def test_assets_fs(fs):
 def test_assets_fs_w(fs):
     fsh = FakeFileSystemHelper(TEST_ASSETS_DIR, fs, read_only=False)
     yield fsh
+
+
+# Either where fakefilesystem is not applicable (known limitations or performance)
+@pytest.fixture(scope="function")
+def test_assets_tmp(tmp_path) -> Generator[Path, None, None]:
+    shutil.copytree(TEST_ASSETS_DIR, tmp_path, dirs_exist_ok=True)
+    yield tmp_path
 
 
 def pytest_addoption(parser):

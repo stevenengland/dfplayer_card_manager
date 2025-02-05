@@ -82,3 +82,94 @@ jobs:
       - name: Perform Unit tests
         shell: bash
         run: "python ./tools/tests.py --e2e --no-cov"
+
+  platform_testing_special_linux:
+    if: contains(github.event.pull_request.title, '[skip ci]') == false
+    needs: check_and_coverage-test
+    name: "Special Linux testing"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+
+      - name: Install dependencies
+        shell: bash
+        run: "python ./tools/create_venv.py --prod"
+
+      - name: Set up mounted USB stick
+        shell: bash
+        run: "sudo ./tools/create_fat_volume.sh"
+
+      - name: Perform dfplayer-card-manager tests
+        shell: bash
+        run: |
+          source .venv/bin/activate
+          ./tests/test_linux.sh > test_run_linux.log 2>&1
+          cat test_run_linux.log
+          grep -q "Traceback (most recent call last)" test_run_linux.log && echo Errors found && exit 1 || echo No errors found
+
+  platform_testing_special_macos:
+    if: contains(github.event.pull_request.title, '[skip ci]') == false
+    needs: check_and_coverage-test
+    name: "Special Mac OS testing"
+    runs-on: macos-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+
+      - name: Install dependencies
+        shell: bash
+        run: "python ./tools/create_venv.py --prod"
+
+      - name: Set up mounted USB stick
+        shell: bash
+        run: "sudo ./tools/create_fat_volume_macos.sh"
+
+      - name: Perform dfplayer-card-manager tests
+        shell: bash
+        run: |
+          source .venv/bin/activate
+          ./tests/test_macos.sh > test_run_macos.log 2>&1
+          cat test_run_macos.log
+          grep -q "Traceback (most recent call last)" test_run_macos.log && echo Errors found && exit 1 || echo No errors found
+
+  platform_testing_special_windows:
+    if: contains(github.event.pull_request.title, '[skip ci]') == false
+    needs: check_and_coverage-test
+    name: "Special Windows testing"
+    runs-on: windows-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+
+      - name: Install dependencies
+        shell: bash
+        run: "python ./tools/create_venv.py --prod"
+
+      - name: Set up mounted USB stick
+        shell: cmd
+        run: ".\\tools\\create_fat_volume.bat"
+
+      - name: Perform dfplayer-card-manager tests
+        shell: cmd
+        run: |
+          call .venv\Scripts\activate.bat
+          call .\tests\test_windows.bat > test_run_windows.log 2>&1
+          type test_run_windows.log
+          findstr "Traceback (most recent call last)" test_run_windows.log >nul
+          if %errorlevel%==0 (
+            echo Errors found
+            exit /b 1
+          ) else (
+            echo No errors found
+            exit /b 0
+          )

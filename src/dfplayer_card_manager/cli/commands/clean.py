@@ -2,17 +2,35 @@ import os
 
 from dfplayer_card_manager.cli.cli_context import CliContext
 from dfplayer_card_manager.cli.printing import (
+    print_error,
     print_neutral,
     print_ok,
     print_warning,
 )
+from dfplayer_card_manager.fat import fat_device_mount
 
 
 def clean(cli_context: CliContext, sd_card_path: str, dry_run: bool) -> None:
+    _device_path, mount_point_path = fat_device_mount.detect_device_path_and_mount_path(
+        sd_card_path=sd_card_path,
+    )
+
+    if not mount_point_path or not os.path.isdir(mount_point_path):
+        print_error(
+            "You provided a device path that has no corresponding mount point. Aborting.",
+        )
+        exit(1)
+
+    if not os.access(mount_point_path, os.W_OK):
+        print_error(
+            f"You don't have write permissions to {mount_point_path}. Aborting.",
+        )
+        exit(1)
+
     if dry_run:
-        _print_unwanted_entries_dry_run(cli_context, sd_card_path)
+        _print_unwanted_entries_dry_run(cli_context, mount_point_path)
     else:
-        _remove_unwanted_entries(cli_context, sd_card_path)
+        _remove_unwanted_entries(cli_context, mount_point_path)
 
 
 def _print_unwanted_entries_dry_run(cli_context: CliContext, sd_card_path: str):

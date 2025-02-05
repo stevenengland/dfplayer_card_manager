@@ -1,9 +1,11 @@
 .venv
 .coverage
 coverage.xml
+htmlcov/
 
 __pycache__/
 
 dist/
 build/
 **/*.egg-info/
+usbstick.img
