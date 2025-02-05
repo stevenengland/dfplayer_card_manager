@@ -60,7 +60,6 @@ class TestReadAudio:
         with pytest.raises(expected_exception=TagError, match="Invalid"):
             sut.read_id3_tags("file_path")
 
-    # @pytest.mark.skip(reason="no way of currently testing this")
     @e2e
     def test_read_id3_tags_from_file_wo_tags(
         self,
@@ -82,7 +81,6 @@ class TestReadAudio:
                 os.path.join(test_assets_tmp, "0003.mp3"),
             )
 
-    # @pytest.mark.skip(reason="no way of currently testing this")
     @e2e
     def test_read_id3_tags_from_file_w_tags(
         self,
