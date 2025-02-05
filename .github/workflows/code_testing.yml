@@ -165,4 +165,11 @@ jobs:
           call .venv\Scripts\activate.bat
           call .\tests\test_windows.bat > test_run_windows.log 2>&1
           type test_run_windows.log
-          findstr "Traceback (most recent call last)" test_run_windows.log >nul && echo Errors found && exit /b 1 || echo No errors found
+          findstr "Traceback (most recent call last)" test_run_windows.log >nul
+          if %errorlevel%==0 (
+            echo Errors found
+            exit /b 1
+          ) else (
+            echo No errors found
+            exit /b 0
+          )
