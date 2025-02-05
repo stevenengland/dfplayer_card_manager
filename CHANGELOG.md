@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.2.1 - 2025-02-05
+
+### paperless-ngx ansible role 0.2.1
+
+#### Bug Fixes
+
+- fix: improve FAT32 check for Unix systems @stevenengland ([#53](https://github.com/stevenengland/dfplayer_card_manager/pull/53))
+- fix(deps): bump fattools from 1.0.39 to 1.0.42 in /requirements @[dependabot[bot]](https://github.com/apps/dependabot) ([#55](https://github.com/stevenengland/dfplayer_card_manager/pull/55))
+- fix(deps): bump pydantic from 2.10.4 to 2.10.6 in /requirements @[dependabot[bot]](https://github.com/apps/dependabot) ([#54](https://github.com/stevenengland/dfplayer_card_manager/pull/54))
+- fix(deps): bump pre-commit from 3.8.0 to 4.1.0 in /requirements @[dependabot[bot]](https://github.com/apps/dependabot) ([#44](https://github.com/stevenengland/dfplayer_card_manager/pull/44))
+- fix(deps): bump twine from 6.0.1 to 6.1.0 in /requirements @[dependabot[bot]](https://github.com/apps/dependabot) ([#50](https://github.com/stevenengland/dfplayer_card_manager/pull/50))
+
+#### Dependencies
+
+<details>
+<summary>4 changes</summary>
+- fix(deps): bump fattools from 1.0.39 to 1.0.42 in /requirements @[dependabot[bot]](https://github.com/apps/dependabot) ([#55](https://github.com/stevenengland/dfplayer_card_manager/pull/55))
+- fix(deps): bump pydantic from 2.10.4 to 2.10.6 in /requirements @[dependabot[bot]](https://github.com/apps/dependabot) ([#54](https://github.com/stevenengland/dfplayer_card_manager/pull/54))
+- fix(deps): bump pre-commit from 3.8.0 to 4.1.0 in /requirements @[dependabot[bot]](https://github.com/apps/dependabot) ([#44](https://github.com/stevenengland/dfplayer_card_manager/pull/44))
+- fix(deps): bump twine from 6.0.1 to 6.1.0 in /requirements @[dependabot[bot]](https://github.com/apps/dependabot) ([#50](https://github.com/stevenengland/dfplayer_card_manager/pull/50))
+
+</details>
+**Full Changelog**: https://github.com/stevenengland/dfplayer_card_manager/compare/0.2.0...0.2.1
+
 ## 0.2.0 - 2025-01-21
 
 ### paperless-ngx ansible role 0.2.0
