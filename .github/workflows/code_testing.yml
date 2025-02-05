@@ -105,7 +105,11 @@ jobs:
 
       - name: Perform dfplayer-card-manager tests
         shell: bash
-        run: "./tests/test_linux.sh"
+        run: |
+          source .venv/bin/activate
+          ./tests/test_linux.sh > test_run_linux.log 2>&1
+          cat test_run_linux.log
+          grep -q "Traceback (most recent call last)" test_run_linux.log && echo Errors found && exit 1 || echo No errors found
 
   platform_testing_special_macos:
     if: contains(github.event.pull_request.title, '[skip ci]') == false
@@ -131,7 +135,9 @@ jobs:
         shell: bash
         run: |
           source .venv/bin/activate
-          ./tests/test_macos.sh
+          ./tests/test_macos.sh > test_run_macos.log 2>&1
+          cat test_run_macos.log
+          grep -q "Traceback (most recent call last)" test_run_macos.log && echo Errors found && exit 1 || echo No errors found
 
   platform_testing_special_windows:
     if: contains(github.event.pull_request.title, '[skip ci]') == false
@@ -157,4 +163,6 @@ jobs:
         shell: cmd
         run: |
           call .venv\Scripts\activate.bat
-          call .\tests\test_windows.bat
+          call .\tests\test_windows.bat > test_run_windows.log 2>&1
+          type test_run_windows.log
+          findstr "Traceback (most recent call last)" test_run_windows.log >nul && echo Errors found && exit /b 1 || echo No errors found
