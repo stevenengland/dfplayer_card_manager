@@ -19,6 +19,6 @@ pyyaml==6.0.2
 strip_ansi==0.1.1
 twine==6.1.0
 types-PyYAML==6.0.12.20241230
-typer==0.15.1
+typer==0.16.0
 wemake-python-styleguide==0.19.2
 wheel==0.45.1
