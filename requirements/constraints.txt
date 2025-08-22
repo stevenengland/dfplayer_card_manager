@@ -18,7 +18,7 @@ pytest-timeout==2.3.1
 pyyaml==6.0.2
 strip_ansi==0.1.1
 twine==6.1.0
-types-PyYAML==6.0.12.20241230
+types-PyYAML==6.0.12.20250822
 typer==0.15.1
 wemake-python-styleguide==0.19.2
 wheel==0.45.1
